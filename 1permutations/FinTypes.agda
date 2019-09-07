@@ -26,21 +26,21 @@ module FinTypes where
     data _≣_ : {T : Type} -> Member T -> Member T -> Set where
         refl₁ : One ≣ One
         reflₓ : {X : Type} -> {Y : Type}
-                -> (p11 : Member X)
-                -> (p21 : Member X)
-                -> (p12 : Member Y)
-                -> (p22 : Member Y)
+                -> {p11 : Member X}
+                -> {p21 : Member X}
+                -> {p12 : Member Y}
+                -> {p22 : Member Y}
                 -> p11 ≣ p21
                 -> p12 ≣ p22
                 -> (p11 , p12) ≣ (p21 , p22)
         reflₗ : {X : Type} -> {Y : Type}
-                -> (x1 : Member X)
-                -> (x2 : Member X)
+                -> {x1 : Member X}
+                -> {x2 : Member X}
                 -> x1 ≣ x2
                 -> _≣_ {X + Y} (left x1) (left x2)
         reflᵣ : {X : Type} -> {Y : Type}
-                -> (y1 : Member Y)
-                -> (y2 : Member Y)
+                -> {y1 : Member Y}
+                -> {y2 : Member Y}
                 -> y1 ≣ y2
                 -> (right {X} y1) ≣ (right {X} y2)
         ≣comp : {A : Type} -> {a b c : Member A} -> a ≣ b -> b ≣ c -> a ≣ c
@@ -48,9 +48,9 @@ module FinTypes where
 
     refl : {A : Type} -> (a : Member A) -> a ≣ a
     refl One = refl₁
-    refl (a , b) = reflₓ a a b b (refl a) (refl b)
-    refl {A + B} (left a) = reflₗ {A} {B} a a (refl a)
-    refl {A + B} (right b) = reflᵣ {A} {B} b b (refl b)
+    refl (a , b) = reflₓ (refl a) (refl b)
+    refl {A + B} (left a) = reflₗ {A} {B} (refl a)
+    refl {A + B} (right b) = reflᵣ {A} {B} (refl b)
 
     record _≈_ (A B : Type) : Set where
         constructor Equiv
@@ -76,17 +76,20 @@ module FinTypes where
     Equiv-symmetry (Equiv f g e1 e2) = Equiv g f e2 e1
 
     --- Function Composition
+
     _∘_ : {A B C : Set} -> (B -> C) -> (A -> B) -> A -> C
     f ∘ g = λ x -> f (g x)
 
     --- Composition
 
     Equiv-composition : {A B C : Type} -> (A ≈ B) -> (B ≈ C) -> (A ≈ C)
-    Equiv-composition (Equiv fab fba eab eba) (Equiv fbc fcb ebc ecb) =
-        Equiv (fbc ∘ fab)
-              (fba ∘ fcb)
-              {!   !}
-              {!   !}
+    Equiv-composition {A} {B} {C} (Equiv fab fba eab eba) (Equiv fbc fcb ebc ecb) =
+        let a-c-a a = ≣app fba (ebc (fab a))
+            c-a-c c = ≣app fbc (eba (fcb c))
+        in  Equiv (fbc ∘ fab)
+                  (fba ∘ fcb)
+                  (λ a -> ≣comp (a-c-a a) (eab a))
+                  (λ c -> ≣comp (c-a-c c) (ecb c))
 
     --- × Unit
 

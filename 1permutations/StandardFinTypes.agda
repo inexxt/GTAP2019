@@ -11,7 +11,6 @@ module StandardFinTypes where
         Fin0 : StandardFinType 𝟘
         FinS : {S : Type} -> StandardFinType S -> StandardFinType (S + 𝟙)
 
-
     getTypeFromStandardType : {T : Type} -> (StandardFinType T) -> Type
     getTypeFromStandardType {T} _ = T
 
@@ -66,28 +65,3 @@ module StandardFinTypes where
     cnfp ((A + B) × C) = let (t , p) = cnfp ((A × C) + (B × C))
                              dst = Equiv-symmetry (×+-distrib {C} {A} {B})
                          in t , Equiv-composition p dst
-
-    -- cnfp 𝟘 = (Fin0 , Equiv-reflex)
-    -- cnfp 𝟙 = (FinS Fin0 , +-unit)
-
-    -- cnfp (𝟘 × A) =  𝟘 , ×𝟘
-    -- cnfp (𝟙 × A) = let (ta , pa) = cnfp A
-    --               in  ta , (Equiv-composition pa (Equiv-symmetry ×-unit))
-    -- cnfp ((A × B) × C) = let (t , p) = cnfp (A × (B × C))
-    --                     in  t , (Equiv-composition p ×-assoc)
-    -- cnfp ((A + B) × C) = let (tac , pac) = cnf (A × C)
-    --                         (tbc , pbc) = cnf (B × C)
-    --                         pabc = Equiv-+respects pac pbc
-    --                         distrib = Equiv-symmetry (×+-distrib {C} {A} {B})
-    --                     in  tac + tbc , Equiv-composition pabc distrib
-
-
-    --- Every type is ≈ to a StandardFinType
-    --- TODO how do I write that???
-    -- allTypesEquivToStandard : (A : Type) -> Σ {T} (StandardFinType T) (λ x -> (getTypeFromStandardType x) ≈ A)
-    -- allTypesEquivToStandard A = ?
-
-    allTypesEquivToStandard : (A : Type) -> ∃ (λ x -> (getTypeFromStandardType x) ≈ A)
-    allTypesEquivToStandard A = {!   !}
-
-    --- First representation of swap: an element of the
