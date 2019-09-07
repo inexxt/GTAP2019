@@ -26,7 +26,6 @@ module Permutations where
     swap23 = swap (right *)
 
     --- Adjecent swaps
-
     --- why cant I pattern match with true/false?
     apply-adjSwap : {T : Type} -> {t : StandardFinType T} -> (Swap t) -> (Member T) -> (Member T)
     apply-adjSwap {t + 𝟙} (swap (right *)) m = m
@@ -36,6 +35,7 @@ module Permutations where
     ...                                    | right * times left * = include x
     ...                                    | right * times right * = m -- this is not possible, I should change somethings
 
+    --- Zero swaps (star transpositions)
     --- why cant I pattern match with true/false?
     apply-zeroSwap : {T : Type} -> {t : StandardFinType T} -> (Swap t) -> (Member T) -> (Member T)
     apply-zeroSwap {t + 𝟙} (swap x) (right *) = right *
@@ -43,9 +43,7 @@ module Permutations where
     ...                                         | left * = (left m)
     ...                                         | right * = x
 
-
-    --- Three generators
-
+    --- Two generators
     Generator : Set
     Generator = Member (𝟙 Type.+ 𝟙)
     s : Generator
@@ -60,6 +58,5 @@ module Permutations where
     ...                                               | right * = right *
     applyGenerator {_} {FinS t} (right *) (left m) = include m --- why can't I remove implicits here?
     applyGenerator {_} {t} (right *) (right *) = max t
-
 
     -- data Permutation : {T : Type} -> {StandardFinType T} -> (cnfp (T × T)) -> Set
