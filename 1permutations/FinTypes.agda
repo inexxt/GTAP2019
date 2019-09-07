@@ -9,7 +9,7 @@ module FinTypes where
         _+_ : Type -> Type -> Type
 
     data Member : Type -> Set where
-        One     : Member 𝟙
+        *     : Member 𝟙
         _,_     : {X : Type} -> {Y : Type} -> Member X -> Member Y -> Member (X × Y)
         left    : {X : Type} -> {Y : Type} -> Member X -> Member (X + Y)
         right   : {X : Type} -> {Y : Type} -> Member Y -> Member (X + Y)
@@ -24,7 +24,7 @@ module FinTypes where
     ×snd (a , b) = b
 
     data _≣_ : {T : Type} -> Member T -> Member T -> Set where
-        refl₁ : One ≣ One
+        refl₁ : * ≣ *
         reflₓ : {X : Type} -> {Y : Type}
                 -> {p11 : Member X}
                 -> {p21 : Member X}
@@ -47,7 +47,7 @@ module FinTypes where
         ≣app  : {A B : Type} -> {a b : Member A} -> (f : Member A -> Member B) -> a ≣ b -> (f a) ≣ (f b)
 
     refl : {A : Type} -> (a : Member A) -> a ≣ a
-    refl One = refl₁
+    refl * = refl₁
     refl (a , b) = reflₓ (refl a) (refl b)
     refl {A + B} (left a) = reflₗ {A} {B} (refl a)
     refl {A + B} (right b) = reflᵣ {A} {B} (refl b)
@@ -94,13 +94,13 @@ module FinTypes where
     --- × Unit
 
     ×-embed𝟙 : {A : Type} -> Member A -> Member (𝟙 × A)
-    ×-embed𝟙 a = (One , a)
+    ×-embed𝟙 a = (* , a)
 
     ×-project𝟙 : {A : Type} -> Member (𝟙 × A) -> Member A
-    ×-project𝟙 (One , a) = a
+    ×-project𝟙 (* , a) = a
 
     ×-unit : {A B : Type} -> (𝟙 × A) ≈ A
-    ×-unit = Equiv ×-project𝟙 ×-embed𝟙 (λ {(One , a) → refl (One , a)}) refl
+    ×-unit = Equiv ×-project𝟙 ×-embed𝟙 (λ {(* , a) → refl (* , a)}) refl
 
     --- × Commutativity
 

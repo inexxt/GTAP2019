@@ -5,41 +5,34 @@ module DecEquality where
 
     open import FinTypes
     open import StandardFinTypes
+    open import Maybe
 
-    --- Non-dependent Product and Sum
-    data Prod (T1 T2 : Set) : Set where
-        _times_ : T1 -> T2 -> Prod T1 T2
-
-    data Sum (T1 T2 : Set) : Set where
-        left : T1 -> Sum T1 T2
-        right : T2 -> Sum T1 T2
-
-    --- Decidable equality
-
-    Maybe : Set -> Set
-    Maybe T = Sum (Member 𝟙) T
-    --
-    -- some : {T : Type} -> (Member T) -> Maybe (Member T)
-    -- some = right
-    -- none : {T : Type} -> Maybe (Member T)
-    -- none = left One
-
-    and : {T1 T2 : Set} -> Maybe T1 -> Maybe T2 -> Maybe (Prod T1 T2)
-    and (right x) (right y) = right (x times y)
-    and _ _ = left One
-    --
     areEqual : {T : Type} -> (a b : Member T) -> Maybe (a ≣ b)
-    areEqual One One = right (refl One)
+    areEqual * * = right (refl *)
     areEqual (a , b) (c , d) with (and (areEqual a c) (areEqual b d))
-    areEqual (a , b) (c , d)    | (left One) = left One
+    areEqual (a , b) (c , d)    | (left *) = left *
     areEqual (a , b) (c , d)    | (right (x times y)) = right (reflₓ x y)
 
     areEqual (left x) (left y) with (areEqual x y)
-    areEqual (left x) (left y)    | (left One) = left One
+    areEqual (left x) (left y)    | (left *) = left *
     areEqual (left x) (left y)    | (right p) = right (reflₗ p)
 
     areEqual (right x) (right y) with (areEqual x y)
-    areEqual (right x) (right y)    | (left One) = left One
+    areEqual (right x) (right y)    | (left *) = left *
     areEqual (right x) (right y)    | (right p) = right (reflᵣ p)
 
-    areEqual _ _ = left One
+    areEqual _ _ = left *
+
+    Bool : Set
+    Bool = Maybe (Member 𝟙)
+
+    true : Bool
+    true = right *
+
+    false : Bool
+    false = left *
+    --
+    areEqualT : {T1 T2 : Type} -> {t1 : StandardFinType T1} -> {t2 : StandardFinType T2} -> (a : Member T1) -> (b : Member T2) -> Bool
+    areEqualT (left x) (left y) = areEqualT x y
+    areEqualT (right x) (right y) = areEqualT x y
+    areEqualT _ _ = false

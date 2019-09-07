@@ -65,3 +65,4 @@ module StandardFinTypes where
     cnfp ((A + B) × C) = let (t , p) = cnfp ((A × C) + (B × C))
                              dst = Equiv-symmetry (×+-distrib {C} {A} {B})
                          in t , Equiv-composition p dst
+                        

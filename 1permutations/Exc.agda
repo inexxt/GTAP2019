@@ -6,3 +6,8 @@ module Exc where
     swap (a , b) = (b , a)
 
     swap_lemma : {A : Set} -> {B : Set} -> ()
+
+    order : {n : Nat} -> (eq : (fin n) ≈ (fin n)) -> Σ Nat (λ n -> ((comp n (eq .f)) ≣ id)) 
+    order n = order' (fact n) n
+
+    order' k n = if (eq .f
