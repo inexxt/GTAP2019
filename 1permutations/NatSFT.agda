@@ -7,9 +7,10 @@ module NatSFT where
     open import FinTypes
     open import StandardFinTypes
     open import Agda.Builtin.Sigma
-    open import Data.Product using (∃)
+    open import Data.Product using (∃; proj₁; proj₂)
     open import Data.Nat using (ℕ ; _<_)
-
+    open import General
+    open import Relation.Binary.PropositionalEquality
 
     natToSft : (n : ℕ) -> ∃ (λ t -> StandardFinType t)
     natToSft ℕ.zero = 𝟘 , Fin0
@@ -23,3 +24,6 @@ module NatSFT where
     natToMemberSft : {T : Type} -> (n : ℕ) -> (k : ℕ) -> {p : k < n} -> Member ((natToSft n) .fst)
     natToMemberSft (ℕ.suc n) ℕ.zero = (right *)
     natToMemberSft (ℕ.suc n) (ℕ.suc k) = left (natToMemberSft n k)
+
+    ℕ≈SFT : ℕ ≈ (∃ (λ T -> StandardFinType T))
+    ℕ≈SFT = Equiv natToSft (λ x -> sftToNat (proj₂ x)) (λ a → {!!}) λ b → {!!}

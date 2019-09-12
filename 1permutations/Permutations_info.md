@@ -13,8 +13,7 @@ https://mathoverflow.net/questions/109071/algorithm-for-reducing-words-in-a-coxe
 
 Standard presentation with one transposition and one cycle ($1)
 https://www.math.auckland.ac.nz/~obrien/research/an-sn-present.pdf
-
-And a paper with the same title and the same authors, but different?
+or (longer version?)
 http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.76.6192&rep=rep1&type=pdf
 
 Algorithm for finding monoid presentation (this is exactly my problem)

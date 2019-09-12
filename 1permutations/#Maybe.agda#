@@ -4,12 +4,10 @@
 module Maybe where
     open import FinTypes
     open import General
-    
-    --- Decidable equality
-
+   
     Maybe : Set -> Set
     Maybe T = Sum (Member 𝟙) T
-    --
+    
     -- some : {T : Type} -> (Member T) -> Maybe (Member T)
     -- some = right
     -- n* : {T : Type} -> Maybe (Member T)

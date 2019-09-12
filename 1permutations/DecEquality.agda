@@ -5,21 +5,23 @@ module DecEquality where
 
     open import FinTypes
     open import StandardFinTypes
+    open import FinTypesEq
     open import Maybe
+    open import General
 
-    areEqual : {T : Type} -> (a b : Member T) -> Maybe (a ≣ b)
-    areEqual * * = right (refl *)
+    areEqual : {T : Type} -> (a b : Member T) -> Maybe (a == b)
+    areEqual * * = right idp
     areEqual (a , b) (c , d) with (and (areEqual a c) (areEqual b d))
-    areEqual (a , b) (c , d)    | (left *) = left *
-    areEqual (a , b) (c , d)    | (right (x times y)) = right (reflₓ x y)
+    ...                         | (left *) = left *
+    ...                         | (right (x times y)) = right (==-× x y)
 
     areEqual (left x) (left y) with (areEqual x y)
     areEqual (left x) (left y)    | (left *) = left *
-    areEqual (left x) (left y)    | (right p) = right (reflₗ p)
+    areEqual (left x) (left y)    | (right p) = right {!!}
 
     areEqual (right x) (right y) with (areEqual x y)
     areEqual (right x) (right y)    | (left *) = left *
-    areEqual (right x) (right y)    | (right p) = right (reflᵣ p)
+    areEqual (right x) (right y)    | (right p) = right {!!}
 
     areEqual _ _ = left *
 

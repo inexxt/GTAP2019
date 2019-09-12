@@ -6,6 +6,7 @@ module StandardFinTypes where
     open import Agda.Builtin.Sigma
     open import Data.Product using (∃)
     open import FinTypes
+    open import FinTypesEquiv
 
     data StandardFinType : Type -> Set where
         Fin0 : StandardFinType 𝟘
@@ -14,7 +15,7 @@ module StandardFinTypes where
     getTypeFromStandardType : {T : Type} -> (StandardFinType T) -> Type
     getTypeFromStandardType {T} _ = T
 
-    _++_ : {A B : Type} -> StandardFinType A -> StandardFinType B -> ∃ (λ x -> getTypeFromStandardType x ≈ (A + B))
+    _++_ : {A B : Type} -> StandardFinType A -> StandardFinType B -> ∃ (λ x -> getTypeFromStandardType x ≋ (A + B))
     Fin0 ++ y = y , +-unit
     _++_ {A + 𝟙} {B} (FinS x) y =
         let (t , p) = x ++ y
@@ -31,7 +32,7 @@ module StandardFinTypes where
             goal = Equiv-composition tt1 [a+b]+1=[a+1]+b
         in  (FinS t) , goal
 
-    -- cnf : (A : Type) -> Σ Type (λ T -> (T ≈ A))
+    -- cnf : (A : Type) -> Σ Type (λ T -> (T ≋ A))
     -- cnf 𝟘 = (𝟘 , Equiv-reflex)
     -- cnf 𝟙 = (𝟘 + 𝟙 , +-unit)
     -- cnf (A + B) = let (ta , pa) = cnf A
@@ -48,7 +49,7 @@ module StandardFinTypes where
     --                         distrib = Equiv-symmetry (×+-distrib {C} {A} {B})
     --                     in  tac + tbc , Equiv-composition pabc distrib
 
-    cnfp : (A : Type) -> ∃ (λ x -> (getTypeFromStandardType x ≈ A))
+    cnfp : (A : Type) -> ∃ (λ x -> (getTypeFromStandardType x ≋ A))
     cnfp 𝟘 = Fin0 , Equiv-reflex
     cnfp 𝟙 = (FinS Fin0) , Equiv-reflex
     cnfp (A + B) = let (ta , pa) = cnfp A
@@ -65,4 +66,3 @@ module StandardFinTypes where
     cnfp ((A + B) × C) = let (t , p) = cnfp ((A × C) + (B × C))
                              dst = Equiv-symmetry (×+-distrib {C} {A} {B})
                          in t , Equiv-composition p dst
-                        
