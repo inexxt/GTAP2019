@@ -56,7 +56,7 @@ module FinTypesEq where
     --             (p : Member (A × B)) -> Member (C p)
     -- elim-prod f (a , b) = f a b
 
-    ==-+ : {A B : Type} -> {a1 a2 : Member A} -> (a1 == a2) -> (left a1) == (left a2)
+    ==-+ : {A B : Type} -> {a1 a2 : Member A} -> (a1 == a2) -> _==_ {_} {Member (A + B)} (left a1) (left a2)
     ==-+ p = ap left p
 
     -- TODO do it with ap

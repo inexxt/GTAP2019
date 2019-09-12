@@ -10,7 +10,7 @@ module General where
     _∘_ : {A : Set ℓ} -> {B : Set ι} -> {C : Set l} -> (B -> C) -> (A -> B) -> A -> C
     f ∘ g = λ x -> f (g x)
 
-    data _==_ {ℓ} {A : Set ℓ} (a : A) : (b : A) ->  Set ℓ where
+    data _==_ {A : Set ℓ} (a : A) : (b : A) ->  Set ℓ where
         idp : a == a
 
     J : {A : Set ℓ} ->

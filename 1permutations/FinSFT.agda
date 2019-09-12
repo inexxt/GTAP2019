@@ -4,29 +4,37 @@
 module FinSFT where
     open import FinTypes
     open import StandardFinTypes
-    open import Agda.Builtin.Sigma
-    open import Data.Product using (∃; proj₁; proj₂)
-    open import Data.Nat using (ℕ ; _<_)
+    open import Data.Nat using (ℕ)
     open import Data.Fin
     open import NatSFT
     open import General
-    open import StandardFinTypesOps
+    open import FinTypesEq
     open ℕ
-    open import Relation.Binary.PropositionalEquality
 
     myFinToFin : {T : Type} -> {t : StandardFinType T} -> (Member T) -> Fin (sftToNat t)
-    myFinToFin {_} {FinS t} (left x) = suc (myFinToFin x)
-    myFinToFin {_} {FinS t} (right *) = zero
+    myFinToFin {t = FinS t} (left x) = suc (myFinToFin x)
+    myFinToFin {t = FinS t} (right *) = zero
 
-    finToMyFin : {n : ℕ} -> (Fin (suc n)) -> ∃ (λ T -> Prod (StandardFinType T) (Member T))
-    finToMyFin {zero} zero = let st = FinS Fin0 in
-                             getTypeFromStandardType st , st times right *
-    finToMyFin {suc n} (suc k) = let (t , pm) = finToMyFin {n} k
-                                     m = p₂ pm in
-                                 t Type.+ 𝟙 , ((FinS (p₁ pm)) times left m)
+    -- finToMyFin : {n : ℕ} -> (Fin n) -> Member (getTypeFromStandardType (proj₂ (natToSft n)))
+    -- finToMyFin {suc n} zero = right *
+    -- finToMyFin {suc n} (suc k) = left (finToMyFin k)
+
+    arr : {T : Type} -> {t : StandardFinType T} -> Fin (sftToNat t) → Member T
+    arr {t = FinS t} zero = right *
+    arr {t = FinS t} (suc x) = left (arr x)
+
+    e1 : {T : Type} -> {t : StandardFinType T} -> (a : Fin (sftToNat t)) → myFinToFin (arr a) == a
+    e1 {𝟘} {Fin0} ()
+    e1 {A + 𝟙} {FinS t} zero = idp
+    e1 {A + 𝟙} {FinS t} (suc a) = ap suc (e1 a)
+
+    e2 : {T : Type} -> {t : StandardFinType T} -> (b : Member T) → arr (myFinToFin b) == b
+    e2 {A + 𝟙} {FinS t} (left a) = let e2a = e2 a in {!!}
+    e2 {A + 𝟙} {FinS t} (right *) = idp
 
     finfin : {T : Type} -> {t : StandardFinType T} -> Fin (sftToNat t) ≈ (Member T)
-    finfin {_} {Fin0} = Equiv (λ ()) (λ ()) (λ ()) (λ ())
-    finfin {_} {FinS t} = Equiv ? {!!} {!!} {!!}
+    finfin = Equiv arr myFinToFin e1 e2
+
+    -- finfin {_} {FinS t} = Equiv {!!} myFinToFin {!!} {!!}
                           -- let x = λ k -> p₂ (proj₂ (finToMyFin k)) in
                           -- Equiv (λ _ → right *) myFinToFin {!   !} {!   !}
