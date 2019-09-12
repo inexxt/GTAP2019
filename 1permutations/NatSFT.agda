@@ -2,7 +2,6 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
 module NatSFT where
-    --- Nat isomorphisms, only for manual testing, not to be used in the core
 
     open import FinTypes
     open import StandardFinTypes
@@ -21,9 +20,9 @@ module NatSFT where
     sftToNat Fin0 = ℕ.zero
     sftToNat (FinS n) = ℕ.suc (sftToNat n)
 
-    natToMemberSft : {T : Type} -> (n : ℕ) -> (k : ℕ) -> {p : k < n} -> Member ((natToSft n) .fst)
-    natToMemberSft (ℕ.suc n) ℕ.zero = (right *)
-    natToMemberSft (ℕ.suc n) (ℕ.suc k) = left (natToMemberSft n k)
+    -- natToMemberSft : {T : Type} -> (n : ℕ) -> (k : ℕ) -> {p : k < n} -> Member ((natToSft n) .fst)
+    -- natToMemberSft (ℕ.suc n) ℕ.zero = (right *)
+    -- natToMemberSft (ℕ.suc n) (ℕ.suc k) = left (natToMemberSft n k)
 
-    ℕ≈SFT : ℕ ≈ (∃ (λ T -> StandardFinType T))
-    ℕ≈SFT = Equiv natToSft (λ x -> sftToNat (proj₂ x)) (λ a → {!!}) λ b → {!!}
+    -- ℕ≈SFT : ℕ ≈ (∃ (λ T -> StandardFinType T))
+    -- ℕ≈SFT = Equiv natToSft (λ x -> sftToNat (proj₂ x)) (λ a → {!!}) λ b → {!!}
