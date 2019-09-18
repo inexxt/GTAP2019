@@ -1,7 +1,6 @@
 {-# OPTIONS --cubical --without-K #-}
 
 module Groups where
-    -- open import Cubical.Core.Everything hiding (_≡_)
     open import Cubical.Foundations.Prelude
     open import Cubical.Core.Everything using (isEquiv ; _≃_)
     open import Cubical.Core.Primitives hiding ( _≡_ )
@@ -62,8 +61,8 @@ module Groups where
     p : (f : F3 -> F3) -> isEquiv f -> * ≡ *
     p f e with f a1 , f a2 , f a3
     p f record { equiv-proof = equiv-proof } | a1 , a1 , _  = let a , b = equiv-proof a1
-                                                                  t1 = b (a1 , {!!})
-                                                                  t2 = b (a2 , {!!})
+                                                                  t1 = b (a1 , {!!}) -- how do I know that, after pattern matching
+                                                                  t2 = b (a2 , {!!}) -- same?
                                                                   abs = (sym t1) ∙ t2 in
                                                               absurd (proj1≡ abs)
     p f record { equiv-proof = equiv-proof } | _  , a1 , a1 = {!   !}
@@ -84,10 +83,7 @@ module Groups where
     proof : (F3 ≃ F3) ≃ (* ≡ *)
     proof = (λ { (f , e) → p f e}) , record { equiv-proof = eqv }
         where
-            eqv = λ y → ? , ?
-
-    data Sn {n : ℕ}: Set where
-        Per : ((k : Fin n) -> (Fin (ℕ.suc (toℕ k)))) -> Sn
+            eqv = λ y → {!!} , {!!}
 
     -- 𝟛 : Set
     -- 𝟛 = Sn {3}
