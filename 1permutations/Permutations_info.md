@@ -68,9 +68,3 @@ https://en.wikipedia.org/wiki/Semi-Thue_system
 How many transpositions (of arbitrary elements) are needed to sort?
 If you're only dealing with permutations of n elements, then you will need exactly n−c(π) swaps, where c(π) is the number of cycles in the disjoint cycle decomposition of π. Since this distance is bi-invariant, transforming π into σ (or A into B, or conversely) requires n−c(σ−1∘π) such moves.
 
----
-
-## Other
-
-Burnside problem - given finite orders of generators, can a group have an infinite order?
-Tarski Monster groups - every subgroup is either a 1, p-element podgroup, or G
