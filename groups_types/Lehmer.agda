@@ -20,9 +20,12 @@ encode : {n : ℕ} -> (Fin n ≈ Fin n) -> S n
 encode {0F} (Equiv f g x y) = Perm (λ ())
 encode {suc n} (Equiv f g x y) = Perm (λ k → howManySmaller (λ l → f (inject! l)) k)
 
-decode : {n : ℕ} -> S n -> (Fin n -> Fin n)
-decode {suc n} (Perm p) 0F = inject! (p 0F)
-decode {suc n} (Perm p) (suc k) = {!   !} where
+addTo : {n : ℕ} -> (Fin n -> Fin n) -> (k : Fin n) ->
+
+decode' : {n : ℕ} -> S n -> (k : Fin n) -> Fin n
+decode' {suc n} (Perm p) acc 0F = addTo acc k (p 0F)
+decode' {suc n} (Perm p) acc (suc k) = {!   !}
+    where
     pp : (k : Fin n) -> Fin (suc (toℕ k))
-    pp k = {! p  !}
-    f' = decode {n} (Perm (λ l → pp l)) k
+    pp k = {! p (inject₁ k) !}
+    f' = decode' {n} (Perm (λ l → pp l)) acc k

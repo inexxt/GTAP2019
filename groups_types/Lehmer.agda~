@@ -24,5 +24,5 @@ decode : {n : ℕ} -> S n -> (Fin n -> Fin n)
 decode {suc n} (Perm p) 0F = inject! (p 0F)
 decode {suc n} (Perm p) (suc k) = {!   !} where
     pp : (k : Fin n) -> Fin (suc (toℕ k))
-    pp k = {! p k  !}
+    pp k = {! p  !}
     f' = decode {n} (Perm (λ l → pp l)) k
