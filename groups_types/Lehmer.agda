@@ -9,6 +9,7 @@ open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 open import Data.Vec hiding (insert)
 open import Function
+open import Data.Nat.Properties
 
 FinN : {n : ℕ} -> (k : Fin n) -> Set
 FinN k = Fin (suc (toℕ k))
@@ -46,38 +47,43 @@ toℕ-fromℕ {suc n} = let p = toℕ-fromℕ {n}
                     in ap suc p
 
 
-insert' : {n : ℕ} -> {k : Fin n} -> Vec (Fin n) (suc (toℕ k)) -> (Fin (suc (toℕ k))) -> (Fin (suc n)) -> Vec (Fin (suc n)) (suc (suc (toℕ k)))
+insert' : {n : ℕ} -> {k : ℕ} -> {p : k Data.Nat.≤ n} -> Vec (Fin n) k -> (Fin (suc k)) -> (Fin (suc n)) -> Vec (Fin (suc n)) (suc k)
 insert' {suc n} v 0F e = e ∷ (map inject₁ v)
-insert' {suc n} {suc k} (x ∷ v) (suc place) e = let pv : Vec (Fin (suc n)) (suc (toℕ k)) == Vec (Fin (suc n)) (suc (toℕ (inject₁ k)))
-                                                    pv = ap (λ x → Vec (Fin (suc n)) (suc x)) injection-eq
-                                                    v' = coe pv v
+insert' {suc n} {suc k} {s≤s p} (x ∷ v) (suc place) e = inject₁ x ∷ (insert' {p = ≤-step p} v place e)
+                                                -- let pv : Vec (Fin (suc n)) k == Vec (Fin (suc n)) (suc (toℕ (inject₁ k)))
+                                                --     pv = ap (λ x → Vec (Fin (suc n)) (suc x)) injection-eq
+                                                --     v' = coe pv v
 
-                                                    pplace : Fin (suc (toℕ k)) == Fin (suc (toℕ (inject₁ k)))
-                                                    pplace = ap (λ x → Fin (suc x)) injection-eq
-                                                    place' = coe pplace place
+                                                --     pplace : Fin (suc (toℕ k)) == Fin (suc (toℕ (inject₁ k)))
+                                                --     pplace = ap (λ x → Fin (suc x)) injection-eq
+                                                --     place' = coe pplace place
 
-                                                    l = insert' {n = suc n} {k = inject₁ k} v' place' e
+                                                --     l = insert' {n = suc n} {k = inject₁ k} v' place' e
 
-                                                    pl : Vec (Fin (suc (suc n))) (suc (suc (toℕ (inject₁ k)))) == Vec (Fin (suc (suc n))) (suc (suc (toℕ k)))
-                                                    pl = ap (λ x → Vec (Fin (suc (suc n))) (suc (suc x))) (rev injection-eq)
-                                                    l' = coe pl l
-                                                in (inject₁ x) ∷ l'
+                                                --     pl : Vec (Fin (suc (suc n))) (suc (suc (toℕ (inject₁ k)))) == Vec (Fin (suc (suc n))) (suc (suc (toℕ k)))
+                                                --     pl = ap (λ x → Vec (Fin (suc (suc n))) (suc (suc x))) (rev injection-eq)
+                                                --     l' = coe pl l
+                                                -- in (inject₁ x) ∷ l'
+-- ≤-proof : {n : ℕ} -> n Data.Nat.≤ n
+-- ≤-proof {0F} = z≤n
+-- ≤-proof {suc x} = s≤s ≤-proof
 
-insert : {n : ℕ} -> Vec (Fin n) n -> Fin n ->  Vec (Fin (suc n)) (suc n)
--- insert {0F} [] 0F = 0F ∷ []
-insert {suc n} v place = let pp : Vec (Fin (suc n)) (suc n) == Vec (Fin (suc n)) (suc (toℕ (fromℕ n)))
-                             pp = ap (λ x → Vec (Fin (suc n)) (suc x)) (rev (toℕ-fromℕ {n}))
+insert : {n : ℕ} -> Vec (Fin n) n -> Fin (suc n) ->  Vec (Fin (suc n)) (suc n)
+insert {0F} [] 0F = 0F ∷ []
+insert {suc n} v place = insert' {p = ≤-refl} v place (fromℕ (suc n))
+                         -- let pp : Vec (Fin (suc n)) (suc n) == Vec (Fin (suc n)) (suc (toℕ (fromℕ n)))
+                         --     pp = ap (λ x → Vec (Fin (suc n)) (suc x)) (rev (toℕ-fromℕ {n}))
 
-                             v' = coe pp v
+                         --     v' = coe pp v
 
-                             place' = transport (λ x → Fin x) (rev toℕ-fromℕ) place
+                         --     place' = transport (λ x → Fin x) (rev toℕ-fromℕ) place
 
-                             vv = insert' {n = (suc n)} {k = fromℕ n} v' place' (fromℕ (suc n))
+                         --     vv = insert' {n = (suc n)} {k = n} v' place' (fromℕ (suc n))
 
-                             ppp : Vec (Fin (suc (suc n))) (suc (suc n)) == Vec (Fin (suc (suc n))) (suc (suc (toℕ (fromℕ n))))
-                             ppp = ap (λ x → Vec (Fin (suc (suc n))) (suc (suc x))) (rev (toℕ-fromℕ {n}))
+                         --     ppp : Vec (Fin (suc (suc n))) (suc (suc n)) == Vec (Fin (suc (suc n))) (suc (suc (toℕ (fromℕ n))))
+                         --     ppp = ap (λ x → Vec (Fin (suc (suc n))) (suc (suc x))) (rev (toℕ-fromℕ {n}))
 
-                         in  coe (rev ppp) vv
+                         -- in  coe (rev ppp) vv
 
 
 decrease-fin : {n : ℕ} -> (i : Fin n) -> Fin (suc (toℕ i))
@@ -89,21 +95,31 @@ toℕ-suc {suc n} {0F} = idp
 toℕ-suc {suc n} {suc k} = let p = toℕ-suc
                           in ap suc p
 
-decode : {n : ℕ} -> Code n -> Vec (Fin n) n
-decode {0F} (Perm p) = []
-decode {suc n} (Perm p) = let C = (λ x → Vec (Fin (toℕ x)) (toℕ x))
-                              f = λ i x → let pp : Vec (Fin (suc (toℕ i))) (suc (toℕ i)) == Vec (Fin (toℕ (suc i))) (toℕ (suc i))
-                                              pp = ap (λ kk → Vec (Fin kk) kk) toℕ-suc
-                                          in coe pp {!insert' ? ? ?!}
-                              x = fold′ {suc n} C f []
-                              xl = x (fromℕ (suc n))
-                          in transport _ (toℕ-fromℕ {n}) xl
+decode' : {n : ℕ} -> Code n -> Vec (Fin n) n
+decode' {0F} (Perm p) = []
+decode' {suc n} (Perm p) = let C = (λ x → Vec (Fin (toℕ x)) (toℕ x))
+                               f = λ i x → let px : Vec (Fin (toℕ (inject₁ i))) (toℕ (inject₁ i)) == Vec (Fin (toℕ i)) (toℕ i)
+                                               px = ap (λ x → Vec (Fin x) x) (rev injection-eq)
+                                               x' = coe px x
+                                          in insert x' (p i)
+                               x = fold′ {suc n} C f []
+                               xl = x (fromℕ (suc n))
+
+                               pxl : Vec (Fin (suc (toℕ (fromℕ n)))) (suc (toℕ (fromℕ n))) == Vec (Fin (suc n)) (suc n)
+                               pxl = ap (λ x → Vec (Fin (suc x)) (suc x)) toℕ-fromℕ
+                               xl' = coe pxl xl
+                           in xl'
+
+decode : {n : ℕ} -> Code n -> (Fin n ≈ Fin n)
+decode {n} (Perm p) = let d = decode' (Perm p)
+                      in Equiv {!!} {!!} {!!} {!!}
 
 
+encode-decode : {n : ℕ} -> (e : Fin n ≈ Fin n) -> decode (encode e) == e
+encode-decode {n} e = {!!}
 
--- decode' {suc n} (Perm p) acc zero = ? -- addTo acc k (p 0F)
--- decode' {suc n} (Perm p) acc (suc k) = {!   !}
-    -- where
-    -- pp : (k : Fin n) -> Fin (suc (toℕ k))
-    -- pp k = {! p (inject₁ k) !}
-    --  f' = decode' {n} (Perm (λ l → pp l)) acc k
+decode-encode : {n : ℕ} -> (c : Code n) -> encode (decode c) == c
+decode-encode {n} p = {!!}
+
+Code-Perm : {n : ℕ} -> (Fin n ≈ Fin n) ≈ Code n
+Code-Perm = Equiv encode decode encode-decode decode-encode
