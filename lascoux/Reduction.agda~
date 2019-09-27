@@ -1,0 +1,68 @@
+module Reduction where
+
+open import Data.List
+open import Data.Nat
+open import Data.Nat.Properties
+open import Data.Product using (∃; _×_; _,_; _,′_)
+open import Relation.Binary
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Relation.Nullary
+open import Data.Empty
+
+variable
+    n : ℕ
+    l : List ℕ
+
+data _≃_ : List ℕ -> List ℕ -> Set where
+    cancel : (n ∷ n ∷ []) ≃ []
+    swap : {k : ℕ} -> {1 < k} -> (n ∷ k ∷ []) ≃ (k ∷ n ∷ [])
+    braid : (n ∷ (suc n) ∷ n ∷ []) ≃ ((suc n) ∷ n ∷ (suc n) ∷ [])
+    ++-respects : {l l' m m' : List ℕ} -> {l ≃ l'} -> {m ≃ m'} -> (l ++ m) ≃ (l' ++ m')
+    refl : {l : List ℕ} -> l ≃ l
+    comm : {l l' : List ℕ} -> {l ≃ l'} -> l' ≃ l
+    trans : {l l' l'' : List ℕ} -> {l ≃ l'} -> {l' ≃ l''} -> l ≃ l''
+
+data _∈_ : ℕ -> List ℕ -> Set where
+    here : (n : ℕ) -> (l : List ℕ) -> n ∈ (n ∷ l)
+    there : (k : ℕ) -> {n : ℕ} -> {l : List ℕ} -> (n ∈ l) -> n ∈ (k ∷ l)
+
+data _∉_ : ℕ -> List ℕ -> Set where
+    nothere : (n : ℕ) -> n ∉ []
+    notthere : {k : ℕ} -> {n : ℕ} -> {¬ (k ≡ n)} -> {l : List ℕ} -> (n ∉ l) -> n ∉ (k ∷ l)
+
+
+_↓_ : (n : ℕ) -> (r : ℕ) -> List ℕ
+n ↓ zero = []
+zero ↓ suc r = zero ∷ []
+suc n ↓ suc r = n ∷ n ↓ r
+
+abs : {A : Set} -> {k n : ℕ} -> (¬ (k ≤ n)) -> (k ≡ n) -> A
+abs {_} {n} {k} p q = let r = ≤-reflexive q
+                      in ⊥-elim (p r)
+
+inv : (t : ℕ) -> {t ≤ 1} -> ℕ
+inv .0 {z≤n} = 1
+inv .1 {s≤s z≤n} = 0
+
+ext : {n m : ℕ} -> suc n ≡ suc m -> n ≡ m
+ext {n} {.n} refl = refl
+
+p1 : (n r i : ℕ) -> {i < n} -> {1 + r + i ≡ n} -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 0) ++ (n ↓ (suc r)))
+p1 (suc n) zero i {pin} {pirn} = let pp : i ≡ n
+                                     pp = ext pirn
+                                 in {!!}
+p1 (suc n) (suc r) i {pin} {pirn} = {!!}
+
+canonize : (n r i : ℕ) -> {i < n} -> ∃ (λ t -> ∃ (λ p -> ((n ↓ r) ++ (i ∷ [])) ≃ ((i ↓ t) ++ (n ↓ ((inv t {p}) + r)))))
+canonize n r i with 1 + r + i ≟ n
+canonize n r i {pin} | yes p = 0 , z≤n , p1 n r i {pin} {p}
+canonize n r i {pin} | no ¬p = 1 , (s≤s z≤n) , {!!}
+
+-- canonize n zero i {pin} | yes p , yes q = i ∷ [] , refl
+-- canonize n (suc r) i {prn}  | yes p , yes q = (_↓_ n r {{!!}}) , {!!}
+-- canonize n r i | yes p , no ¬q = {!   !}
+-- canonize n r i | no ¬p , yes q = abs ¬p q
+-- canonize n r i | no ¬p , no ¬q = {!   !}
+
+reduction-lemma : {n ∈ l} -> ∃ (λ l' -> ∃ (λ r -> (n ∉ l) × (l ≃ (l' ++ (n ↓ r)))))
+reduction-lemma = {!   !}
