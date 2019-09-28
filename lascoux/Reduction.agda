@@ -27,7 +27,7 @@ data _≃_ : List ℕ -> List ℕ -> Set where
     prepend : (k : ℕ) -> {l l' : List ℕ} -> (l ≃ l') -> (k ∷ l) ≃ (k ∷ l')
 --    ++-respects : {l l' m m' : List ℕ} -> {l ≃ l'} -> {m ≃ m'} -> (l ++ m) ≃ (l' ++ m')
     refl : {l : List ℕ} -> l ≃ l
-    comm : {l l' : List ℕ} -> {l ≃ l'} -> l' ≃ l
+    comm : {l l' : List ℕ} -> (l ≃ l') -> l' ≃ l
     trans : {l l' l'' : List ℕ} -> {l ≃ l'} -> {l' ≃ l''} -> l ≃ l''
 
 data _∈_ : ℕ -> List ℕ -> Set where
@@ -41,7 +41,8 @@ data _∉_ : ℕ -> List ℕ -> Set where
 
 _↓_ : (n : ℕ) -> (r : ℕ) -> List ℕ
 n ↓ zero = []
-zero ↓ suc r = []
+zero ↓ suc zero = zero ∷ []
+zero ↓ suc (suc r) = []
 suc n ↓ suc r = n ∷ n ↓ r
 
 abs : {A : Set} -> {k n : ℕ} -> (¬ (k ≤ n)) -> (k ≡ n) -> A
@@ -109,8 +110,8 @@ open ≤-Reasoning renaming (_∎ to _<∎)
 <-tight {m} {n} p q = {!!}
 
 braid-base-case : (k : ℕ) -> (((1 + k) ↓ 2) ++ k ∷ []) ≃ ((k ↓ 1) ++ ((1 + k) ↓ 2))
-braid-base-case zero = {!!}
-braid-base-case (suc k) = {!!}
+braid-base-case zero = refl
+braid-base-case (suc k) = comm braid
 
 p> : (n i r : ℕ) -> i < n -> n < i + r -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 1) ++ (n ↓ r))
 -- Two ugly impossible cases
@@ -143,12 +144,17 @@ p> n i (suc zero) i<n n<i+r =
     in ⊥-elim (1+n≰n i<i)
 
 -- The true base case : n ≡ i + 1
+-- we use braid here
 p> n i (suc (suc zero)) i<n n<i+r =
      let 1+i≡n : n ≡ 1 + i
          1+i≡n = <-tight i<n n<i+r
 
-     in {!!}
-
+         pp = braid-base-case i
+     in subst (λ k -> ((k ↓ 2) ++ i ∷ []) ≃ ((i ↓ 1) ++ (k ↓ 2)) ) (≡-sym 1+i≡n) pp
+-- Inductive case is quite difficult
+-- we have to swap until 1+i≡n
+-- then do braid
+-- and then once again exchange
 p> n i (suc (suc (suc r))) i<n n<i+r = {!!}
 
 p2 : (n i r : ℕ) -> i < n -> ¬ (1 + i + r) ≡ n -> ¬ (i + r) ≡ n -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 1) ++ (n ↓ r))
