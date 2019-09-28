@@ -2,16 +2,18 @@ module Reduction where
 
 open import Data.List
 open import Data.Nat
+open import Data.List.Properties
 open import Data.Nat.Properties
 open import Data.Product using (∃; _×_; _,_; _,′_)
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong) renaming (trans to ≡-trans; sym to ≡-sym)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 
 open import General
 open import Relation.Nullary
 open import Data.Empty
 -- open import Relation.Binary.Reasoning.Setoid
 open Relation.Binary.PropositionalEquality.≡-Reasoning
+
 
 
 variable
@@ -59,7 +61,6 @@ ext {n} {.n} refl = refl
 ≤-up {n} {.0} z≤n = z≤n
 ≤-up {.(suc _)} {.(suc _)} (s≤s q) = s≤s (≤-up q)
 
-
 pa : {n i r : ℕ} -> suc (r + i) ≡ n -> suc i ≤ n
 pa {zero} {i} {r} = λ ()
 pa {suc n} {i} {zero} = ≤-reflexive
@@ -77,33 +78,86 @@ pa {suc n} {i} {suc r} = λ y -> ≤-up (pa {n} {i} {r} (ext y))
 postulate
     ≤-+-respects : {m n r p : ℕ} -> m ≤ n -> r ≤ p -> r + m ≤ p + n
 
-
 lemma : {n i r : ℕ} -> suc (i + suc r) ≡ n -> suc i < n
 lemma {.(suc (i + 1))} {i} {zero} refl = s≤s (≤-reflexive (+-comm 1 i))
 lemma {.(suc (i + suc (suc r)))} {i} {suc r} refl =  s≤s (≤-trans {suc i} {suc (suc i)} (s≤s (<⇒≤ n<1+n)) (≤-trans {_} {i + suc (suc zero)} (≤-reflexive (+-comm 2 i)) (≤-+-respects (s≤s (s≤s z≤n)) (≤-refl {i}) )))
 
 
 p1 : (n r i : ℕ) -> {i < n} -> {1 + i + r ≡ n} -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 0) ++ (n ↓ (suc r)))
-p1 (suc n) zero i {pin} {pirn} = let pp : i ≡ n
-                                     pp = ext ( ≡-trans (cong suc ( ≡-sym (+-zero {i}))) pirn)
-                                     rl : (i ∷ []) ≃ (i ∷ [])
-                                     rl = refl
-                                 in transport _ (tr pp) rl
-p1 (suc n) (suc r) zero {pin} {pirn} = let pp = ext pirn
-                                           ll = p1 n r zero {<-zero pp} {pp}
-                                       in prepend n ll
+p1 (suc n) zero i {pin} {pirn} =
+    let pp : i ≡ n
+        pp = ext ( ≡-trans (cong suc ( ≡-sym (+-zero {i}))) pirn)
+        rl : (i ∷ []) ≃ (i ∷ [])
+        rl = refl
+    in subst _ pp rl
+p1 (suc n) (suc r) zero {pin} {pirn} =
+    let pp = ext pirn
+        ll = p1 n r zero {<-zero pp} {pp}
+    in prepend n ll
 --- idea here : induction on n and r at the same time
-p1 (suc n) (suc r) (suc i) {pin} {pirn} = let pp = ext pirn
-                                              ll = p1 n r (suc i) {lemma pp} {_} -- this lemma is trivial too, as the previous one, but there has to be another way ...
-                                          in prepend n ll
+p1 (suc n) (suc r) (suc i) {pin} {pirn} =
+    let pp = ext pirn
+        ll = p1 n r (suc i) {lemma pp} {_} -- skipped lemma is trivial too, as the previous one, but there has to be another way ...
+    in prepend n ll
 
+l++[] : {l : List ℕ} -> l ++ [] ≡ l
+l++[] {l} = ++-identityʳ l
 
+open ≤-Reasoning renaming (_∎ to _<∎)
 
+<-tight : {m n : ℕ} -> m < n -> n < m + 2 -> n ≡ 1 + m
+<-tight {m} {n} p q = {!!}
 
-p2 : (n i r : ℕ) -> suc i ≤ n -> ¬ suc (i + r) ≡ n -> ¬ (i + r) ≡ n -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 1) ++ (n ↓ r))
-p2 n i r pin pirn1 pirn with (i + r) <? n
-... | yes p = {!!}
-... | no ¬p = {!!}
+braid-base-case : (k : ℕ) -> (((1 + k) ↓ 2) ++ k ∷ []) ≃ ((k ↓ 1) ++ ((1 + k) ↓ 2))
+braid-base-case zero = {!!}
+braid-base-case (suc k) = {!!}
+
+p> : (n i r : ℕ) -> i < n -> n < i + r -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 1) ++ (n ↓ r))
+-- Two ugly impossible cases
+p> n i zero i<n n<i+r =
+    let n<i : n < i
+        n<i =
+            begin-strict
+                n
+            <⟨ n<i+r ⟩
+                i + zero
+            ≤⟨ ≤-reflexive (+-comm i zero) ⟩
+                i
+            <∎
+        n<n : (suc n) < suc n
+        n<n = ≤-trans ( s≤s (s≤s (<⇒≤ n<i))) (s≤s i<n)
+    in ⊥-elim (1+n≰n n<n)
+-- Another one...
+p> n i (suc zero) i<n n<i+r =
+    let i<i : suc i < suc i
+        i<i =
+            begin-strict
+                suc i
+            ≤⟨ i<n ⟩
+                n
+            <⟨ n<i+r ⟩
+                i + 1
+            ≤⟨ ≤-reflexive (+-comm i 1) ⟩
+                1 + i
+            <∎
+    in ⊥-elim (1+n≰n i<i)
+
+-- The true base case : n ≡ i + 1
+p> n i (suc (suc zero)) i<n n<i+r =
+     let 1+i≡n : n ≡ 1 + i
+         1+i≡n = <-tight i<n n<i+r
+
+     in {!!}
+
+p> n i (suc (suc (suc r))) i<n n<i+r = {!!}
+
+p2 : (n i r : ℕ) -> i < n -> ¬ (1 + i + r) ≡ n -> ¬ (i + r) ≡ n -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 1) ++ (n ↓ r))
+p2 n i r i<n 1+i+r≠n i+r≠n with (i + r) <? n
+... | no 1+i+r≰n =
+    let n<i+r : n < i + r
+        n<i+r = {!!}
+    in p> _ _ _ i<n n<i+r
+... | yes 1+i+r≤n = {!!}
 
 abs2 : {A : Set} -> 1 + n ≡ n -> A
 abs2 ()
@@ -115,11 +169,6 @@ canonize n r i {pin} | yes p , no ¬p = 0 , z≤n , p1 n r i {pin} {p} -- p1 fro
 canonize n r i {pin} | no ¬p , yes p = {!!} -- here we will have to cancel, but might be hard, as the original paper doesnt take that into account...
 canonize n r i {pin} | no ¬p , no ¬q = 1 , (s≤s z≤n) , p2 n i r pin ¬p ¬q
 
--- canonize n zero i {pin} | yes p , yes q = i ∷ [] , refl
--- canonize n (suc r) i {prn}  | yes p , yes q = (_↓_ n r {{!!}}) , {!!}
--- canonize n r i | yes p , no ¬q = {!   !}
--- canonize n r i | no ¬p , yes q = abs ¬p q
--- canonize n r i | no ¬p , no ¬q = {!   !}
 
 reduction-lemma : {n ∈ l} -> ∃ (λ l' -> ∃ (λ r -> (n ∉ l) × (l ≃ (l' ++ (n ↓ r)))))
 reduction-lemma = {!   !}
