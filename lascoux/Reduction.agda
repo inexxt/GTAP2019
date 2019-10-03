@@ -35,8 +35,8 @@ data _∈_ : ℕ -> List ℕ -> Set where
     there : (k : ℕ) -> {n : ℕ} -> {l : List ℕ} -> (n ∈ l) -> n ∈ (k ∷ l)
 
 data _∉_ : ℕ -> List ℕ -> Set where
-    nothere : (n : ℕ) -> n ∉ []
-    notthere : {k : ℕ} -> {n : ℕ} -> {¬ (k == n)} -> {l : List ℕ} -> (n ∉ l) -> n ∉ (k ∷ l)
+    not-here : (n : ℕ) -> n ∉ []
+    not-there : {k : ℕ} -> {n : ℕ} -> {¬ (k == n)} -> {l : List ℕ} -> (n ∉ l) -> n ∉ (k ∷ l)
 
 
 _↓_ : (n : ℕ) -> (r : ℕ) -> List ℕ
@@ -107,7 +107,7 @@ l++[] {l} = ++-identityʳ l
 open ≤-Reasoning renaming (_∎ to _<∎)
 
 <-tight : {m n : ℕ} -> m < n -> n < m + 2 -> n ≡ 1 + m
-<-tight {m} {n} p q = {!!}
+<-tight {m} {n} p q = {!   !}
 
 braid-base-case : (k : ℕ) -> (((1 + k) ↓ 2) ++ k ∷ []) ≃ ((k ↓ 1) ++ ((1 + k) ↓ 2))
 braid-base-case zero = refl
@@ -150,7 +150,7 @@ p> n i (suc (suc zero)) i<n n<i+r =
          1+i≡n = <-tight i<n n<i+r
 
          pp = braid-base-case i
-     in subst (λ k -> ((k ↓ 2) ++ i ∷ []) ≃ ((i ↓ 1) ++ (k ↓ 2)) ) (≡-sym 1+i≡n) pp
+     in subst (λ k -> ((k ↓ 2) ++ i ∷ []) ≃ ((i ↓ 1) ++ (k ↓ 2)) ) (≡-sym 1+i≡n) pp -- this is stupid, subst should be able to guess the function
 -- Inductive case is quite difficult
 -- we have to swap until 1+i≡n
 -- then do braid
@@ -161,16 +161,18 @@ p2 : (n i r : ℕ) -> i < n -> ¬ (1 + i + r) ≡ n -> ¬ (i + r) ≡ n -> ((n �
 p2 n i r i<n 1+i+r≠n i+r≠n with (i + r) <? n
 ... | no 1+i+r≰n =
     let n<i+r : n < i + r
-        n<i+r = {!!}
+        n<i+r = {!   !}
     in p> _ _ _ i<n n<i+r
-... | yes 1+i+r≤n = {!!}
+... | yes 1+i+r≤n = {!   !}
 
-abs2 : {A : Set} -> 1 + n ≡ n -> A
-abs2 ()
 
 canonize : (n r i : ℕ) -> {i < n} -> ∃ (λ t -> ∃ (λ p -> ((n ↓ r) ++ (i ∷ [])) ≃ ((i ↓ t) ++ (n ↓ ((inv t {p}) + r)))))
 canonize n r i with (1 + i + r ≟ n) ,′ (i + r ≟ n)
-canonize n r i {pin} | yes p , yes q = abs2 (≡-trans p (≡-sym q))
+canonize n r i {pin} | yes p , yes q = absurd (≡-trans p (≡-sym q))
+    where
+        absurd : {A : Set} -> {n : ℕ} -> 1 + n ≡ n -> A
+        absurd ()
+
 canonize n r i {pin} | yes p , no ¬p = 0 , z≤n , p1 n r i {pin} {p} -- p1 from the paper
 canonize n r i {pin} | no ¬p , yes p = {!!} -- here we will have to cancel, but might be hard, as the original paper doesnt take that into account...
 canonize n r i {pin} | no ¬p , no ¬q = 1 , (s≤s z≤n) , p2 n i r pin ¬p ¬q
