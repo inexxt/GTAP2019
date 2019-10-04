@@ -4,7 +4,7 @@ open import Data.List
 open import Data.Nat
 open import Data.List.Properties
 open import Data.Nat.Properties
-open import Data.Product using (∃; _×_; _,_; _,′_)
+open import Data.Product using (∃; Σ; _×_; _,_; _,′_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 
@@ -13,7 +13,6 @@ open import Relation.Nullary
 open import Data.Empty
 -- open import Relation.Binary.Reasoning.Setoid
 open Relation.Binary.PropositionalEquality.≡-Reasoning
-
 
 
 variable
@@ -76,107 +75,37 @@ pa {suc n} {i} {suc r} = λ y -> ≤-up (pa {n} {i} {r} (ext y))
 <-down : {m n : ℕ} -> suc m < suc n -> m < n
 <-down {m} {n} (s≤s p) = p
 
+open Σ
+
 postulate
     ≤-+-respects : {m n r p : ℕ} -> m ≤ n -> r ≤ p -> r + m ≤ p + n
+    ∸-not-< : {n r : ℕ} -> (n > r) -> ¬ (zero ≡ n ∸ r)
+    <-holes : {i n : ℕ} -> (1 + i + zero > n) -> (i < n) -> ⊥
+    ∸-exact : {p q : ℕ} -> (q > p) -> (t : Σ ℕ (λ k -> k ≡ q ∸ p)) -> (proj₁ t + p ≡ q)
+    +-cancel : {p q r : ℕ} -> (r + q ≡ r + p) -> (q ≡ p)
 
-lemma : {n i r : ℕ} -> suc (i + suc r) ≡ n -> suc i < n
-lemma {.(suc (i + 1))} {i} {zero} refl = s≤s (≤-reflexive (+-comm 1 i))
-lemma {.(suc (i + suc (suc r)))} {i} {suc r} refl =  s≤s (≤-trans {suc i} {suc (suc i)} (s≤s (<⇒≤ n<1+n)) (≤-trans {_} {i + suc (suc zero)} (≤-reflexive (+-comm 2 i)) (≤-+-respects (s≤s (s≤s z≤n)) (≤-refl {i}) )))
-
-
-p1 : (n r i : ℕ) -> {i < n} -> {1 + i + r ≡ n} -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 0) ++ (n ↓ (suc r)))
-p1 (suc n) zero i {pin} {pirn} =
-    let pp : i ≡ n
-        pp = ext ( ≡-trans (cong suc ( ≡-sym (+-zero {i}))) pirn)
-        rl : (i ∷ []) ≃ (i ∷ [])
-        rl = refl
-    in subst _ pp rl
-p1 (suc n) (suc r) zero {pin} {pirn} =
-    let pp = ext pirn
-        ll = p1 n r zero {<-zero pp} {pp}
-    in prepend n ll
---- idea here : induction on n and r at the same time
-p1 (suc n) (suc r) (suc i) {pin} {pirn} =
-    let pp = ext pirn
-        ll = p1 n r (suc i) {lemma pp} {_} -- skipped lemma is trivial too, as the previous one, but there has to be another way ...
-    in prepend n ll
-
-l++[] : {l : List ℕ} -> l ++ [] ≡ l
-l++[] {l} = ++-identityʳ l
-
-open ≤-Reasoning renaming (_∎ to _<∎)
-
-<-tight : {m n : ℕ} -> m < n -> n < m + 2 -> n ≡ 1 + m
-<-tight {m} {n} p q = {!   !}
-
-braid-base-case : (k : ℕ) -> (((1 + k) ↓ 2) ++ k ∷ []) ≃ ((k ↓ 1) ++ ((1 + k) ↓ 2))
-braid-base-case zero = refl
-braid-base-case (suc k) = comm braid
-
-p> : (n i r : ℕ) -> i < n -> n < i + r -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 1) ++ (n ↓ r))
--- Two ugly impossible cases
-p> n i zero i<n n<i+r =
-    let n<i : n < i
-        n<i =
-            begin-strict
-                n
-            <⟨ n<i+r ⟩
-                i + zero
-            ≤⟨ ≤-reflexive (+-comm i zero) ⟩
-                i
-            <∎
-        n<n : (suc n) < suc n
-        n<n = ≤-trans ( s≤s (s≤s (<⇒≤ n<i))) (s≤s i<n)
-    in ⊥-elim (1+n≰n n<n)
--- Another one...
-p> n i (suc zero) i<n n<i+r =
-    let i<i : suc i < suc i
-        i<i =
-            begin-strict
-                suc i
-            ≤⟨ i<n ⟩
-                n
-            <⟨ n<i+r ⟩
-                i + 1
-            ≤⟨ ≤-reflexive (+-comm i 1) ⟩
-                1 + i
-            <∎
-    in ⊥-elim (1+n≰n i<i)
-
--- The true base case : n ≡ i + 1
--- we use braid here
-p> n i (suc (suc zero)) i<n n<i+r =
-     let 1+i≡n : n ≡ 1 + i
-         1+i≡n = <-tight i<n n<i+r
-
-         pp = braid-base-case i
-     in subst (λ k -> ((k ↓ 2) ++ i ∷ []) ≃ ((i ↓ 1) ++ (k ↓ 2)) ) (≡-sym 1+i≡n) pp -- this is stupid, subst should be able to guess the function
--- Inductive case is quite difficult
--- we have to swap until 1+i≡n
--- then do braid
--- and then once again exchange
-p> n i (suc (suc (suc r))) i<n n<i+r = {!!}
-
-p2 : (n i r : ℕ) -> i < n -> ¬ (1 + i + r) ≡ n -> ¬ (i + r) ≡ n -> ((n ↓ r) ++ i ∷ []) ≃ ((i ↓ 1) ++ (n ↓ r))
-p2 n i r i<n 1+i+r≠n i+r≠n with (i + r) <? n
-... | no 1+i+r≰n =
-    let n<i+r : n < i + r
-        n<i+r = {!   !}
-    in p> _ _ _ i<n n<i+r
-... | yes 1+i+r≤n = {!   !}
-
-
-canonize : (n r i : ℕ) -> {i < n} -> ∃ (λ t -> ∃ (λ p -> ((n ↓ r) ++ (i ∷ [])) ≃ ((i ↓ t) ++ (n ↓ ((inv t {p}) + r)))))
-canonize n r i with (1 + i + r ≟ n) ,′ (i + r ≟ n)
-canonize n r i {pin} | yes p , yes q = absurd (≡-trans p (≡-sym q))
-    where
-        absurd : {A : Set} -> {n : ℕ} -> 1 + n ≡ n -> A
-        absurd ()
-
-canonize n r i {pin} | yes p , no ¬p = 0 , z≤n , p1 n r i {pin} {p} -- p1 from the paper
-canonize n r i {pin} | no ¬p , yes p = {!!} -- here we will have to cancel, but might be hard, as the original paper doesnt take that into account...
-canonize n r i {pin} | no ¬p , no ¬q = 1 , (s≤s z≤n) , p2 n i r pin ¬p ¬q
-
+-- REMEMBER - i is (suc i)
+canonize-p> : (n r i : ℕ) -> (i < n) -> (r < n) -> ((suc i) + r > n) -> (∃ (λ k -> k ≡ ((suc i) + r) ∸ n)) -> ((n ↓ r) ++ ((suc i) ∷ [])) ≃ (i ∷ (n ↓ r))
+canonize-p> n r i pin prn pirn (zero , snd) = ⊥-elim ((∸-not-< pirn) snd)
+canonize-p> n zero i pin prn pirn (suc zero , snd) = ⊥-elim (<-holes pirn pin)
+canonize-p> n (suc zero) i pin prn pirn (suc zero , snd) = {!!}
+canonize-p> (suc zero) (suc (suc zero)) i pin (s≤s ()) pirn (suc zero , snd)
+canonize-p> (suc (suc n)) (suc (suc zero)) i pin prn pirn (suc zero , snd) =
+  let 2+n=i+2 : suc (suc n) ≡ i + 2
+      2+n=i+2 = ∸-exact (<-down pirn) (1 , snd)
+      2+n=2+i = begin
+          2 + n
+        ≡⟨ 2+n=i+2 ⟩
+          i + 2
+        ≡⟨ +-comm i 2 ⟩
+          2 + i
+        ∎
+      n=i : n ≡ i
+      n=i = +-cancel 2+n=2+i
+  in subst _ n=i (comm (braid {n})) -- true base case
+canonize-p> (suc zero) (suc (suc (suc r))) i pin (s≤s ()) pirn (suc zero , snd)
+canonize-p> (suc (suc n)) (suc (suc (suc r))) i pin prn pirn (suc zero , snd) = {!!}
+canonize-p> n r i pin prn pirn (suc (suc fst) , snd) = {!!}
 
 reduction-lemma : {n ∈ l} -> ∃ (λ l' -> ∃ (λ r -> (n ∉ l) × (l ≃ (l' ++ (n ↓ r)))))
 reduction-lemma = {!   !}
