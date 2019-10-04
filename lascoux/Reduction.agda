@@ -44,6 +44,10 @@ zero ↓ suc zero = zero ∷ []
 zero ↓ suc (suc r) = []
 suc n ↓ suc r = n ∷ n ↓ r
 
+↓-rec : {n k : ℕ} -> (k < n) -> (n ↓ suc k) ≡ (n ↓ k) ++ [ n ∸ (k + 1) ]
+↓-rec {suc n} {zero} (s≤s z≤n) = refl
+↓-rec {suc (suc n)} {suc k} (s≤s p) = cong (λ l -> suc n ∷ l) (↓-rec p)
+
 abs : {A : Set} -> {k n : ℕ} -> (¬ (k ≤ n)) -> (k ≡ n) -> A
 abs {_} {n} {k} p q = let r = ≤-reflexive q
                       in ⊥-elim (p r)
@@ -65,6 +69,12 @@ ext {n} {.n} refl = refl
 ≤-down {.(suc _)} {zero} (s≤s p) = z≤n
 ≤-down {.(suc _)} {suc n} (s≤s p) = s≤s (≤-down p)
 
+≤-down2 : {n m : ℕ} -> suc m ≤ suc n -> m ≤ n
+≤-down2 {m} {n} (s≤s p) = p
+
+≤-abs : {A : Set} -> {n : ℕ} -> (suc n ≤ 0) -> A
+≤-abs ()
+
 pa : {n i r : ℕ} -> suc (r + i) ≡ n -> suc i ≤ n
 pa {zero} {i} {r} = λ ()
 pa {suc n} {i} {zero} = ≤-reflexive
@@ -84,10 +94,12 @@ open Σ
 postulate
     ≤-+-respects : {m n r p : ℕ} -> m ≤ n -> r ≤ p -> r + m ≤ p + n
     ∸-not-< : {n r : ℕ} -> (n > r) -> ¬ (zero ≡ n ∸ r)
+    ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
     <-holes : {i n : ℕ} -> (1 + i + zero > n) -> (i < n) -> ⊥
     ∸-exact : {p q : ℕ} -> (q > p) -> (t : Σ ℕ (λ k -> k ≡ q ∸ p)) -> (proj₁ t + p ≡ q)
     +-cancel : {p q r : ℕ} -> (r + q ≡ r + p) -> (q ≡ p)
     ∸-up : {p q r : ℕ} -> (suc r ≤ q) -> (p ≡ q ∸ (suc r)) -> (suc p ≡ q ∸ r)
+    ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)
 
 nnl=l : {l : List ℕ} -> {n : ℕ} -> (n ∷ n ∷ l) ≃ l
 nnl=l = ++-respects cancel refl
@@ -106,22 +118,32 @@ canonize-p> : (n r1 r2 : ℕ)
 canonize-p> zero (suc r1) r2 {i} pr1 pr2 ()
 canonize-p> (suc zero) (suc (suc r1)) (suc zero) pr1 pr2 (s≤s ())
 canonize-p> (suc zero) (suc zero) (suc zero) {i} pr1 pr2 (s≤s ())
-canonize-p> (suc (suc zero)) (suc zero) (suc zero) {i} pr1 pr2 prrn {pinr} rewrite pinr = trans (nnl=l {0 ∷ 1 ∷ []}) (comm l++nn=l)
+canonize-p> (suc (suc zero)) (suc zero) (suc zero) {i} pr1 pr2 prrn {pinr} rewrite pinr =
+  trans (nnl=l {0 ∷ 1 ∷ []}) (comm l++nn=l)
 canonize-p> (suc (suc (suc n))) (suc zero) (suc zero) {i} pr1 pr2 prrn {pinr} rewrite pinr =
   let x : ((2 +  n) ∷ 1 + n ∷ n ∷ 1 + n ∷ []) ≃ ((2 + n) ∷ n ∷ 1 + n ∷ n ∷ [])
       x = prepend (2 + n) (comm (braid {n}))
       y : {l : List ℕ} -> ((2 + n) ∷ n ∷ l) ≃ (n ∷ (2 + n) ∷ l)
       y = ++-respects (swap n<1+n) refl
   in trans x y
-canonize-p> (suc (suc n)) (suc (suc r1)) (suc zero) {i} pr1 pr2 (s≤s prrn) {pinr} =
-  let x = prepend (suc n) (canonize-p> (suc n) (suc r1) (suc zero) {i} (s≤s z≤n) pr2 (prrn) {pinr})
-      y : (suc n ∷ [ i ]) ≃ (i ∷ [ suc n ])
-      y = swap (s≤s {!!})
-      z = ++-respects y (refl { n ∷ (n ↓ suc (r1 + 1))})
+canonize-p> (suc (suc zero)) (suc (suc r1)) (suc zero) {i} pr1 pr2 (s≤s (s≤s prrn)) {pinr} =
+  ≤-abs (≤-trans (≤-reflexive (+-comm 1 r1)) prrn)
+canonize-p> (suc (suc (suc n))) (suc (suc r1)) (suc zero) {i} pr1 pr2 (s≤s prrn) {pinr} =
+  let x = prepend (suc (suc n)) (canonize-p> (suc (suc n)) (suc r1) (suc zero) {i} (s≤s z≤n) pr2 (prrn) {pinr})
+      y : (suc (suc n) ∷ [ i ]) ≃ (i ∷ [ suc (suc n) ])
+      y = swap (s≤s (s≤s (∸-implies-≤ {i} {n} {suc r1} pinr)))
+      z = ++-respects y (refl { (suc n) ∷ ((suc n) ↓ suc (r1 + 1))})
   in trans x z
-canonize-p> (suc n) (suc r1) (suc (suc r2)) {i} pr1 pr2 (s≤s prrn) {pirn} =
-  let x = canonize-p> (suc n) (suc r1) (suc r2) {i} pr1 (s≤s z≤n) (s≤s {!!}) {pirn}
-  in {!!}
+canonize-p> (suc zero) (suc r1) (suc (suc r2)) {i} pr1 pr2 (s≤s prrn) {pirn} =
+  ≤-abs (≤-remove-+ {r1} {suc (suc r2)} {zero} prrn)
+canonize-p> (suc (suc zero)) (suc r1) (suc (suc r2)) {i} pr1 pr2 (s≤s prrn) {pirn} =
+  let t = ≤-down2 (≤-remove-+ {r1} {suc (suc r2)} {1} prrn)
+  in  ≤-abs t
+canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr1 pr2 (s≤s prrn) {pirn} =
+  let x = canonize-p> (3 + n) (1 + r1) (1 + r2) {i} pr1 (s≤s z≤n) (s≤s {!!}) {pirn}
+      r2<i : r2 ≤ i
+      r2<i = {!!}
+  in  {!!}
 
 reduction-lemma : {n ∈ l} -> ∃ (λ l' -> ∃ (λ r -> (n ∉ l) × (l ≃ (l' ++ (n ↓ r)))))
 reduction-lemma = {!   !}
