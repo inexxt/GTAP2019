@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 module ReductionStep where
 
 open import Data.List
@@ -13,7 +15,13 @@ open import Relation.Nullary
 open import Data.Empty
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
-open import Canonization using (F-canonize-p>; F-canonize-p≡; F-canonize-p<; _≃_)
+open import Canonization using (F-canonize-p>; F-canonize-p≡; F-canonize-p<; _≃_; _↓_ )
+
+open _≃_
+
+variable
+  n : ℕ
+  l : List ℕ
 
 data _∈_ : ℕ -> List ℕ -> Set where
     here : (n : ℕ) -> (l : List ℕ) -> n ∈ (n ∷ l)
@@ -23,12 +31,23 @@ data _∉_ : ℕ -> List ℕ -> Set where
     not-here : (n : ℕ) -> n ∉ []
     not-there : {k : ℕ} -> {n : ℕ} -> {¬ (k == n)} -> {l : List ℕ} -> (n ∉ l) -> n ∉ (k ∷ l)
 
-first-occ : {n : ℕ} -> {l : List ℕ} -> (n ∈ l) -> Σ ((List ℕ) × (List ℕ)) (λ (l' , l'') -> (n ∉ l') × ((l' ++ [ n ] ++ l'') ≡ l)))
-
 data _>=_ : ℕ -> List ℕ -> Set where
   [] : {n : ℕ} -> n >= []
-  _:⟨_⟩:_ : {n : ℕ} -> (k : ℕ) -> (k ≤ n) -> n >= l -> n >= (k ∷ l)
+  _:⟨_⟩:_ : {n : ℕ} -> {l : List ℕ} -> (k : ℕ) -> (k ≤ n) -> n >= l -> n >= (k ∷ l)
 
+≤-≠-≤ : {n m : ℕ} -> (n ≤ suc m) -> ¬ (n ≡ suc m) -> (n ≤ m)
+≤-≠-≤ z≤n q = z≤n
+≤-≠-≤ (s≤s p) q = {!!}
+
+step : (ll : (suc n) >= l) -> Σ (List ℕ × ℕ) (λ (l' , r) -> (n >= l') × (l' ++ ((suc (suc n)) ↓ r)) ≃ l)
+step {n} {.[]} [] = ([] , 0) , ([] , refl)
+step {n} {k ∷ l} (_ :⟨ x ⟩: ll) with k ≟ (suc n)
+step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | yes p =  {!all-reduce!}
+step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | no ¬p =
+  let k≤n : k ≤ n
+      k≤n = ≤-≠-≤ x ¬p
+      (l , r) , (ll , pp) = step ll
+  in ((k ∷ l) , r) , ((k :⟨ k≤n ⟩: ll) , (prepend k pp))
 
 data Canonical : (n : ℕ) -> Set where
   CanZ : Canonical 0
@@ -37,9 +56,6 @@ data Canonical : (n : ℕ) -> Set where
 immersion : {n : ℕ} -> Canonical n -> List ℕ
 immersion {zero} CanZ = []
 immersion {suc n} (CanS k r n<k r≤k l) = (k ↓ r) ++ immersion l
-
-reduction-lemma : {n ∈ l} -> ∃ (λ l' -> ∃ (λ r -> (n ∉ l) × (l ≃ (l' ++ (n ↓ r)))))
-reduction-lemma = {!   !}
 
 open import Data.Fin
 
