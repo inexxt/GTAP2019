@@ -1,4 +1,4 @@
-module Reduction where
+module Canonization where
 
 open import Data.List
 open import Data.Nat
@@ -11,9 +11,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subs
 open import General
 open import Relation.Nullary
 open import Data.Empty
--- open import Relation.Binary.Reasoning.Setoid
 open Relation.Binary.PropositionalEquality.≡-Reasoning
-
 
 variable
     n : ℕ
@@ -32,18 +30,6 @@ data _≃_ : List ℕ -> List ℕ -> Set where
 refl≡ : {l l' : List ℕ} -> (l ≡ l') -> l ≃ l'
 refl≡ refl = refl
 
--- data _∈_ : ℕ -> List ℕ -> Set where
---     here : (n : ℕ) -> (l : List ℕ) -> n ∈ (n ∷ l)
---     there : (k : ℕ) -> {n : ℕ} -> {l : List ℕ} -> (n ∈ l) -> n ∈ (k ∷ l)
-
--- data _∉_ : ℕ -> List ℕ -> Set where
---     not-here : (n : ℕ) -> n ∉ []
---     not-there : {k : ℕ} -> {n : ℕ} -> {¬ (k == n)} -> {l : List ℕ} -> (n ∉ l) -> n ∉ (k ∷ l)
-
-data _>=_ : ℕ -> List ℕ -> Set where
-  [] : {n : ℕ} -> n >= []
-  _:⟨_⟩:_ : {n : ℕ} -> (k : ℕ) -> (k ≤ n) -> n >= l -> n >= (k ∷ l)
-
 _↓_ : (n : ℕ) -> (r : ℕ) -> List ℕ
 n ↓ zero = []
 zero ↓ suc zero = zero ∷ []
@@ -53,19 +39,6 @@ suc n ↓ suc r = n ∷ n ↓ r
 ↓-rec : {n k : ℕ} -> (k < n) -> (n ↓ suc k) ≡ (n ↓ k) ++ [ n ∸ (k + 1) ]
 ↓-rec {suc n} {zero} (s≤s z≤n) = refl
 ↓-rec {suc (suc n)} {suc k} (s≤s p) = cong (λ l -> suc n ∷ l) (↓-rec p)
-
-abs : {A : Set} -> {k n : ℕ} -> (¬ (k ≤ n)) -> (k ≡ n) -> A
-abs {_} {n} {k} p q = let r = ≤-reflexive q
-                      in ⊥-elim (p r)
-
-inv : (t : ℕ) -> {t ≤ 1} -> ℕ
-inv .0 {z≤n} = 1
-inv .1 {s≤s z≤n} = 0
-
-
--- for some reason, ≤-refl does not want to work
-ext : {n m : ℕ} -> suc n ≡ suc m -> n ≡ m
-ext {n} {.n} refl = refl
 
 ≤-up : {n m : ℕ} -> m ≤ n -> m ≤ suc n
 ≤-up {n} {.0} z≤n = z≤n
@@ -81,30 +54,10 @@ ext {n} {.n} refl = refl
 ≤-abs : {A : Set} -> {n : ℕ} -> (suc n ≤ 0) -> A
 ≤-abs ()
 
-pa : {n i r : ℕ} -> suc (r + i) ≡ n -> suc i ≤ n
-pa {zero} {i} {r} = λ ()
-pa {suc n} {i} {zero} = ≤-reflexive
-pa {suc n} {i} {suc r} = λ y -> ≤-up (pa {n} {i} {r} (ext y))
-
-+-zero : n + zero ≡ n
-+-zero {n} = +-comm n zero
-
-<-zero : {n r : ℕ} -> suc r ≡ n -> zero < n
-<-zero {.(suc r)} {r} refl = s≤s z≤n
-
-<-down : {m n : ℕ} -> suc m < suc n -> m < n
-<-down {m} {n} (s≤s p) = p
-
 open Σ
 
 postulate
-    ≤-+-respects : {m n r p : ℕ} -> m ≤ n -> r ≤ p -> r + m ≤ p + n
-    ∸-not-< : {n r : ℕ} -> (n > r) -> ¬ (zero ≡ n ∸ r)
     ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
-    <-holes : {i n : ℕ} -> (1 + i + zero > n) -> (i < n) -> ⊥
-    ∸-exact : {p q : ℕ} -> (q > p) -> (t : Σ ℕ (λ k -> k ≡ q ∸ p)) -> (proj₁ t + p ≡ q)
-    +-cancel : {p q r : ℕ} -> (r + q ≡ r + p) -> (q ≡ p)
-    ∸-up : {p q r : ℕ} -> (suc r ≤ q) -> (p ≡ q ∸ (suc r)) -> (suc p ≡ q ∸ r)
     ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)
 
 nnl=l : {l : List ℕ} -> {n : ℕ} -> (n ∷ n ∷ l) ≃ l
@@ -172,23 +125,3 @@ postulate
                   -> (i < n)
                   -> ((suc i) + (1 + r) < n)
                   -> ((n ↓ r) ++ [ suc i ]) ≃ ((suc i) ∷ n ↓ r)
-
-  first-occ : {n : ℕ} -> {l : List ℕ} -> (n ∈ l) -> Σ ((List ℕ) × (List ℕ)) (λ (l' , l'') -> (n ∉ l') × ((l' ++ [ n ] ++ l'') ≡ l))
-
-
-data Canonical : (n : ℕ) -> Set where
-  CanZ : Canonical 0
-  CanS : {n : ℕ} -> (k r : ℕ) -> (n < k) -> (r ≤ k) -> (l : Canonical n) -> Canonical k
-
-immersion : {n : ℕ} -> Canonical n -> List ℕ
-immersion {zero} CanZ = []
-immersion {suc n} (CanS k r n<k r≤k l) = (k ↓ r) ++ immersion l
-
-reduction-lemma : {n ∈ l} -> ∃ (λ l' -> ∃ (λ r -> (n ∉ l) × (l ≃ (l' ++ (n ↓ r)))))
-reduction-lemma = {!   !}
-
-open import Data.Fin
-
-canonical-form-lemma : {n : ℕ} -> (l : List (Fin n)) -> ∃ (λ cl -> (map (λ x -> toℕ x) l) ≃ (immersion {n} cl))
-
-canonical-form-lemma-Free : (l : List ℕ) -> ∃ (λ n -> ∃ (λ cl -> l ≃ (immersion {n} cl)))
