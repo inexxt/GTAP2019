@@ -113,7 +113,7 @@ canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr1 pr2 (s≤s (s≤
 postulate
   F-canonize-p> : (n r i : ℕ)
                 -> (2 < n)
-                -> (r < n)
+                -> (r ≤ n)
                 -> ((suc i) < n)
                 -> ((suc i) + r > n)
                 -> ((n ↓ r) ++ [ suc i ]) ≃ (i ∷ n ↓ r)

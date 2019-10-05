@@ -31,9 +31,9 @@ variable
 --     not-here : (n : ℕ) -> n ∉ []
 --     not-there : {k : ℕ} -> {n : ℕ} -> {¬ (k == n)} -> {l : List ℕ} -> (n ∉ l) -> n ∉ (k ∷ l)
 
-data _>=_ : ℕ -> List ℕ -> Set where
-  [] : {n : ℕ} -> n >= []
-  _:⟨_⟩:_ : {n : ℕ} -> {l : List ℕ} -> (k : ℕ) -> (k ≤ n) -> n >= l -> n >= (k ∷ l)
+data _>>_ : ℕ -> List ℕ -> Set where
+  [] : {n : ℕ} -> n >> []
+  _:⟨_⟩:_ : {n : ℕ} -> {l : List ℕ} -> (k : ℕ) -> (k < n) -> n >> l -> n >> (k ∷ l)
 
 ≤-≠-≤ : {n m : ℕ} -> (n ≤ suc m) -> ¬ (n ≡ suc m) -> (n ≤ m)
 ≤-≠-≤ z≤n q = z≤n
@@ -61,53 +61,63 @@ n>i+1+r = {!!}
                      yy = ++-unit (l1 ++ l2)
                      in ≡-trans (≡-sym xx) yy
 
->=-++ : {l1 l2 : List ℕ} -> n >= l1 -> n >= l2 -> n >= (l1 ++ l2)
->=-++ {n} {[]} {l2} ll1 ll2 = ll2
->=-++ {n} {x ∷ l1} {l2} (.x :⟨ p ⟩: ll1) ll2 = x :⟨ p ⟩: (>=-++ ll1 ll2)
+>>-++ : {l1 l2 : List ℕ} -> n >> l1 -> n >> l2 -> n >> (l1 ++ l2)
+>>-++ {n} {[]} {l2} ll1 ll2 = ll2
+>>-++ {n} {x ∷ l1} {l2} (.x :⟨ p ⟩: ll1) ll2 = x :⟨ p ⟩: (>>-++ ll1 ll2)
 
 open Σ
 
 postulate
-  ++-≃ : {l l' w r r' : List ℕ} -> (l ≃ l') -> (r ≃ r') -> (l ++ w ++ r) ≃ (l' ++ w ++ r')
+  ++-≃ : {l l' w w' : List ℕ} -> (l ≃ l') -> (w ≃ w') -> (l ++ w) ≃ (l' ++ w')
 
 all-reduce : (w : List ℕ)
              -> (w' : List ℕ)
              -> (n : ℕ)
              -> (r : ℕ)
-             -> {r ≤ (suc n)}
-             -> {1 < n}
-             -> (ww : n >= w)
-             -> (ww' : (suc n) >= w')
-             -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >= w'') × (w'' ++ ((suc n) ↓ r')) ≃ (w ++ ((suc n) ↓ r) ++ w'))
-all-reduce w [] n r ww [] = let tt = ++-assoc  in  (w , r) , (ww , refl≡ (≡-sym (++-unit2 w ((suc n) ↓ r))) )
+             -> {r ≤ n}
+             -> {2 < n}
+             -> (ww : n >> w)
+             -> (ww' : (suc n) >> w')
+             -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ (n ↓ r')) ≃ (w ++ (n ↓ r) ++ w'))
+all-reduce w [] n r ww [] = let tt = ++-assoc  in  (w , r) , (ww , refl≡ (≡-sym (++-unit2 w (n ↓ r))) )
 all-reduce w (0 ∷ w') n r ww (.0 :⟨ p ⟩: ww') = {!!} , {!!}
 all-reduce w ((suc i) ∷ w') n r {prn} {pn} ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? (suc i) + r) with (n ≟ (suc i) + r) with (n ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? n)
 ... | yes q | _ | _ | _ =
-  let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r {prn} {pn} (>=-++ ww (i :⟨ p ⟩: [])) ww'
-      lemma0 : ((i ∷ []) ++ ((suc n) ↓ r)) ≃ (((suc n) ↓ r) ++ [ suc i ])
-      lemma0 = comm (F-canonize-p> (suc n) r i (s≤s pn) {!!} {!!} {!q!})
+  let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r {prn} {pn} (>>-++ ww (i :⟨ p ⟩: [])) ww'
+      lemma0 : ((i ∷ []) ++ (n ↓ r)) ≃ ((n ↓ r) ++ [ suc i ])
+      lemma0 = comm (F-canonize-p> n r i pn prn {!!} q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
 
-      lemma1 : ((w ++ (i ∷ [])) ++ ((suc n) ↓ r) ++ w') ≃ (w ++ ((suc n) ↓ r) ++ [ suc i ] ++ w')
+      lemma1 : ((w ++ i ∷ []) ++ (n ↓ r) ++ w') ≃ (w ++ i ∷ [] ++ (n ↓ r) ++ w')
       lemma1 = {!!}
 
-      lemma2 : (w ++ ((suc n) ↓ r) ++ suc i ∷ w') ≃ (w ++ ((suc n) ↓ r) ++ [ suc i ] ++ w')
-      lemma2 = {!!}
+      lemma2a : (w ++ i ∷ [] ++ (n ↓ r) ++ w') ≃ (w ++ (i ∷ [] ++ (n ↓ r)) ++ w')
+      lemma2a = {!!}
 
-      lemma3 = trans lemma1 lemma2
-  in (w'' , r') , (ww'' , trans pp lemma3) --p>
+      lemma2b : (w ++ (i ∷ [] ++ (n ↓ r)) ++ w') ≃ (w ++ ((n ↓ r) ++ [ suc i ]) ++ w')
+      lemma2b = ++-≃ refl (++-≃ lemma0 refl) -- this is the key lemma where I use F-canonize
+
+      lemma2c : (w ++ ((n ↓ r) ++ [ suc i ]) ++ w') ≃ (w ++ (n ↓ r) ++ [ suc i ] ++ w')
+      lemma2c = {!!}
+
+      lemma3 : (w ++ (n ↓ r) ++ suc i ∷ w') ≃ (w ++ (n ↓ r) ++ [ suc i ] ++ w')
+      lemma3 = {!!}
+
+      lemma2 = trans lemma2a (trans lemma2b lemma2c)
+      lemma4 = trans lemma1 (trans lemma2 lemma3)
+  in (w'' , r') , (ww'' , trans pp lemma4) --p>
 ... | _ | yes q | _ | _ = {!!} -- reduction
 ... | _ | _ | yes q | _ = {!!} -- p1
 ... | _ | _ | _ | yes q = {!!} -- p<
 ... | no p1 | no p2 | no p3 | no p4  = {!!}
 
-step : (ll : (suc n) >= l) -> Σ (List ℕ × ℕ) (λ (l' , r) -> (n >= l') × (l' ++ ((suc (suc n)) ↓ r)) ≃ l)
+step : (ll : (suc n) >> l) -> Σ (List ℕ × ℕ) (λ (l' , r) -> (n >> l') × (l' ++ ((suc (suc n)) ↓ r)) ≃ l)
 step {n} {.[]} [] = ([] , 0) , ([] , refl)
-step {n} {k ∷ l} (_ :⟨ x ⟩: ll) with k ≟ (suc n)
+step {n} {k ∷ l} (_ :⟨ x ⟩: ll) with (suc k) ≟ (suc n)
 step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | yes p =
   let xx = all-reduce {!!} {!!} {!!} {!!}
   in  {!!}
 step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | no ¬p =
-  let k≤n : k ≤ n
+  let k≤n : k < n
       k≤n = ≤-≠-≤ x ¬p
       (l' , r) , (ll' , pp) = step ll
   in ((k ∷ l') , r) , ((k :⟨ k≤n ⟩: ll') , (prepend k pp))
