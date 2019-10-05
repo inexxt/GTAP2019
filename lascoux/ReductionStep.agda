@@ -65,17 +65,36 @@ n>i+1+r = {!!}
 >=-++ {n} {[]} {l2} ll1 ll2 = ll2
 >=-++ {n} {x ∷ l1} {l2} (.x :⟨ p ⟩: ll1) ll2 = x :⟨ p ⟩: (>=-++ ll1 ll2)
 
+open Σ
+
+postulate
+  ++-≃ : {l l' w r r' : List ℕ} -> (l ≃ l') -> (r ≃ r') -> (l ++ w ++ r) ≃ (l' ++ w ++ r')
+
 all-reduce : (w : List ℕ)
              -> (w' : List ℕ)
              -> (n : ℕ)
              -> (r : ℕ)
+             -> {r ≤ (suc n)}
+             -> {1 < n}
              -> (ww : n >= w)
              -> (ww' : (suc n) >= w')
-             -> Σ (List ℕ × ℕ) (λ (w'' , r') -> (n >= w'') × (w'' ++ (n ↓ r')) ≃ (w ++ (n ↓ r) ++ w'))
-all-reduce w [] n r ww [] = let tt = ++-assoc  in  (w , r) , (ww , refl≡ (≡-sym (++-unit2 w (n ↓ r))) )
+             -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >= w'') × (w'' ++ ((suc n) ↓ r')) ≃ (w ++ ((suc n) ↓ r) ++ w'))
+all-reduce w [] n r ww [] = let tt = ++-assoc  in  (w , r) , (ww , refl≡ (≡-sym (++-unit2 w ((suc n) ↓ r))) )
 all-reduce w (0 ∷ w') n r ww (.0 :⟨ p ⟩: ww') = {!!} , {!!}
-all-reduce w ((suc i) ∷ w') n r ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? i + r) with (n ≟ i + r) with (n ≟ i + (1 + r)) with (i + (1 + r) <? n)
-... | yes q | _ | _ | _ = (w ++ [ i  ] , r) , (>=-++ ww (i :⟨ p ⟩: []) , {!!}) -- p>
+all-reduce w ((suc i) ∷ w') n r {prn} {pn} ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? (suc i) + r) with (n ≟ (suc i) + r) with (n ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? n)
+... | yes q | _ | _ | _ =
+  let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r {prn} {pn} (>=-++ ww (i :⟨ p ⟩: [])) ww'
+      lemma0 : ((i ∷ []) ++ ((suc n) ↓ r)) ≃ (((suc n) ↓ r) ++ [ suc i ])
+      lemma0 = comm (F-canonize-p> (suc n) r i (s≤s pn) {!!} {!!} {!q!})
+
+      lemma1 : ((w ++ (i ∷ [])) ++ ((suc n) ↓ r) ++ w') ≃ (w ++ ((suc n) ↓ r) ++ [ suc i ] ++ w')
+      lemma1 = {!!}
+
+      lemma2 : (w ++ ((suc n) ↓ r) ++ suc i ∷ w') ≃ (w ++ ((suc n) ↓ r) ++ [ suc i ] ++ w')
+      lemma2 = {!!}
+
+      lemma3 = trans lemma1 lemma2
+  in (w'' , r') , (ww'' , trans pp lemma3) --p>
 ... | _ | yes q | _ | _ = {!!} -- reduction
 ... | _ | _ | yes q | _ = {!!} -- p1
 ... | _ | _ | _ | yes q = {!!} -- p<
