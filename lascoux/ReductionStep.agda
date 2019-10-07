@@ -40,8 +40,6 @@ data _>>_ : ℕ -> List ℕ -> Set where
 ≤-≠-≤ z≤n q = z≤n
 ≤-≠-≤ (s≤s p) q = {!!}
 
-n<i+r : (n : ℕ) -> (r : ℕ) -> (i : ℕ) -> (n < i + r) -> {!!}
-n<i+r = {!!}
 
 n=i+r : (n : ℕ) -> (r : ℕ) -> (i : ℕ) -> (n ≡ i + r) -> {!!}
 n=i+r = {!!}
@@ -71,6 +69,24 @@ open Σ
 postulate
   ++-≃ : {l l' w w' : List ℕ} -> (l ≃ l') -> (w ≃ w') -> (l ++ w) ≃ (l' ++ w')
 
+n<i+r : (w w' : List ℕ) -> (n r i : ℕ) -> (n < (suc i) + r) -> ((w ++ i ∷ []) ++ (n ↓ r) ++ w') ≃ (w ++ (n ↓ r) ++ suc i ∷ w')
+n<i+r w w' n r i q =
+  let lemma0 : ((i ∷ []) ++ (n ↓ r)) ≃ ((n ↓ r) ++ [ suc i ])
+      lemma0 = comm (F-canonize-p> n r i {!!} {!!} {!!} q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
+      in
+        ≃begin
+          ((w ++ i ∷ []) ++ (n ↓ r) ++ w')
+        ≃⟨ refl≡ (++-assoc w (i ∷ []) _)  ⟩
+          (w ++ (i ∷ [] ++ (n ↓ r) ++ w'))
+        ≃⟨ refl ⟩
+          (w ++ (i ∷ [] ++ (n ↓ r)) ++ w')
+        ≃⟨ ++-≃ refl (++-≃ lemma0 refl) ⟩
+          (w ++ ((n ↓ r) ++ [ suc i ]) ++ w')
+        ≃⟨ ++-≃ {w} {w} refl (refl≡ (++-assoc (n ↓ r) _ _)) ⟩
+          (w ++ (n ↓ r) ++ suc i ∷ w')
+        ≃∎
+
+
 all-reduce : (w : List ℕ)
              -> (w' : List ℕ)
              -> (n : ℕ)
@@ -84,22 +100,7 @@ all-reduce w (0 ∷ w') n r prn ww (.0 :⟨ p ⟩: ww') = {!!}
 all-reduce w ((suc i) ∷ w') n r prn ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? (suc i) + r) with (n ≟ (suc i) + r) with (n ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? n)
 ... | yes q | _ | _ | _ =
   let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r prn (>>-++ ww (i :⟨ p ⟩: [])) ww'
-      lemma0 : ((i ∷ []) ++ (n ↓ r)) ≃ ((n ↓ r) ++ [ suc i ])
-      lemma0 = comm (F-canonize-p> n r i {!!} {!!} {!!} q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
-
-      lemma =
-        ≃begin
-          ((w ++ i ∷ []) ++ (n ↓ r) ++ w')
-        ≃⟨ refl≡ (++-assoc w (i ∷ []) _)  ⟩
-          (w ++ (i ∷ [] ++ (n ↓ r) ++ w'))
-        ≃⟨ refl ⟩
-          (w ++ (i ∷ [] ++ (n ↓ r)) ++ w')
-        ≃⟨ ++-≃ refl (++-≃ lemma0 refl) ⟩
-          (w ++ ((n ↓ r) ++ [ suc i ]) ++ w')
-        ≃⟨ ++-≃ {w} {w} refl (refl≡ (++-assoc (n ↓ r) _ _)) ⟩
-          (w ++ (n ↓ r) ++ suc i ∷ w')
-        ≃∎
-  in (w'' , r') , (ww'' , trans pp lemma) -- p>
+  in (w'' , r') , (ww'' , trans pp (n<i+r w w' _ _ _ q)) -- p>
 ... | _ | yes q | _ | _ = {!!} -- reduction
 ... | _ | _ | yes q | _ = {!!} -- p1
 ... | _ | _ | _ | yes q = {!!} -- p<
