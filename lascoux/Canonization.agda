@@ -15,6 +15,9 @@ open import Relation.Nullary
 open import Data.Empty
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
+open ≤-Reasoning renaming (_∎ to _≤∎; begin_ to begin-≤_) hiding (_≡⟨_⟩_)
+
+
 variable
     n : ℕ
     l : List ℕ
@@ -95,6 +98,7 @@ postulate
     ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)
     ≡-down2 : (p q : ℕ) -> suc p ≡ suc q -> p ≡ q
     +-three-assoc : {k i r : ℕ} -> k + i + r ≡ i + k + r
+    ++-unit : l ++ [] ≡ l
 
 ∸-up : {n r : ℕ} -> (r < n) -> (n ∸ r) ≡ suc (n ∸ (suc r))
 ∸-up {suc zero} {zero} p = refl
@@ -105,7 +109,7 @@ postulate
 nnl=l : {l : List ℕ} -> {n : ℕ} -> (n ∷ n ∷ l) ≃ l
 nnl=l = ++-respects cancel refl
 l++nn=l : {l : List ℕ} -> {n : ℕ} -> (l ++ (n ∷ n ∷ [])) ≃ l
-l++nn=l = trans (++-respects refl cancel) {!!}
+l++nn=l = trans (++-respects refl cancel) (refl≡ ++-unit)
 
 canonize-p< : (n r1 r2 : ℕ)
               -> {i : ℕ}
@@ -170,7 +174,7 @@ canonize-p> (suc (suc (suc n))) zero (suc zero) {i} (s≤s ()) prn {pinr}
 canonize-p> (suc (suc (suc n))) (suc r1) (suc zero) {i} (s≤s ()) prn
 -- now, induction
 canonize-p> (suc (suc zero)) zero (suc (suc zero)) {i} pr2 prn {pinr} rewrite pinr = comm braid -- base case on r1 and r2
-canonize-p> (suc (suc (suc n))) zero (suc (suc r2)) {suc i} pr2 (s≤s (s≤s (s≤s prn))) {pinr} rewrite (≡-down2 i n pinr) = -- induction on r1
+canonize-p> (suc (suc (suc n))) zero (suc (suc r2)) {suc i} pr2 (s≤s (s≤s (s≤s prn))) {pinr} rewrite (≡-down2 i n pinr) = -- induction on r2
   let rec = canonize-swap n r2 (2 + n) (prn) (s≤s (s≤s (≤-reflexive refl)))
   in  ≃begin
          (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ r2) ++ (2 + n) ∷ []
@@ -181,7 +185,7 @@ canonize-p> (suc (suc (suc n))) zero (suc (suc r2)) {suc i} pr2 (s≤s (s≤s (s
        ≃⟨ ++-respects (comm braid) refl ⟩
          (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ r2)
        ≃∎
-canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr2 prn {pinr} =
+canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr2 prn {pinr} = -- induction on r1
   let rec = canonize-p> (suc (suc n)) r1 (suc (suc r2)) {i} pr2 (≤-down2 prn) {pinr}
   in ≃begin
          (2 + n) ∷ (((2 + n) ↓ r1) ++ (1 + i) ∷ i ∷ (i ↓ (1 + r2))) ++ (1 + i) ∷ []
@@ -219,22 +223,61 @@ canonize-p≡ (suc n) r i pn prn pirn =
   in refl≡ (subst (λ k -> ((suc n) ↓ r) ++ [ k ] ≡ ((suc n) ↓ suc r))  i=n-r-1 tt)
 
 
-postulate
-  F-canonize-p> : (n r i : ℕ)
+F-canonize-p> : (n r i : ℕ)
                 -> (0 < n)
                 -> (r ≤ n)
-                -> ((suc i) ≤ n)
-                -> ((suc i) + r > n)
+                -> ((suc i) < n)
+                -> (n < (suc i) + r)
                 -> ((n ↓ r) ++ [ suc i ]) ≃ (i ∷ n ↓ r)
-  F-canonize-p≡ : (n r i : ℕ)
-                  -> (0 < n)
-                  -> (r ≤ n)
-                  -> ((suc i) < n)
-                  -> (((suc i) + 1 + r) ≡ n)
-                  -> ((n ↓ r) ++ [ suc i ]) ≃ (n ↓ (1 + r))
-  F-canonize-p< : (n r i : ℕ)
-                  -> (0 < n)
-                  -> (r ≤ n)
-                  -> ((suc i) < n)
-                  -> ((suc i) + (1 + r) < n)
-                  -> ((n ↓ r) ++ [ suc i ]) ≃ ((suc i) ∷ n ↓ r)
+F-canonize-p> (suc n) zero i pn prn (s≤s pin) (s≤s pirn) =
+  let tt = begin-≤
+             suc (suc n)
+           ≤⟨ s≤s pirn ⟩
+             suc (i + zero)
+           ≤⟨ s≤s (≤-reflexive (+-comm i zero)) ⟩
+             suc i
+           ≤⟨ pin ⟩
+             n
+           ≤⟨ ≤-up (≤-reflexive refl) ⟩
+             suc n
+           ≤∎
+  in  ⊥-elim (1+n≰n tt)
+
+F-canonize-p> (suc n) (suc zero) i pn prn (s≤s pin) (s≤s pirn) =
+  let tt = begin-≤
+             suc (suc n)
+           ≤⟨ s≤s pirn ⟩
+             suc (i + 1)
+           ≤⟨ s≤s (≤-reflexive (+-comm i 1)) ⟩
+             suc (suc i)
+           ≤⟨ s≤s pin ⟩
+             suc n
+           ≤∎
+  in  ⊥-elim (1+n≰n tt)
+
+F-canonize-p> (suc n) (suc (suc r)) i pn prn (s≤s pin) pirn =
+  let tt = begin-≤
+             suc i
+           ≤⟨ pin ⟩
+             n
+           <⟨ <⇒≤ pirn ⟩
+              suc (i + (2 + r))
+           ≤∎
+      tt = canonize-p> (suc n) ((suc n) ∸ (2 + i) ) ( ((suc i) + (2 + r)) ∸ (suc n) ) {i} {!   !} {!   !} {{!!}}
+  in {!   !}
+
+F-canonize-p≡ : (n r i : ℕ)
+                -> (0 < n)
+                -> (r ≤ n)
+                -> ((suc i) < n)
+                -> (((suc i) + 1 + r) ≡ n)
+                -> ((n ↓ r) ++ [ suc i ]) ≃ (n ↓ (1 + r))
+F-canonize-p≡ n r i pn prn pin pirn = {!   !}
+
+F-canonize-p< : (n r i : ℕ)
+                -> (0 < n)
+                -> (r ≤ n)
+                -> ((suc i) < n)
+                -> ((suc i) + (1 + r) < n)
+                -> ((n ↓ r) ++ [ suc i ]) ≃ ((suc i) ∷ n ↓ r)
+F-canonize-p< n r i pn prn pin pirn = {!   !}
