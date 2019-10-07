@@ -29,6 +29,38 @@ data _≃_ : List ℕ -> List ℕ -> Set where
     comm : {l l' : List ℕ} -> (l ≃ l') -> l' ≃ l
     trans : {l l' l'' : List ℕ} -> (l ≃ l') -> (l' ≃ l'') -> l ≃ l''
 
+module ≃-Reasoning where
+    infix  1 ≃begin_
+    infixr 2 _≃⟨⟩_ _≃⟨_⟩_
+    infix  3 _≃∎
+
+    ≃begin_ : ∀ {x y : List ℕ}
+             → x ≃ y
+      -----
+             → x ≃ y
+    ≃begin x≃y  =  x≃y
+
+    _≃⟨⟩_ : ∀ (x : List ℕ) {y : List ℕ}
+            → x ≃ y
+      -----
+            → x ≃ y
+    x ≃⟨⟩ x≃y  =  x≃y
+
+    _≃⟨_⟩_ : ∀ (x : List ℕ) {y z : List ℕ}
+             → x ≃ y
+             → y ≃ z
+      -----
+             → x ≃ z
+    x ≃⟨ x≃y ⟩ y≃z  =  trans x≃y y≃z
+
+    _≃∎ : ∀ (x : List ℕ)
+      -----
+         → x ≃ x
+    x ≃∎  =  refl
+
+open ≃-Reasoning
+
+
 refl≡ : {l l' : List ℕ} -> (l ≡ l') -> l ≃ l'
 refl≡ refl = refl
 

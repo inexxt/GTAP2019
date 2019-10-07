@@ -18,6 +18,7 @@ open Relation.Binary.PropositionalEquality.≡-Reasoning
 open import Canonization using (F-canonize-p>; F-canonize-p≡; F-canonize-p<; _≃_; _↓_ ; refl≡)
 
 open _≃_
+open Canonization.≃-Reasoning
 
 variable
   n : ℕ
@@ -80,31 +81,26 @@ all-reduce : (w : List ℕ)
              -> (ww' : (suc n) >> w')
              -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ (n ↓ r')) ≃ (w ++ (n ↓ r) ++ w'))
 all-reduce w [] n r ww [] = let tt = ++-assoc  in  (w , r) , (ww , refl≡ (≡-sym (++-unit2 w (n ↓ r))) )
-all-reduce w (0 ∷ w') n r ww (.0 :⟨ p ⟩: ww') = {!!} , {!!}
+all-reduce w (0 ∷ w') n r ww (.0 :⟨ p ⟩: ww') = {!!}
 all-reduce w ((suc i) ∷ w') n r {prn} {pn} ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? (suc i) + r) with (n ≟ (suc i) + r) with (n ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? n)
 ... | yes q | _ | _ | _ =
   let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r {prn} {pn} (>>-++ ww (i :⟨ p ⟩: [])) ww'
       lemma0 : ((i ∷ []) ++ (n ↓ r)) ≃ ((n ↓ r) ++ [ suc i ])
       lemma0 = comm (F-canonize-p> n r i pn prn {!!} q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
 
-      lemma1 : ((w ++ i ∷ []) ++ (n ↓ r) ++ w') ≃ (w ++ i ∷ [] ++ (n ↓ r) ++ w')
-      lemma1 = {!!}
-
-      lemma2a : (w ++ i ∷ [] ++ (n ↓ r) ++ w') ≃ (w ++ (i ∷ [] ++ (n ↓ r)) ++ w')
-      lemma2a = {!!}
-
-      lemma2b : (w ++ (i ∷ [] ++ (n ↓ r)) ++ w') ≃ (w ++ ((n ↓ r) ++ [ suc i ]) ++ w')
-      lemma2b = ++-≃ refl (++-≃ lemma0 refl) -- this is the key lemma where I use F-canonize
-
-      lemma2c : (w ++ ((n ↓ r) ++ [ suc i ]) ++ w') ≃ (w ++ (n ↓ r) ++ [ suc i ] ++ w')
-      lemma2c = {!!}
-
-      lemma3 : (w ++ (n ↓ r) ++ suc i ∷ w') ≃ (w ++ (n ↓ r) ++ [ suc i ] ++ w')
-      lemma3 = {!!}
-
-      lemma2 = trans lemma2a (trans lemma2b lemma2c)
-      lemma4 = trans lemma1 (trans lemma2 lemma3)
-  in (w'' , r') , (ww'' , trans pp lemma4) --p>
+      lemma =
+        ≃begin
+          ((w ++ i ∷ []) ++ (n ↓ r) ++ w')
+        ≃⟨ refl≡ (++-assoc w (i ∷ []) _)  ⟩
+          (w ++ (i ∷ [] ++ (n ↓ r) ++ w'))
+        ≃⟨ refl ⟩
+          (w ++ (i ∷ [] ++ (n ↓ r)) ++ w')
+        ≃⟨ ++-≃ refl (++-≃ lemma0 refl) ⟩
+          (w ++ ((n ↓ r) ++ [ suc i ]) ++ w')
+        ≃⟨ ++-≃ {w} {w} refl (refl≡ (++-assoc (n ↓ r) _ _)) ⟩
+          (w ++ (n ↓ r) ++ suc i ∷ w')
+        ≃∎
+  in (w'' , r') , (ww'' , trans pp lemma) -- p>
 ... | _ | yes q | _ | _ = {!!} -- reduction
 ... | _ | _ | yes q | _ = {!!} -- p1
 ... | _ | _ | _ | yes q = {!!} -- p<
@@ -114,7 +110,7 @@ step : (ll : (suc n) >> l) -> Σ (List ℕ × ℕ) (λ (l' , r) -> (n >> l') × 
 step {n} {.[]} [] = ([] , 0) , ([] , refl)
 step {n} {k ∷ l} (_ :⟨ x ⟩: ll) with (suc k) ≟ (suc n)
 step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | yes p =
-  let xx = all-reduce {!!} {!!} {!!} {!!}
+  let xx = all-reduce {!!}  ? ? {!!} {!!} {!!}
   in  {!!}
 step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | no ¬p =
   let k≤n : k < n
