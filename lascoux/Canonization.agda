@@ -106,31 +106,28 @@ canonize-p< : (n r1 r2 : ℕ)
               -> ((r1 + r2) < n)
               -> {i ≡ n ∸ (2 + r1 + r2)}
               -> ((n ↓ r1) ++ [ i ]) ≃ (i ∷ (n ↓ r1))
-
+-- unfortunately, we have to weed out some impossible cases
 canonize-p< (suc n) zero r2 {i} pr2 pinr = refl
 canonize-p< (suc zero) (suc zero) r2 {zero} pr2 pinr = refl
 canonize-p< (suc zero) (suc (suc r1)) r2 {zero} pr2 pinr = refl
 canonize-p< (suc (suc zero)) (suc zero) (suc r2) {i} pr2 (s≤s (s≤s ())) {pinr}
 canonize-p< (suc (suc zero)) (suc (suc r1)) (suc r2) {i} pr2 (s≤s (s≤s prn)) {pinr} = ≤-abs prn
 canonize-p< (suc (suc (suc zero))) (suc (suc r1)) (suc r2) {i} pr2 (s≤s (s≤s (s≤s prn))) {pinr} = ≤-abs (≤-remove-+ prn)
-
+-- and now the induction
 canonize-p< (suc (suc (suc zero))) (suc zero) (suc r2) {i} pr2 prn {pinr} rewrite pinr = swap (s≤s (s≤s z≤n)) -- base case
-canonize-p< (suc (suc (suc (suc n)))) (suc zero) (suc r2) {i} pr2 prn {pinr} rewrite pinr =
-  let tt = ∸-implies-≤ {r = r2} (_≡_.refl {x = n ∸ r2})
-  in swap (s≤s (s≤s (≤-trans tt (≤-up (≤-reflexive refl)))))
-canonize-p< (suc (suc (suc (suc n)))) (suc (suc r1)) (suc r2) {i} pr2 (s≤s prn) {pinr} =
-  let rec = prepend (3 + n) (canonize-p< (suc (suc (suc n))) (suc r1) (suc r2) {i} pr2 prn {pinr})
+canonize-p< (suc (suc (suc (suc n)))) (suc r1) (suc r2) {i} pr2 (s≤s prn) {pinr} = -- inductive case
+  let rec = prepend (3 + n) (canonize-p< (suc (suc (suc n))) r1 (suc r2) {i} pr2 prn {pinr})
 
       i≤1+n : i ≤ (suc n)
-      i≤1+n = ≤-trans (∸-implies-≤ {_} {_} {r = r1 + suc r2} pinr) ((≤-up (≤-reflexive refl)))
+      i≤1+n = ∸-implies-≤ {_} {_} {r1 + suc r2} pinr
 
       lemma =
         ≃begin
-          (3 + n) ∷ (2 + n) ∷ ((2 + n) ↓ r1) ++ i ∷ []
+          ((3 + n) ∷ ((3 + n) ↓ r1) ++ [ i ])
         ≃⟨ rec ⟩
-          (3 + n) ∷ (i ∷ (2 + n) ∷ ((2 + n) ↓ r1))
+          (3 + n) ∷ i ∷ ((3 + n) ↓ r1)
         ≃⟨ ++-respects (swap (s≤s (s≤s i≤1+n))) refl ⟩
-          i ∷ (3 + n) ∷ (2 + n) ∷ ((2 + n) ↓ r1)
+          (i ∷ 3 + n ∷ (3 + n) ↓ r1)
         ≃∎
   in lemma
 
