@@ -94,6 +94,13 @@ postulate
     ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
     ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)
     ≡-down2 : (p q : ℕ) -> suc p ≡ suc q -> p ≡ q
+    +-three-assoc : {k i r : ℕ} -> k + i + r ≡ i + k + r
+
+∸-up : {n r : ℕ} -> (r < n) -> (n ∸ r) ≡ suc (n ∸ (suc r))
+∸-up {suc zero} {zero} p = refl
+∸-up {suc zero} {suc r} (s≤s p) = ≤-abs p
+∸-up {suc (suc n)} {zero} p = refl
+∸-up {suc (suc n)} {suc r} (s≤s p) = ∸-up {suc n} {r} p
 
 nnl=l : {l : List ℕ} -> {n : ℕ} -> (n ∷ n ∷ l) ≃ l
 nnl=l = ++-respects cancel refl
@@ -143,7 +150,7 @@ canonize-swap (suc n) (suc r) i prn pni =
          n ∷ (n ↓ r) ++ i ∷ []
        ≃⟨ prepend n rec ⟩
          n ∷ i ∷ (n ↓ r)
-       ≃⟨ ++-respects (swap {!!}) refl ⟩
+       ≃⟨ ++-respects (comm (swap (≤-down pni))) refl ⟩
          i ∷ n ∷ (n ↓ r)
        ≃∎
 
@@ -153,75 +160,80 @@ canonize-p> : (n r1 r2 : ℕ)
               -> ((suc (suc zero)) ≤ r2)
               -> (r1 + r2 < n)
               -> {i ≡ n ∸ (2 + r1)}
---              -> ((n ↓ (r2 + r1)) ++ [ suc i ]) ≃ (i ∷ n ↓ (r1 + r2))
               -> (((n ↓ r1) ++ [ 1 + i ] ++ (1 + i) ↓ r2) ++ [ 1 + i ]) ≃ (i ∷ (n ↓ (1 + r1 + r2)))
+-- again, weeding out small, impossible cases
 canonize-p> (suc zero) r1 (suc r2) {i} pr2 prn = ≤-abs (≤-remove-+ {r1} (≤-down2 prn))
 canonize-p> (suc (suc zero)) r1 (suc zero) {i} (s≤s ()) prn
-canonize-p> (suc (suc zero)) zero (suc (suc zero)) {i} pr2 prn {pinr} rewrite pinr = comm braid -- base case
 canonize-p> (suc (suc zero)) (suc r1) (suc (suc zero)) {i} pr2 (s≤s (s≤s prn)) = ≤-abs (≤-remove-+ {r1} prn)
 canonize-p> (suc (suc zero)) r1 (suc (suc (suc r2))) {i} pr2 (s≤s prn) = ≤-abs (≤-down2 (≤-remove-+ {r1} prn))
-
 canonize-p> (suc (suc (suc n))) zero (suc zero) {i} (s≤s ()) prn {pinr}
-canonize-p> (suc (suc (suc zero))) zero (suc (suc zero)) {suc i} pr2 prn {pinr} rewrite (≡-down2 i _ pinr) = {!!}
-canonize-p> (suc (suc (suc (suc n)))) zero (suc (suc zero)) {suc i} pr2 prn {pinr} = {!!}
-
-canonize-p> (suc (suc (suc n))) zero (suc (suc (suc r2))) {suc i} pr2 (s≤s (s≤s (s≤s prn))) {pinr} rewrite (≡-down2 i n pinr) = -- induction on r1
-  let rec = canonize-swap n (suc r2) (2 + n) (prn) (s≤s (s≤s (≤-reflexive refl)))
+canonize-p> (suc (suc (suc n))) (suc r1) (suc zero) {i} (s≤s ()) prn
+-- now, induction
+canonize-p> (suc (suc zero)) zero (suc (suc zero)) {i} pr2 prn {pinr} rewrite pinr = comm braid -- base case on r1 and r2
+canonize-p> (suc (suc (suc n))) zero (suc (suc r2)) {suc i} pr2 (s≤s (s≤s (s≤s prn))) {pinr} rewrite (≡-down2 i n pinr) = -- induction on r1
+  let rec = canonize-swap n r2 (2 + n) (prn) (s≤s (s≤s (≤-reflexive refl)))
   in  ≃begin
-         (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ suc r2) ++ (2 + n) ∷ []
+         (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ r2) ++ (2 + n) ∷ []
        ≃⟨ prepend (2 + n) (prepend (1 + n) (prepend n rec)) ⟩
-         (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ (n ↓ suc r2)
+         (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ (n ↓ r2)
        ≃⟨ prepend (2 + n) (prepend (1 + n) (++-respects (comm (swap (s≤s (≤-reflexive refl)))) refl)) ⟩
-         (2 + n) ∷ 1 + n ∷ (2 + n) ∷ n ∷ (n ↓ suc r2)
+         (2 + n) ∷ 1 + n ∷ (2 + n) ∷ n ∷ (n ↓ r2)
        ≃⟨ ++-respects (comm braid) refl ⟩
-         (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ suc r2)
+         (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ r2)
+       ≃∎
+canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr2 prn {pinr} =
+  let rec = canonize-p> (suc (suc n)) r1 (suc (suc r2)) {i} pr2 (≤-down2 prn) {pinr}
+  in ≃begin
+         (2 + n) ∷ (((2 + n) ↓ r1) ++ (1 + i) ∷ i ∷ (i ↓ (1 + r2))) ++ (1 + i) ∷ []
+       ≃⟨ prepend (2 + n) rec ⟩
+         (2 + n) ∷ i ∷ (1 + n) ∷ ((1 + n) ↓ (r1 + (2 + r2)))
+       ≃⟨ ++-respects (swap (s≤s (s≤s (∸-implies-≤ {r = r1} pinr)))) (refl {(1 + n) ∷ ((1 + n) ↓ (r1 + (2 + r2)))} ) ⟩
+         i ∷ (2 + n) ∷ (1 + n) ∷ ((1 + n) ↓ (r1 + (2 + r2)))
        ≃∎
 
-canonize-p> (suc (suc (suc n))) (suc r1) (suc zero) {i} (s≤s ()) prn --
-canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr2 prn = {!!}
+add-lemma : {i r : ℕ} -> suc (i + 1 + r) ≡ suc (suc (i + r))
+add-lemma {i} {r} =
+  begin
+    suc (i + 1 + r)
+  ≡⟨ cong (λ x -> suc x) (+-three-assoc {i} {1} {r}) ⟩
+    suc (suc (i + r))
+  ∎
 
--- -- canonize-p> (suc (suc n)) (suc zero) (suc (suc zero)) {i} pr1 pr2 prrn {pinr} rewrite pinr =
--- --   trans (nnl=l {0 ∷ 1 ∷ []}) (comm {!!})
--- canonize-p> (suc (suc (suc n))) (suc zero) (suc (suc zero)) {i} pr1 pr2 prrn {pinr} rewrite pinr =
---   let x : ((2 +  n) ∷ 1 + n ∷ n ∷ 1 + n ∷ []) ≃ ((2 + n) ∷ n ∷ 1 + n ∷ n ∷ [])
---       x = prepend (2 + n) (comm (braid {n}))
---       y : {l : List ℕ} -> ((2 + n) ∷ n ∷ l) ≃ (n ∷ (2 + n) ∷ l)
---       y = ++-respects (swap n<1+n) refl
---   in trans {!!} {!!}
--- canonize-p> (suc (suc (suc n))) (suc (suc r1)) (suc (suc zero)) {i} pr1 pr2 (s≤s prrn) {pinr} =
---   let x = prepend (suc (suc n)) (canonize-p> (suc (suc n)) (suc r1) (suc zero) {i} ({!!}) pr2 (prrn) {pinr})
---       y : (suc (suc n) ∷ [ i ]) ≃ (i ∷ [ suc (suc n) ])
---       y = swap (s≤s (s≤s (∸-implies-≤ {i} {n} {suc r1} {!!})))
---       z = ++-respects y (refl { (suc n) ∷ ((suc n) ↓ suc (r1 + 1))})
---   in trans x z
+canonize-p≡ : (n r i : ℕ)
+              -> (0 < n)
+              -> (r < n)
+              -> (i ≡ n ∸ (1 + r))
+              -> ((n ↓ r) ++ [ i ]) ≃ (n ↓ (1 + r))
+canonize-p≡ (suc n) r i pn prn pirn =
+  let tt = ≡-sym (↓-rec {suc n} {r} prn)
+      i=n-r-1 : (suc n) ∸ (r + 1) ≡ i
+      i=n-r-1 = begin
+                    suc n ∸ (r + 1)
+                  ≡⟨ cong (λ x -> (suc n) ∸ x) (+-comm r 1) ⟩
+                    suc n ∸ (1 + r)
+                  ≡⟨ refl ⟩
+                    n ∸ r
+                  ≡⟨ ≡-sym pirn ⟩
+                    i
+                  ∎
+  in refl≡ (subst (λ k -> ((suc n) ↓ r) ++ [ k ] ≡ ((suc n) ↓ suc r))  i=n-r-1 tt)
 
--- canonize-p> (suc (suc zero)) (suc r1) (suc (suc r2)) {i} pr1 pr2 (s≤s prrn) {pirn} =
---   let t = ≤-down2 (≤-remove-+ {r1} {suc (suc r2)} {1} (≤-down {!!}))
---   in  ≤-abs t
--- canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr1 pr2 prrn {pirn} =
---   let r1<n : r1 < n
---       r1<n = {!!}
---       r2<i : r2 < i
---       r2<i = {!!}
---       tt = ↓-rec r2<i
--- --      tt2 = cong (λ l -> (suc (suc n) ∷ ((suc (suc n) ↓ r1) ++ suc i ∷ i ∷ l) ++ [ suc i ])) tt
---       goal :  (((i ↓ suc r2)) ++ [ suc i ]) ≃ (suc n ↓ (r1 + suc (suc r2)))
---       goal = {!!}
---       x = canonize-p> (3 + n) (1 + r1) (1 + r2) {i} pr1 (s≤s {!!}) (s≤s {!!}) {pirn}
---   in  {!!}
 
 postulate
   F-canonize-p> : (n r i : ℕ)
+                -> (0 < n)
                 -> (r ≤ n)
                 -> ((suc i) ≤ n)
                 -> ((suc i) + r > n)
                 -> ((n ↓ r) ++ [ suc i ]) ≃ (i ∷ n ↓ r)
   F-canonize-p≡ : (n r i : ℕ)
+                  -> (0 < n)
                   -> (r ≤ n)
                   -> ((suc i) < n)
                   -> (((suc i) + 1 + r) ≡ n)
                   -> ((n ↓ r) ++ [ suc i ]) ≃ (n ↓ (1 + r))
   F-canonize-p< : (n r i : ℕ)
+                  -> (0 < n)
                   -> (r ≤ n)
                   -> ((suc i) < n)
                   -> ((suc i) + (1 + r) < n)
