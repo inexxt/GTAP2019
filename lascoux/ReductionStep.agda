@@ -75,18 +75,17 @@ all-reduce : (w : List ℕ)
              -> (w' : List ℕ)
              -> (n : ℕ)
              -> (r : ℕ)
-             -> {r ≤ n}
-             -> {2 < n}
+             -> (r ≤ n)
              -> (ww : n >> w)
              -> (ww' : (suc n) >> w')
              -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ (n ↓ r')) ≃ (w ++ (n ↓ r) ++ w'))
-all-reduce w [] n r ww [] = let tt = ++-assoc  in  (w , r) , (ww , refl≡ (≡-sym (++-unit2 w (n ↓ r))) )
-all-reduce w (0 ∷ w') n r ww (.0 :⟨ p ⟩: ww') = {!!}
-all-reduce w ((suc i) ∷ w') n r {prn} {pn} ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? (suc i) + r) with (n ≟ (suc i) + r) with (n ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? n)
+all-reduce w [] n r prn ww [] = (w , r) , (ww , refl≡ (≡-sym (++-unit2 w (n ↓ r))) )
+all-reduce w (0 ∷ w') n r prn ww (.0 :⟨ p ⟩: ww') = {!!}
+all-reduce w ((suc i) ∷ w') n r prn ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? (suc i) + r) with (n ≟ (suc i) + r) with (n ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? n)
 ... | yes q | _ | _ | _ =
-  let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r {prn} {pn} (>>-++ ww (i :⟨ p ⟩: [])) ww'
+  let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r prn (>>-++ ww (i :⟨ p ⟩: [])) ww'
       lemma0 : ((i ∷ []) ++ (n ↓ r)) ≃ ((n ↓ r) ++ [ suc i ])
-      lemma0 = comm (F-canonize-p> n r i pn prn {!!} q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
+      lemma0 = comm (F-canonize-p> n r i {!!} {!!} {!!} q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
 
       lemma =
         ≃begin
@@ -110,7 +109,7 @@ step : (ll : (suc n) >> l) -> Σ (List ℕ × ℕ) (λ (l' , r) -> (n >> l') × 
 step {n} {.[]} [] = ([] , 0) , ([] , refl)
 step {n} {k ∷ l} (_ :⟨ x ⟩: ll) with (suc k) ≟ (suc n)
 step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | yes p =
-  let xx = all-reduce {!!}  ? ? {!!} {!!} {!!}
+  let xx = all-reduce {!!}  {!!} {!!} {!!} {!!} {!!}
   in  {!!}
 step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | no ¬p =
   let k≤n : k < n
