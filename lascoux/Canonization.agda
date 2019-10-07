@@ -99,6 +99,7 @@ postulate
     ≡-down2 : (p q : ℕ) -> suc p ≡ suc q -> p ≡ q
     +-three-assoc : {k i r : ℕ} -> k + i + r ≡ i + k + r
     ++-unit : l ++ [] ≡ l
+    ∸-with-≡ : {p q r : ℕ} -> (r ≤ q) -> (p + r ≡ q) -> (p ≡ q ∸ r)
 
 ∸-up : {n r : ℕ} -> (r < n) -> (n ∸ r) ≡ suc (n ∸ (suc r))
 ∸-up {suc zero} {zero} p = refl
@@ -268,11 +269,19 @@ F-canonize-p> (suc n) (suc (suc r)) i pn prn (s≤s pin) pirn =
 
 F-canonize-p≡ : (n r i : ℕ)
                 -> (0 < n)
-                -> (r ≤ n)
+                -> (r < n)
                 -> ((suc i) < n)
                 -> (((suc i) + 1 + r) ≡ n)
                 -> ((n ↓ r) ++ [ suc i ]) ≃ (n ↓ (1 + r))
-F-canonize-p≡ n r i pn prn pin pirn = {!   !}
+F-canonize-p≡ n r i pn prn pin pirn =
+  let tx = begin
+             (suc i) + suc r
+           ≡⟨ cong suc (≡-sym (+-assoc i 1 r)) ⟩
+             suc ((i + 1) + r)
+           ≡⟨ pirn ⟩
+             n
+           ∎
+  in  canonize-p≡ n r (suc i) pn prn (∸-with-≡ prn tx)
 
 F-canonize-p< : (n r i : ℕ)
                 -> (0 < n)
@@ -280,4 +289,6 @@ F-canonize-p< : (n r i : ℕ)
                 -> ((suc i) < n)
                 -> ((suc i) + (1 + r) < n)
                 -> ((n ↓ r) ++ [ suc i ]) ≃ ((suc i) ∷ n ↓ r)
-F-canonize-p< n r i pn prn pin pirn = {!   !}
+F-canonize-p< (suc n) r i pn prn (s≤s pin) pirn = {!!} --
+--  let xx = {!!}
+--  in  canonize-p< n r ( n ∸ (2 + i + r)) {suc i} {!!} {!!} {{!!}}
