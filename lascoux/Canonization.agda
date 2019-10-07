@@ -131,6 +131,22 @@ canonize-p< (suc (suc (suc (suc n)))) (suc r1) (suc r2) {i} pr2 (s≤s prn) {pin
         ≃∎
   in lemma
 
+canonize-swap : (n r i : ℕ)
+                -> (r ≤ n)
+                -> ((suc n) < i)
+                -> ((n ↓ r) ++ [ i ]) ≃ (i ∷ (n ↓ r))
+canonize-swap zero zero i prn pni = refl
+canonize-swap (suc n) zero i prn pni = refl
+canonize-swap (suc n) (suc r) i prn pni =
+  let rec = canonize-swap n r i (≤-down2 prn) (≤-down pni)
+  in  ≃begin
+         n ∷ (n ↓ r) ++ i ∷ []
+       ≃⟨ prepend n rec ⟩
+         n ∷ i ∷ (n ↓ r)
+       ≃⟨ ++-respects (swap {!!}) refl ⟩
+         i ∷ n ∷ (n ↓ r)
+       ≃∎
+
 -- REMEMBER - i is (suc i)
 canonize-p> : (n r1 r2 : ℕ)
               -> {i : ℕ}
@@ -146,12 +162,21 @@ canonize-p> (suc (suc zero)) (suc r1) (suc (suc zero)) {i} pr2 (s≤s (s≤s prn
 canonize-p> (suc (suc zero)) r1 (suc (suc (suc r2))) {i} pr2 (s≤s prn) = ≤-abs (≤-down2 (≤-remove-+ {r1} prn))
 
 canonize-p> (suc (suc (suc n))) zero (suc zero) {i} (s≤s ()) prn {pinr}
-canonize-p> (suc (suc (suc n))) zero (suc (suc zero)) {i} pr2 prn {pinr} = {!!}
+canonize-p> (suc (suc (suc zero))) zero (suc (suc zero)) {suc i} pr2 prn {pinr} rewrite (≡-down2 i _ pinr) = {!!}
+canonize-p> (suc (suc (suc (suc n)))) zero (suc (suc zero)) {suc i} pr2 prn {pinr} = {!!}
 
-canonize-p> (suc (suc (suc n))) zero (suc (suc (suc r2))) {suc i} pr2 (s≤s prn) {pinr} rewrite (≡-down2 i n pinr) =
-  let reci = canonize-p> (suc (suc n)) zero (suc (suc r2)) {i} (s≤s (s≤s z≤n)) prn {≡-down2 i n pinr}
-      recn = subst (λ k -> (suc k ∷ k ∷ (k ↓ suc r2) ++ [ suc k ]) ≃ (k ∷ suc n ∷ n ∷ (n ↓ suc r2))) ((≡-down2 i n pinr)) reci
-  in  {!!}
+canonize-p> (suc (suc (suc n))) zero (suc (suc (suc r2))) {suc i} pr2 (s≤s (s≤s (s≤s prn))) {pinr} rewrite (≡-down2 i n pinr) = -- induction on r1
+  let rec = canonize-swap n (suc r2) (2 + n) (prn) (s≤s (s≤s (≤-reflexive refl)))
+  in  ≃begin
+         (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ suc r2) ++ (2 + n) ∷ []
+       ≃⟨ prepend (2 + n) (prepend (1 + n) (prepend n rec)) ⟩
+         (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ (n ↓ suc r2)
+       ≃⟨ prepend (2 + n) (prepend (1 + n) (++-respects (comm (swap (s≤s (≤-reflexive refl)))) refl)) ⟩
+         (2 + n) ∷ 1 + n ∷ (2 + n) ∷ n ∷ (n ↓ suc r2)
+       ≃⟨ ++-respects (comm braid) refl ⟩
+         (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ suc r2)
+       ≃∎
+
 canonize-p> (suc (suc (suc n))) (suc r1) (suc zero) {i} (s≤s ()) prn --
 canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr2 prn = {!!}
 
