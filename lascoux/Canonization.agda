@@ -97,9 +97,15 @@ postulate
     ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
     ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)
     ≡-down2 : (p q : ℕ) -> suc p ≡ suc q -> p ≡ q
-    +-three-assoc : {k i r : ℕ} -> k + i + r ≡ i + k + r
+    +-three-assoc : {k i r : ℕ} -> k + (i + r) ≡ (i + k) + r
     ++-unit : l ++ [] ≡ l
-    ∸-with-≡ : {p q r : ℕ} -> (r ≤ q) -> (p + r ≡ q) -> (p ≡ q ∸ r)
+    introduce-∸ : {p q r : ℕ} -> (r ≤ q) -> (p + r ≡ q) -> (p ≡ q ∸ r)
+    eliminate-∸ : {p q r : ℕ} -> (r ≤ q) -> (p ≡ q ∸ r) -> (p + r ≡ q)
+    introduce-∸-≤ : {p q r : ℕ} -> (r ≤ q) -> (p + r ≤ q) -> (p ≤ q ∸ r)
+    eliminate-∸-≤ : {p q r : ℕ} -> (r ≤ q) -> (p ≤ q ∸ r) -> (p + r ≤ q)
+    ∸-to-zero : {p q : ℕ} -> {p ≡ q} -> (p ∸ q ≡ 0)
+    minus-plus : {p q : ℕ} -> {q ≤ p} -> p ∸ q + q ≡ p
+    ∸-down2 : {n r : ℕ} -> {r ≤ n} -> ((suc n) ∸ (suc r)) ≡ n ∸ r
 
 ∸-up : {n r : ℕ} -> (r < n) -> (n ∸ r) ≡ suc (n ∸ (suc r))
 ∸-up {suc zero} {zero} p = refl
@@ -196,13 +202,13 @@ canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr2 prn {pinr} = -- 
          i ∷ (2 + n) ∷ (1 + n) ∷ ((1 + n) ↓ (r1 + (2 + r2)))
        ≃∎
 
-add-lemma : {i r : ℕ} -> suc (i + 1 + r) ≡ suc (suc (i + r))
-add-lemma {i} {r} =
-  begin
-    suc (i + 1 + r)
-  ≡⟨ cong (λ x -> suc x) (+-three-assoc {i} {1} {r}) ⟩
-    suc (suc (i + r))
-  ∎
+-- add-lemma : {i r : ℕ} -> suc (i + 1 + r) ≡ suc (suc (i + r))
+-- add-lemma {i} {r} =
+--   begin
+--     suc (i + 1 + r)
+--   ≡⟨ cong (λ x -> suc x) (+-three-assoc {i} {1} {r}) ⟩
+--     suc (suc (i + r))
+--   ∎
 
 canonize-p≡ : (n r i : ℕ)
               -> (0 < n)
@@ -230,6 +236,7 @@ F-canonize-p> : (n r i : ℕ)
                 -> ((suc i) < n)
                 -> (n < (suc i) + r)
                 -> ((n ↓ r) ++ [ suc i ]) ≃ (i ∷ n ↓ r)
+-- r ≥ 2
 F-canonize-p> (suc n) zero i pn prn (s≤s pin) (s≤s pirn) =
   let tt = begin-≤
              suc (suc n)
@@ -243,7 +250,7 @@ F-canonize-p> (suc n) zero i pn prn (s≤s pin) (s≤s pirn) =
              suc n
            ≤∎
   in  ⊥-elim (1+n≰n tt)
-
+-- r ≥ 2
 F-canonize-p> (suc n) (suc zero) i pn prn (s≤s pin) (s≤s pirn) =
   let tt = begin-≤
              suc (suc n)
@@ -257,15 +264,32 @@ F-canonize-p> (suc n) (suc zero) i pn prn (s≤s pin) (s≤s pirn) =
   in  ⊥-elim (1+n≰n tt)
 
 F-canonize-p> (suc n) (suc (suc r)) i pn prn (s≤s pin) pirn =
-  let tt = begin-≤
-             suc i
-           ≤⟨ pin ⟩
-             n
-           <⟨ <⇒≤ pirn ⟩
-              suc (i + (2 + r))
-           ≤∎
-      tt = canonize-p> (suc n) ((suc n) ∸ (2 + i) ) ( ((suc i) + (2 + r)) ∸ (suc n) ) {i} {!   !} {!   !} {{!!}}
-  in {!   !}
+  let lmm : suc (n ∸ suc i) ≤ n
+      lmm = ∸-implies-≤ {r = i} (≡-sym (∸-up pin))
+      lm2 =
+        begin
+          i + suc (n ∸ suc i)
+        ≡⟨ +-three-assoc {i} {1} {n ∸ suc i} ⟩
+          suc i + (n ∸ suc i)
+        ≡⟨ +-comm (suc i) (n ∸ suc i) ⟩
+          (n ∸ suc i) + suc i
+        ≡⟨ minus-plus {n} {suc i} {pin}⟩
+          n
+        ∎
+      pin : i ≡ n ∸ suc (n ∸ suc i)
+      pin = introduce-∸ lmm lm2
+
+      pirn' : 2 ≤ i + r ∸ suc n
+      pirn' = introduce-∸-≤ {2} {i + r} {suc n} {!!}
+        (begin-≤
+          {!!}
+        ≤⟨ {!!} ⟩
+          {!!}
+        ≤⟨ {!!} ⟩
+          {!!}
+        ≤∎)
+      tt = canonize-p> (suc n) ((suc n) ∸ (1 + (suc i)) ) ((i + r) ∸ (suc n)) {i} {!!} {!   !} {pin}
+  in {!  tt !}
 
 F-canonize-p≡ : (n r i : ℕ)
                 -> (0 < n)
@@ -281,7 +305,7 @@ F-canonize-p≡ n r i pn prn pin pirn =
            ≡⟨ pirn ⟩
              n
            ∎
-  in  canonize-p≡ n r (suc i) pn prn (∸-with-≡ prn tx)
+  in  canonize-p≡ n r (suc i) pn prn (introduce-∸ prn tx)
 
 F-canonize-p< : (n r i : ℕ)
                 -> (0 < n)
