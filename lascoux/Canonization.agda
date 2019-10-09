@@ -96,6 +96,7 @@ open Σ
 postulate
     ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
     ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)
+    introduce-≤-from-+ : {p q r : ℕ} -> (p + q ≡ r) -> (p ≤ r)
     ≡-down2 : (p q : ℕ) -> suc p ≡ suc q -> p ≡ q
     +-three-assoc : {k i r : ℕ} -> k + (i + r) ≡ (i + k) + r
     ++-unit : l ++ [] ≡ l
@@ -106,6 +107,7 @@ postulate
     ∸-to-zero : {p q : ℕ} -> {p ≡ q} -> (p ∸ q ≡ 0)
     minus-plus : {p q : ℕ} -> {q ≤ p} -> p ∸ q + q ≡ p
     ∸-down2 : {n r : ℕ} -> {r ≤ n} -> ((suc n) ∸ (suc r)) ≡ n ∸ r
+    ≤-up2-+ : {p q r : ℕ} -> (p ≤ q) -> (r + p ≤ r + q)
 
 ∸-up : {n r : ℕ} -> (r < n) -> (n ∸ r) ≡ suc (n ∸ (suc r))
 ∸-up {suc zero} {zero} p = refl
@@ -151,7 +153,7 @@ canonize-p< (suc (suc (suc (suc n)))) (suc r1) (suc r2) {i} pr2 (s≤s prn) {pin
 
 canonize-swap : (n r i : ℕ)
                 -> (r ≤ n)
-                -> ((suc n) < i)
+                -> (n < i)
                 -> ((n ↓ r) ++ [ i ]) ≃ (i ∷ (n ↓ r))
 canonize-swap zero zero i prn pni = refl
 canonize-swap (suc n) zero i prn pni = refl
@@ -161,45 +163,62 @@ canonize-swap (suc n) (suc r) i prn pni =
          n ∷ (n ↓ r) ++ i ∷ []
        ≃⟨ prepend n rec ⟩
          n ∷ i ∷ (n ↓ r)
-       ≃⟨ ++-respects (comm (swap (≤-down pni))) refl ⟩
+       ≃⟨ ++-respects (comm (swap pni)) refl ⟩
          i ∷ n ∷ (n ↓ r)
        ≃∎
 
 -- REMEMBER - i is (suc i)
 canonize-p> : (n r1 r2 : ℕ)
               -> {i : ℕ}
-              -> ((suc (suc zero)) ≤ r2)
+              -> ((suc zero) ≤ r2)
               -> (r1 + r2 < n)
               -> {i ≡ n ∸ (2 + r1)}
               -> (((n ↓ r1) ++ [ 1 + i ] ++ (1 + i) ↓ r2) ++ [ 1 + i ]) ≃ (i ∷ (n ↓ (1 + r1 + r2)))
 -- again, weeding out small, impossible cases
 canonize-p> (suc zero) r1 (suc r2) {i} pr2 prn = ≤-abs (≤-remove-+ {r1} (≤-down2 prn))
-canonize-p> (suc (suc zero)) r1 (suc zero) {i} (s≤s ()) prn
+canonize-p> (suc (suc zero)) (suc r1) (suc zero) {i} pr2 (s≤s (s≤s prn)) = ≤-abs (≤-remove-+ {r1} prn)
 canonize-p> (suc (suc zero)) (suc r1) (suc (suc zero)) {i} pr2 (s≤s (s≤s prn)) = ≤-abs (≤-remove-+ {r1} prn)
-canonize-p> (suc (suc zero)) r1 (suc (suc (suc r2))) {i} pr2 (s≤s prn) = ≤-abs (≤-down2 (≤-remove-+ {r1} prn))
-canonize-p> (suc (suc (suc n))) zero (suc zero) {i} (s≤s ()) prn {pinr}
-canonize-p> (suc (suc (suc n))) (suc r1) (suc zero) {i} (s≤s ()) prn
 -- now, induction
-canonize-p> (suc (suc zero)) zero (suc (suc zero)) {i} pr2 prn {pinr} rewrite pinr = comm braid -- base case on r1 and r2
-canonize-p> (suc (suc (suc n))) zero (suc (suc r2)) {suc i} pr2 (s≤s (s≤s (s≤s prn))) {pinr} rewrite (≡-down2 i n pinr) = -- induction on r2
-  let rec = canonize-swap n r2 (2 + n) (prn) (s≤s (s≤s (≤-reflexive refl)))
+-- base case on r1 and r2
+canonize-p> (suc (suc n)) zero (suc r2) {i} pr2 prn {pinr} rewrite pinr = -- induction on r2
+  let rec = canonize-swap n r2 (1 + n) (≤-down2 (≤-down2 prn)) (s≤s (≤-reflexive refl))
   in  ≃begin
-         (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ r2) ++ (2 + n) ∷ []
-       ≃⟨ prepend (2 + n) (prepend (1 + n) (prepend n rec)) ⟩
-         (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ (n ↓ r2)
-       ≃⟨ prepend (2 + n) (prepend (1 + n) (++-respects (comm (swap (s≤s (≤-reflexive refl)))) refl)) ⟩
-         (2 + n) ∷ 1 + n ∷ (2 + n) ∷ n ∷ (n ↓ r2)
-       ≃⟨ ++-respects (comm braid) refl ⟩
-         (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ (n ↓ r2)
+         (1 + n) ∷ n ∷ (n ↓ r2) ++ (1 + n) ∷ []
+       ≃⟨ (prepend (1 + n) (prepend n rec)) ⟩
+         (1 + n) ∷ n ∷ (1 + n) ∷ (n ↓ r2)
+       ≃⟨ ++-respects (comm braid) refl  ⟩
+         n ∷ suc n ∷ n ∷ (n ↓ r2)
        ≃∎
-canonize-p> (suc (suc (suc n))) (suc r1) (suc (suc r2)) {i} pr2 prn {pinr} = -- induction on r1
-  let rec = canonize-p> (suc (suc n)) r1 (suc (suc r2)) {i} pr2 (≤-down2 prn) {pinr}
+canonize-p> (suc (suc n)) (suc r1) (suc r2) {i} pr2 prn {pinr} = -- induction on r1
+  let rec = canonize-p> (suc n) r1 (suc r2) {i} pr2 (≤-down2 prn) {pinr}
+      1+r1≤n : suc r1 ≤ n
+      1+r1≤n = ≤-down2 (≤-down2 (
+        begin-≤
+          suc (suc (suc r1))
+        ≤⟨ s≤s (s≤s (≤-reflexive (+-comm 1 r1))) ⟩
+          suc (suc (r1 + 1))
+        ≤⟨ s≤s (s≤s (≤-up2-+ {1} {suc r2} {r1} (s≤s z≤n))) ⟩
+          suc (suc (r1 + (1 + r2)))
+        ≤⟨ prn ⟩
+          suc (suc n)
+        ≤∎))
+
+      lemma =
+        begin
+          (1 + i) + r1
+        ≡⟨ +-three-assoc {1} {i} {r1} ⟩
+          (i + 1) + r1
+        ≡⟨ +-assoc i 1 r1 ⟩
+          i + (1 + r1)
+        ≡⟨ eliminate-∸ 1+r1≤n pinr ⟩
+          n
+        ∎
   in ≃begin
-         (2 + n) ∷ (((2 + n) ↓ r1) ++ (1 + i) ∷ i ∷ (i ↓ (1 + r2))) ++ (1 + i) ∷ []
-       ≃⟨ prepend (2 + n) rec ⟩
-         (2 + n) ∷ i ∷ (1 + n) ∷ ((1 + n) ↓ (r1 + (2 + r2)))
-       ≃⟨ ++-respects (swap (s≤s (s≤s (∸-implies-≤ {r = r1} pinr)))) (refl {(1 + n) ∷ ((1 + n) ↓ (r1 + (2 + r2)))} ) ⟩
-         i ∷ (2 + n) ∷ (1 + n) ∷ ((1 + n) ↓ (r1 + (2 + r2)))
+         (1 + n) ∷ (((1 + n) ↓ r1) ++ (1 + i) ∷ i ∷ (i ↓ r2)) ++ (1 + i) ∷ []
+       ≃⟨ prepend (1 + n) rec ⟩
+         (1 + n) ∷ i ∷ n ∷ ( n ↓ (r1 + (1 + r2)))
+       ≃⟨ ++-respects (swap (s≤s (introduce-≤-from-+ lemma))) (refl {n ∷ (n ↓ (r1 + (1 + r2)))} ) ⟩
+         i ∷ (1 + n) ∷ n ∷ (n ↓ (r1 + (1 + r2)))
        ≃∎
 
 -- add-lemma : {i r : ℕ} -> suc (i + 1 + r) ≡ suc (suc (i + r))
