@@ -121,7 +121,7 @@ F-canonize-p≡ : (n r i : ℕ)
                 -> (r < n)
                 -> ((suc i) < n)
                 -> (((suc i) + 1 + r) ≡ n)
-                -> ((n ↓ r) ++ [ suc i ]) ≃ (n ↓ (1 + r))
+                -> ((n ↓ r) ++ [ suc i ]) ≡ (n ↓ (1 + r))
 F-canonize-p≡ n r i prn pin pirn =
   let tx = begin
              (suc i) + suc r

@@ -81,7 +81,6 @@ n<i+r w w' n r i pin prn q =
           (w ++ (n ↓ r) ++ suc i ∷ w')
         ≃∎
 
-
 all-reduce : (w : List ℕ)
              -> (w' : List ℕ)
              -> (n : ℕ)
@@ -104,10 +103,28 @@ all-reduce w ((suc i) ∷ w') n pn r prn ww (.(suc i) :⟨ p ⟩: ww') with ((su
 ... | yes q | _ | _ | _ =
   let (w'' , r') , (ww'' , pp) = all-reduce (w ++ [ i ]) w' n pn r prn (>>-++ ww (i :⟨ ≤-down2 p ⟩: [])) ww'
   in (w'' , r') , (ww'' , trans pp (n<i+r w w' (suc n) r i (s≤s (≤-down2 p)) prn q)) -- p>
-... | _ | yes q | _ | _ = {!!} -- reduction
-... | _ | _ | yes q | _ = {!!} -- p1
-... | _ | _ | _ | yes q = {!!} -- p<
-... | no p1 | no p2 | no p3 | no p4  = {!!}
+... | _ | yes q | _ | _ = {!!}
+... | _ | _ | yes q | _ =
+  let xx : 1 + r ≤ n
+      xx = (≤-remove-+ {i} {1 + r} (≤-reflexive (≡-down2 (i + suc r) n (≡-sym q))))
+
+      r≤n : r ≤ n
+      r≤n = ≤-≠-≤ prn (λ x → 1+n≰n (≤-down (≤-trans (s≤s xx) (≤-reflexive (≡-sym x)))))
+
+      (w'' , r') , (ww'' , pp) = all-reduce w w' n pn (suc r) (s≤s r≤n) ww ww'
+
+      pp' = F-canonize-p≡ (suc n) r i (s≤s r≤n) (s≤s (≤-down2 p)) (≡-sym (≡-trans q (cong suc (≡-sym (+-assoc i 1 r)))))
+      pp'' = ≡-sym (cong (λ l -> w ++ l ++ w') pp')
+  in (w'' , r') , (ww'' , trans pp (refl≡ (≡-trans pp'' (cong (λ l -> w ++ l) (++-assoc (suc n ↓ r) (suc i ∷ []) w'))))) -- p≡
+... | _ | _ | _ | yes q =  -- p<
+  let i+1+r≡1+i+r : i + suc r ≡ suc i + r
+      i+1+r≡1+i+r = {!!}
+      2+i≤n : 2 + i ≤ n
+      2+i≤n = ≤-down2 (≤-trans (s≤s (s≤s (≤-trans (≤-up-+ {r = r} (≤-reflexive refl)) (≤-reflexive (≡-sym i+1+r≡1+i+r))))) q)
+      (w'' , r') , (ww'' , pp) = all-reduce (w ++ [ suc i ]) w' n pn r prn (>>-++ ww ((suc i) :⟨ 2+i≤n ⟩: [])) ww'
+      pp' = F-canonize-p< (suc n) r (suc i) prn (s≤s (≤-trans (≤-reflexive (cong suc (≡-sym i+1+r≡1+i+r))) (≤-down2 q)))
+  in (w'' , r') , (ww'' , trans pp (refl≡ (≡-trans ? (cong (λ l -> w ++ l) (++-assoc (suc n ↓ r) (suc i ∷ []) w'))))) -- p<
+... | no p1 | no p2 | no p3 | no p4  = {!!} -- absurd
 
 step : (ll : (suc n) >> l) -> Σ (List ℕ × ℕ) (λ (l' , r) -> (n >> l') × (l' ++ ((suc (suc n)) ↓ r)) ≃ l)
 step {n} {.[]} [] = ([] , 0) , ([] , refl)

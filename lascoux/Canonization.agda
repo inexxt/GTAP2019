@@ -145,7 +145,7 @@ canonize-p>' (suc (suc n)) (suc r1) (suc r2) {i} pr2 prn {pinr} = -- induction o
 canonize-p≡ : (n r i : ℕ)
               -> (r < n)
               -> (i ≡ n ∸ (1 + r))
-              -> ((n ↓ r) ++ [ i ]) ≃ (n ↓ (1 + r))
+              -> ((n ↓ r) ++ [ i ]) ≡ (n ↓ (1 + r))
 canonize-p≡ (suc n) r i prn pirn =
   let tt = ≡-sym (↓-rec {suc n} {r} prn)
       i=n-r-1 : (suc n) ∸ (r + 1) ≡ i
@@ -158,7 +158,7 @@ canonize-p≡ (suc n) r i prn pirn =
                   ≡⟨ ≡-sym pirn ⟩
                     i
                   ∎
-  in refl≡ (subst (λ k -> ((suc n) ↓ r) ++ [ k ] ≡ ((suc n) ↓ suc r))  i=n-r-1 tt)
+  in subst (λ k -> ((suc n) ↓ r) ++ [ k ] ≡ ((suc n) ↓ suc r)) i=n-r-1 tt
 
 
 canonize-p>-lemma : (n r1 r2 : ℕ)
