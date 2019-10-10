@@ -22,6 +22,17 @@ variable
     n : ℕ
     l : List ℕ
 
+open ≃-Reasoning
+
+-- canonize-p>-lemma : (n r i : ℕ)
+--                     -> (0 < n)
+--                     -> (r ≤ n)
+--                     -> ((suc i) < n)
+--                     -> (n < (suc i) + r)
+--                     -> ((suc n) ↓ r) ≡ ((suc n ↓ (n ∸ suc i)) ++ (suc (suc i)) ↓ (suc i ∸ (n ∸ r)))
+
+-- canonize-p>-lemma n r i pn prn pin pirn = {!!}
+
 F-canonize-p> : (n r i : ℕ)
                 -> (0 < n)
                 -> (r ≤ n)
@@ -44,8 +55,8 @@ F-canonize-p> (suc n) (suc (suc r)) i pn (s≤s prn) (s≤s pin) (s≤s pirn) =
       pin' : i ≡ n ∸ suc (n ∸ suc i)
       pin' = introduce-∸ lmm lm2
 
-      tt : n ≤ (i + suc r)
-      tt = ≤-down2
+      n≤i+1+r : n ≤ (i + suc r)
+      n≤i+1+r = ≤-down2
         (begin-≤
           suc n
          ≤⟨ pirn ⟩
@@ -55,13 +66,37 @@ F-canonize-p> (suc n) (suc (suc r)) i pn (s≤s prn) (s≤s pin) (s≤s pirn) =
         ≤∎)
 
       pr2 : 1 ≤ suc i ∸ (n ∸ suc r)
-      pr2 = introduce-∸-≤ (introduce-∸-≤l prn (≤-up tt)) (s≤s (introduce-∸-≤l prn (tt)))
+      pr2 = introduce-∸-≤ (introduce-∸-≤l prn (≤-up n≤i+1+r)) (s≤s (introduce-∸-≤l prn n≤i+1+r))
 
       pirn' : n ∸ suc i + (suc i ∸ (n ∸ suc r)) ≤ n
-      pirn' = eliminate-∸-≤ (introduce-∸-≤l (introduce-∸-≤l {n} {suc i} {r = suc r} prn (≤-up tt)) (≤-up-+ pin)) (∸-anti-≤ (∸-implies-≤ {r = n ∸ suc r} refl) pin)
+      pirn' = eliminate-∸-≤ (introduce-∸-≤l (introduce-∸-≤l {n} {suc i} {r = suc r} prn (≤-up n≤i+1+r)) (≤-up-+ pin)) (∸-anti-≤ (∸-implies-≤ {r = n ∸ suc r} refl) pin)
 
-      tt = canonize-p> (suc n) ((suc n) ∸ (1 + (suc i)) ) ((1 + i) ∸ ((suc n) ∸ (suc (suc r)))) {i} pr2 (s≤s pirn') {pin'}
-  in {!  tt !}
+      r1 = (suc n) ∸ (1 + (suc i))
+      r2 = (1 + i) ∸ ((suc n) ∸ (suc (suc r)))
+
+      call = canonize-p> (suc n) r1 r2 {i} pr2 (s≤s pirn') {pin'}
+
+      left : (n ∷ (n ↓ suc r) ++ [ suc i ]) ≡ ((suc n ↓ (n ∸ suc i)) ++ suc i ∷ (suc i ↓ (suc i ∸ (n ∸ suc r)))) ++ suc i ∷ []
+      left = cong (λ l -> l ++ [ suc i ]) {!!}
+
+      lemma : suc r ≡ ((n ∸ suc i) + (suc i ∸ (n ∸ suc r)))
+      lemma = {!!}
+
+      right : (i ∷ n ∷ (n ↓ suc r)) ≡ (i ∷ n ∷ (n ↓ (n ∸ suc i + (suc i ∸ (n ∸ suc r)))))
+      right = cong (λ l -> i ∷ n ∷ l) (cong (λ x -> n ↓ x) lemma)
+
+  in
+    ≃begin
+      n ∷ (n ↓ suc r) ++ suc i ∷ []
+    ≃⟨ refl≡ left ⟩
+      _
+    ≃⟨ call ⟩
+      _
+    ≃⟨ refl≡ (≡-sym right) ⟩
+      i ∷ n ∷ (n ↓ suc r)
+    ≃∎
+
+
 -- TODO move the impossible cases up
 -- r ≤ 1
 F-canonize-p> (suc n) zero i pn prn (s≤s pin) (s≤s pirn) =

@@ -159,3 +159,20 @@ canonize-p≡ (suc n) r i pn prn pirn =
                     i
                   ∎
   in refl≡ (subst (λ k -> ((suc n) ↓ r) ++ [ k ] ≡ ((suc n) ↓ suc r))  i=n-r-1 tt)
+
+
+canonize-p>-lemma : (n r1 r2 : ℕ)
+                    -> {i : ℕ}
+                    -> ((suc zero) ≤ r2)
+                    -> (r1 + r2 < n)
+                    -> {i ≡ n ∸ (2 + r1)}
+                    -> (n ↓ suc (r1 + r2)) ≡ (((n ↓ r1) ++ (suc (suc i)) ↓ (suc r2)))
+-- impossible, small cases
+canonize-p>-lemma (suc zero) zero (suc r2) {zero} pr2 (s≤s ()) {pirn}
+canonize-p>-lemma (suc zero) (suc r1) r2 {zero} pr2 (s≤s ()) {pirn}
+-- induction by n and r1
+canonize-p>-lemma (suc (suc n)) zero r2 {i} pr2 prn {pirn} rewrite pirn = refl
+-- induction step
+canonize-p>-lemma (suc (suc n)) (suc r1) r2 {i} pr2 (s≤s prn) {pirn} =
+  let rec =  canonize-p>-lemma (suc n) r1 r2 {i} pr2 prn {pirn}
+  in  cong (λ l -> suc n ∷ l) rec
