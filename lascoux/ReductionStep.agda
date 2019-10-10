@@ -15,22 +15,17 @@ open import Relation.Nullary
 open import Data.Empty
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
-open import Canonization using (F-canonize-p>; F-canonize-p≡; F-canonize-p<; _≃_; _↓_ ; refl≡)
+open import Coxeter hiding (n; l)
+open import Arithmetic hiding (n; l)
+open import Canonization hiding (n; l)
+open import CanonizationInterface hiding (n; l)
 
 open _≃_
-open Canonization.≃-Reasoning
+open ≃-Reasoning
 
 variable
   n : ℕ
   l : List ℕ
-
--- data _∈_ : ℕ -> List ℕ -> Set where
---     here : (n : ℕ) -> (l : List ℕ) -> n ∈ (n ∷ l)
---     there : (k : ℕ) -> {n : ℕ} -> {l : List ℕ} -> (n ∈ l) -> n ∈ (k ∷ l)
-
--- data _∉_ : ℕ -> List ℕ -> Set where
---     not-here : (n : ℕ) -> n ∉ []
---     not-there : {k : ℕ} -> {n : ℕ} -> {¬ (k == n)} -> {l : List ℕ} -> (n ∉ l) -> n ∉ (k ∷ l)
 
 data _>>_ : ℕ -> List ℕ -> Set where
   [] : {n : ℕ} -> n >> []
@@ -39,7 +34,6 @@ data _>>_ : ℕ -> List ℕ -> Set where
 ≤-≠-≤ : {n m : ℕ} -> (n ≤ suc m) -> ¬ (n ≡ suc m) -> (n ≤ m)
 ≤-≠-≤ z≤n q = z≤n
 ≤-≠-≤ (s≤s p) q = {!!}
-
 
 n=i+r : (n : ℕ) -> (r : ℕ) -> (i : ℕ) -> (n ≡ i + r) -> {!!}
 n=i+r = {!!}
@@ -51,13 +45,9 @@ n>i+1+r : (n : ℕ) -> (r : ℕ) -> (i : ℕ) -> (n > i + (1 + r)) -> {!!}
 n>i+1+r = {!!}
 
 
-++-unit : (l : List ℕ) -> (l ++ []) ≡ l
-++-unit [] = refl
-++-unit (x ∷ l) = cong (λ l -> x ∷ l) (++-unit l)
-
 ++-unit2 : (l1 l2 : List ℕ) -> (l1 ++ (l2 ++ [])) ≡ (l1 ++ l2)
 ++-unit2 l1 l2 = let xx = ++-assoc l1 l2 []
-                     yy = ++-unit (l1 ++ l2)
+                     yy = ++-unit {l1 ++ l2}
                      in ≡-trans (≡-sym xx) yy
 
 >>-++ : {l1 l2 : List ℕ} -> n >> l1 -> n >> l2 -> n >> (l1 ++ l2)
@@ -69,10 +59,15 @@ open Σ
 postulate
   ++-≃ : {l l' w w' : List ℕ} -> (l ≃ l') -> (w ≃ w') -> (l ++ w) ≃ (l' ++ w')
 
-n<i+r : (w w' : List ℕ) -> (n r i : ℕ) -> (n < (suc i) + r) -> ((w ++ i ∷ []) ++ (n ↓ r) ++ w') ≃ (w ++ (n ↓ r) ++ suc i ∷ w')
-n<i+r w w' n r i q =
+n<i+r : (w w' : List ℕ)
+        -> (n r i : ℕ)
+        -> (suc i < n)
+        -> (r ≤ n)
+        -> (n < (suc i) + r)
+        -> ((w ++ i ∷ []) ++ (n ↓ r) ++ w') ≃ (w ++ (n ↓ r) ++ suc i ∷ w')
+n<i+r w w' n r i pin prn q =
   let lemma0 : ((i ∷ []) ++ (n ↓ r)) ≃ ((n ↓ r) ++ [ suc i ])
-      lemma0 = comm (F-canonize-p> n r i {!!} {!!} {!!} q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
+      lemma0 = comm (F-canonize-p> n r i prn pin q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
       in
         ≃begin
           ((w ++ i ∷ []) ++ (n ↓ r) ++ w')
@@ -100,7 +95,7 @@ all-reduce w (0 ∷ w') n r prn ww (.0 :⟨ p ⟩: ww') = {!!}
 all-reduce w ((suc i) ∷ w') n r prn ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? (suc i) + r) with (n ≟ (suc i) + r) with (n ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? n)
 ... | yes q | _ | _ | _ =
   let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r prn (>>-++ ww (i :⟨ p ⟩: [])) ww'
-  in (w'' , r') , (ww'' , trans pp (n<i+r w w' _ _ _ q)) -- p>
+  in (w'' , r') , (ww'' , trans pp (n<i+r w w' n r i {!!} {!!} q)) -- p>
 ... | _ | yes q | _ | _ = {!!} -- reduction
 ... | _ | _ | yes q | _ = {!!} -- p1
 ... | _ | _ | _ | yes q = {!!} -- p<

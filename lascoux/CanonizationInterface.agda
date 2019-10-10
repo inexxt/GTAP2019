@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module CanonizationInterface where
 
 open import Data.List
@@ -25,12 +26,11 @@ variable
 open ≃-Reasoning
 
 F-canonize-p> : (n r i : ℕ)
-                -> (0 < n)
                 -> (r ≤ n)
                 -> ((suc i) < n)
                 -> (n < (suc i) + r)
                 -> ((n ↓ r) ++ [ suc i ]) ≃ (i ∷ n ↓ r)
-F-canonize-p> (suc n) (suc (suc r)) i pn (s≤s prn) (s≤s pin) (s≤s pirn) =
+F-canonize-p> (suc n) (suc (suc r)) i (s≤s prn) (s≤s pin) (s≤s pirn) =
   let lmm : suc (n ∸ suc i) ≤ n
       lmm = ∸-implies-≤ {r = i} (≡-sym (∸-up pin))
       lm2 =
@@ -90,7 +90,7 @@ F-canonize-p> (suc n) (suc (suc r)) i pn (s≤s prn) (s≤s pin) (s≤s pirn) =
 
 -- TODO move the impossible cases up
 -- r ≤ 1
-F-canonize-p> (suc n) zero i pn prn (s≤s pin) (s≤s pirn) =
+F-canonize-p> (suc n) zero i prn (s≤s pin) (s≤s pirn) =
   let tt = begin-≤
              suc (suc n)
            ≤⟨ s≤s pirn ⟩
@@ -104,7 +104,7 @@ F-canonize-p> (suc n) zero i pn prn (s≤s pin) (s≤s pirn) =
            ≤∎
   in  ⊥-elim (1+n≰n tt)
 -- r ≤ 1
-F-canonize-p> (suc n) (suc zero) i pn prn (s≤s pin) (s≤s pirn) =
+F-canonize-p> (suc n) (suc zero) i prn (s≤s pin) (s≤s pirn) =
   let tt = begin-≤
              suc (suc n)
            ≤⟨ s≤s pirn ⟩
@@ -118,12 +118,11 @@ F-canonize-p> (suc n) (suc zero) i pn prn (s≤s pin) (s≤s pirn) =
 
 
 F-canonize-p≡ : (n r i : ℕ)
-                -> (0 < n)
                 -> (r < n)
                 -> ((suc i) < n)
                 -> (((suc i) + 1 + r) ≡ n)
                 -> ((n ↓ r) ++ [ suc i ]) ≃ (n ↓ (1 + r))
-F-canonize-p≡ n r i pn prn pin pirn =
+F-canonize-p≡ n r i prn pin pirn =
   let tx = begin
              (suc i) + suc r
            ≡⟨ cong suc (≡-sym (+-assoc i 1 r)) ⟩
@@ -131,16 +130,15 @@ F-canonize-p≡ n r i pn prn pin pirn =
            ≡⟨ pirn ⟩
              n
            ∎
-  in  canonize-p≡ n r (suc i) pn prn (introduce-∸ prn tx)
+  in  canonize-p≡ n r (suc i) prn (introduce-∸ prn tx)
 
 F-canonize-p< : (n r i : ℕ)
-                -> (0 < n)
                 -> (r ≤ n)
                 -> ((1 + i + r) < n)
                 -> ((n ↓ r) ++ [ i ]) ≃ (i ∷ n ↓ r)
-F-canonize-p< (suc n) zero i pn prn (s≤s pin) = refl
-F-canonize-p< (suc zero) (suc r) zero pn prn (s≤s pin) = refl
-F-canonize-p< (suc (suc n)) (suc r) i (s≤s pn) (s≤s prn) (s≤s pin) =
+F-canonize-p< (suc n) zero i prn (s≤s pin) = refl
+F-canonize-p< (suc zero) (suc r) zero prn (s≤s pin) = refl
+F-canonize-p< (suc (suc n)) (suc r) i (s≤s prn) (s≤s pin) =
   let 1+i+r≤n : 1 + i + r ≤ n
       1+i+r≤n =
         begin-≤
@@ -150,7 +148,7 @@ F-canonize-p< (suc (suc n)) (suc r) i (s≤s pn) (s≤s prn) (s≤s pin) =
         ≤⟨ ≤-down2 pin ⟩
           n
         ≤∎
-      rec = F-canonize-p< (suc n) r i (s≤s z≤n) prn (s≤s 1+i+r≤n)
+      rec = F-canonize-p< (suc n) r i prn (s≤s 1+i+r≤n)
 
       1+i≤n : 1 + i ≤ n
       1+i≤n = ≤-down-+ 1+i+r≤n
