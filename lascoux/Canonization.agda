@@ -16,56 +16,14 @@ open import Data.Empty
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
 open ≤-Reasoning renaming (_∎ to _≤∎; begin_ to begin-≤_) hiding (_≡⟨_⟩_)
+open import Arithmetic hiding (n)
+open import Coxeter hiding (n; l)
 
+open ≃-Reasoning
 
 variable
     n : ℕ
     l : List ℕ
-
-data _≃_ : List ℕ -> List ℕ -> Set where
-    cancel : (n ∷ n ∷ []) ≃ []
-    swap : {k : ℕ} -> (suc k < n) -> (n ∷ k ∷ []) ≃ (k ∷ n ∷ [])
-    braid : (n ∷ (suc n) ∷ n ∷ []) ≃ ((suc n) ∷ n ∷ (suc n) ∷ [])
-    prepend : (k : ℕ) -> {l l' : List ℕ} -> (l ≃ l') -> (k ∷ l) ≃ (k ∷ l')
-    ++-respects : {l l' m m' : List ℕ} -> (l ≃ l') -> (m ≃ m') -> (l ++ m) ≃ (l' ++ m')
-    refl : {l : List ℕ} -> l ≃ l
-    comm : {l l' : List ℕ} -> (l ≃ l') -> l' ≃ l
-    trans : {l l' l'' : List ℕ} -> (l ≃ l') -> (l' ≃ l'') -> l ≃ l''
-
-module ≃-Reasoning where
-    infix  1 ≃begin_
-    infixr 2 _≃⟨⟩_ _≃⟨_⟩_
-    infix  3 _≃∎
-
-    ≃begin_ : ∀ {x y : List ℕ}
-             → x ≃ y
-               -----
-             → x ≃ y
-    ≃begin x≃y  =  x≃y
-
-    _≃⟨⟩_ : ∀ (x : List ℕ) {y : List ℕ}
-            → x ≃ y
-              -----
-            → x ≃ y
-    x ≃⟨⟩ x≃y  =  x≃y
-
-    _≃⟨_⟩_ : ∀ (x : List ℕ) {y z : List ℕ}
-             → x ≃ y
-             → y ≃ z
-               -----
-             → x ≃ z
-    x ≃⟨ x≃y ⟩ y≃z  =  trans x≃y y≃z
-
-    _≃∎ : ∀ (x : List ℕ)
-           -----
-          → x ≃ x
-    x ≃∎  =  refl
-
-open ≃-Reasoning
-
-
-refl≡ : {l l' : List ℕ} -> (l ≡ l') -> l ≃ l'
-refl≡ refl = refl
 
 _↓_ : (n : ℕ) -> (r : ℕ) -> List ℕ
 zero ↓ r = []
@@ -77,43 +35,7 @@ suc n ↓ suc r = n ∷ n ↓ r
 ↓-rec {suc (suc n)} {zero} (s≤s z≤n) = refl
 ↓-rec {suc (suc n)} {suc k} (s≤s p) = cong (λ l -> suc n ∷ l) (↓-rec p)
 
-≤-up : {n m : ℕ} -> m ≤ n -> m ≤ suc n
-≤-up {n} {.0} z≤n = z≤n
-≤-up {.(suc _)} {.(suc _)} (s≤s q) = s≤s (≤-up q)
-
-≤-down : {n m : ℕ} -> suc m ≤ n -> m ≤ n
-≤-down {.(suc _)} {zero} (s≤s p) = z≤n
-≤-down {.(suc _)} {suc n} (s≤s p) = s≤s (≤-down p)
-
-≤-down2 : {n m : ℕ} -> suc m ≤ suc n -> m ≤ n
-≤-down2 {m} {n} (s≤s p) = p
-
-≤-abs : {A : Set} -> {n : ℕ} -> (suc n ≤ 0) -> A
-≤-abs ()
-
 open Σ
-
-postulate
-    ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
-    ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)
-    introduce-≤-from-+ : {p q r : ℕ} -> (p + q ≡ r) -> (p ≤ r)
-    ≡-down2 : (p q : ℕ) -> suc p ≡ suc q -> p ≡ q
-    +-three-assoc : {k i r : ℕ} -> k + (i + r) ≡ (i + k) + r
-    ++-unit : l ++ [] ≡ l
-    introduce-∸ : {p q r : ℕ} -> (r ≤ q) -> (p + r ≡ q) -> (p ≡ q ∸ r)
-    eliminate-∸ : {p q r : ℕ} -> (r ≤ q) -> (p ≡ q ∸ r) -> (p + r ≡ q)
-    introduce-∸-≤ : {p q r : ℕ} -> (r ≤ q) -> (p + r ≤ q) -> (p ≤ q ∸ r)
-    eliminate-∸-≤ : {p q r : ℕ} -> (r ≤ q) -> (p ≤ q ∸ r) -> (p + r ≤ q)
-    ∸-to-zero : {p q : ℕ} -> {p ≡ q} -> (p ∸ q ≡ 0)
-    minus-plus : {p q : ℕ} -> {q ≤ p} -> p ∸ q + q ≡ p
-    ∸-down2 : {n r : ℕ} -> {r ≤ n} -> ((suc n) ∸ (suc r)) ≡ n ∸ r
-    ≤-up2-+ : {p q r : ℕ} -> (p ≤ q) -> (r + p ≤ r + q)
-
-∸-up : {n r : ℕ} -> (r < n) -> (n ∸ r) ≡ suc (n ∸ (suc r))
-∸-up {suc zero} {zero} p = refl
-∸-up {suc zero} {suc r} (s≤s p) = ≤-abs p
-∸-up {suc (suc n)} {zero} p = refl
-∸-up {suc (suc n)} {suc r} (s≤s p) = ∸-up {suc n} {r} p
 
 nnl=l : {l : List ℕ} -> {n : ℕ} -> (n ∷ n ∷ l) ≃ l
 nnl=l = ++-respects cancel refl
@@ -174,10 +96,8 @@ canonize-p> : (n r1 r2 : ℕ)
               -> (r1 + r2 < n)
               -> {i ≡ n ∸ (2 + r1)}
               -> (((n ↓ r1) ++ [ 1 + i ] ++ (1 + i) ↓ r2) ++ [ 1 + i ]) ≃ (i ∷ (n ↓ (1 + r1 + r2)))
--- again, weeding out small, impossible cases
+-- again, weeding out small, impossible case
 canonize-p> (suc zero) r1 (suc r2) {i} pr2 prn = ≤-abs (≤-remove-+ {r1} (≤-down2 prn))
-canonize-p> (suc (suc zero)) (suc r1) (suc zero) {i} pr2 (s≤s (s≤s prn)) = ≤-abs (≤-remove-+ {r1} prn)
-canonize-p> (suc (suc zero)) (suc r1) (suc (suc zero)) {i} pr2 (s≤s (s≤s prn)) = ≤-abs (≤-remove-+ {r1} prn)
 -- now, induction
 -- base case on r1 and r2
 canonize-p> (suc (suc n)) zero (suc r2) {i} pr2 prn {pinr} rewrite pinr = -- induction on r2
@@ -221,14 +141,6 @@ canonize-p> (suc (suc n)) (suc r1) (suc r2) {i} pr2 prn {pinr} = -- induction on
          i ∷ (1 + n) ∷ n ∷ (n ↓ (r1 + (1 + r2)))
        ≃∎
 
--- add-lemma : {i r : ℕ} -> suc (i + 1 + r) ≡ suc (suc (i + r))
--- add-lemma {i} {r} =
---   begin
---     suc (i + 1 + r)
---   ≡⟨ cong (λ x -> suc x) (+-three-assoc {i} {1} {r}) ⟩
---     suc (suc (i + r))
---   ∎
-
 canonize-p≡ : (n r i : ℕ)
               -> (0 < n)
               -> (r < n)
@@ -247,91 +159,3 @@ canonize-p≡ (suc n) r i pn prn pirn =
                     i
                   ∎
   in refl≡ (subst (λ k -> ((suc n) ↓ r) ++ [ k ] ≡ ((suc n) ↓ suc r))  i=n-r-1 tt)
-
-
-F-canonize-p> : (n r i : ℕ)
-                -> (0 < n)
-                -> (r ≤ n)
-                -> ((suc i) < n)
-                -> (n < (suc i) + r)
-                -> ((n ↓ r) ++ [ suc i ]) ≃ (i ∷ n ↓ r)
--- r ≥ 2
-F-canonize-p> (suc n) zero i pn prn (s≤s pin) (s≤s pirn) =
-  let tt = begin-≤
-             suc (suc n)
-           ≤⟨ s≤s pirn ⟩
-             suc (i + zero)
-           ≤⟨ s≤s (≤-reflexive (+-comm i zero)) ⟩
-             suc i
-           ≤⟨ pin ⟩
-             n
-           ≤⟨ ≤-up (≤-reflexive refl) ⟩
-             suc n
-           ≤∎
-  in  ⊥-elim (1+n≰n tt)
--- r ≥ 2
-F-canonize-p> (suc n) (suc zero) i pn prn (s≤s pin) (s≤s pirn) =
-  let tt = begin-≤
-             suc (suc n)
-           ≤⟨ s≤s pirn ⟩
-             suc (i + 1)
-           ≤⟨ s≤s (≤-reflexive (+-comm i 1)) ⟩
-             suc (suc i)
-           ≤⟨ s≤s pin ⟩
-             suc n
-           ≤∎
-  in  ⊥-elim (1+n≰n tt)
-
-F-canonize-p> (suc n) (suc (suc r)) i pn prn (s≤s pin) pirn =
-  let lmm : suc (n ∸ suc i) ≤ n
-      lmm = ∸-implies-≤ {r = i} (≡-sym (∸-up pin))
-      lm2 =
-        begin
-          i + suc (n ∸ suc i)
-        ≡⟨ +-three-assoc {i} {1} {n ∸ suc i} ⟩
-          suc i + (n ∸ suc i)
-        ≡⟨ +-comm (suc i) (n ∸ suc i) ⟩
-          (n ∸ suc i) + suc i
-        ≡⟨ minus-plus {n} {suc i} {pin}⟩
-          n
-        ∎
-      pin : i ≡ n ∸ suc (n ∸ suc i)
-      pin = introduce-∸ lmm lm2
-
-      pirn' : 2 ≤ i + r ∸ suc n
-      pirn' = introduce-∸-≤ {2} {i + r} {suc n} {!!}
-        (begin-≤
-          {!!}
-        ≤⟨ {!!} ⟩
-          {!!}
-        ≤⟨ {!!} ⟩
-          {!!}
-        ≤∎)
-      tt = canonize-p> (suc n) ((suc n) ∸ (1 + (suc i)) ) ((i + r) ∸ (suc n)) {i} {!!} {!   !} {pin}
-  in {!  tt !}
-
-F-canonize-p≡ : (n r i : ℕ)
-                -> (0 < n)
-                -> (r < n)
-                -> ((suc i) < n)
-                -> (((suc i) + 1 + r) ≡ n)
-                -> ((n ↓ r) ++ [ suc i ]) ≃ (n ↓ (1 + r))
-F-canonize-p≡ n r i pn prn pin pirn =
-  let tx = begin
-             (suc i) + suc r
-           ≡⟨ cong suc (≡-sym (+-assoc i 1 r)) ⟩
-             suc ((i + 1) + r)
-           ≡⟨ pirn ⟩
-             n
-           ∎
-  in  canonize-p≡ n r (suc i) pn prn (introduce-∸ prn tx)
-
-F-canonize-p< : (n r i : ℕ)
-                -> (0 < n)
-                -> (r ≤ n)
-                -> ((suc i) < n)
-                -> ((suc i) + (1 + r) < n)
-                -> ((n ↓ r) ++ [ suc i ]) ≃ ((suc i) ∷ n ↓ r)
-F-canonize-p< (suc n) r i pn prn (s≤s pin) pirn = {!!} --
---  let xx = {!!}
---  in  canonize-p< n r ( n ∸ (2 + i + r)) {suc i} {!!} {!!} {{!!}}
