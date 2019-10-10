@@ -55,3 +55,6 @@ postulate
 ∸-up {suc zero} {suc r} (s≤s p) = ≤-abs p
 ∸-up {suc (suc n)} {zero} p = refl
 ∸-up {suc (suc n)} {suc r} (s≤s p) = ∸-up {suc n} {r} p
+
+postulate
+    nowhere : {n k : ℕ} -> (¬ (n < k)) -> (¬ (n ≡ k)) -> (¬ (n ≡ 1 + k)) -> (¬ (1 + k < n)) -> ⊥
