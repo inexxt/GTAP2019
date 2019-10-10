@@ -24,15 +24,6 @@ variable
 
 open ≃-Reasoning
 
--- canonize-p>-lemma : (n r i : ℕ)
---                     -> (0 < n)
---                     -> (r ≤ n)
---                     -> ((suc i) < n)
---                     -> (n < (suc i) + r)
---                     -> ((suc n) ↓ r) ≡ ((suc n ↓ (n ∸ suc i)) ++ (suc (suc i)) ↓ (suc i ∸ (n ∸ r)))
-
--- canonize-p>-lemma n r i pn prn pin pirn = {!!}
-
 F-canonize-p> : (n r i : ℕ)
                 -> (0 < n)
                 -> (r ≤ n)
@@ -76,11 +67,11 @@ F-canonize-p> (suc n) (suc (suc r)) i pn (s≤s prn) (s≤s pin) (s≤s pirn) =
 
       call = canonize-p> (suc n) r1 r2 {i} pr2 (s≤s pirn') {pin'}
 
-      left : (n ∷ (n ↓ suc r) ++ [ suc i ]) ≡ ((suc n ↓ (n ∸ suc i)) ++ suc i ∷ (suc i ↓ (suc i ∸ (n ∸ suc r)))) ++ suc i ∷ []
-      left = cong (λ l -> l ++ [ suc i ]) {!!}
-
       lemma : suc r ≡ ((n ∸ suc i) + (suc i ∸ (n ∸ suc r)))
       lemma = {!!}
+
+      left : n ∷ (n ↓ suc r) ++ suc i ∷ [] ≡ n ∷ (n ↓ (n ∸ suc i + (suc i ∸ (n ∸ suc r)))) ++ suc i ∷ []
+      left = cong (λ l -> n ∷ l ++ [ suc i ]) (cong (λ k -> n ↓ k) lemma)
 
       right : (i ∷ n ∷ (n ↓ suc r)) ≡ (i ∷ n ∷ (n ↓ (n ∸ suc i + (suc i ∸ (n ∸ suc r)))))
       right = cong (λ l -> i ∷ n ∷ l) (cong (λ x -> n ↓ x) lemma)
@@ -145,9 +136,29 @@ F-canonize-p≡ n r i pn prn pin pirn =
 F-canonize-p< : (n r i : ℕ)
                 -> (0 < n)
                 -> (r ≤ n)
-                -> ((suc i) < n)
-                -> ((suc i) + (1 + r) < n)
-                -> ((n ↓ r) ++ [ suc i ]) ≃ ((suc i) ∷ n ↓ r)
-F-canonize-p< (suc n) r i pn prn (s≤s pin) pirn = {!!} --
---  let xx = {!!}
---  in  canonize-p< n r ( n ∸ (2 + i + r)) {suc i} {!!} {!!} {{!!}}
+                -> ((1 + i + r) < n)
+                -> ((n ↓ r) ++ [ i ]) ≃ (i ∷ n ↓ r)
+F-canonize-p< (suc n) zero i pn prn (s≤s pin) = refl
+F-canonize-p< (suc zero) (suc r) zero pn prn (s≤s pin) = refl
+F-canonize-p< (suc (suc n)) (suc r) i (s≤s pn) (s≤s prn) (s≤s pin) =
+  let 1+i+r≤n : 1 + i + r ≤ n
+      1+i+r≤n =
+        begin-≤
+          suc (i + r)
+        ≤⟨ ≤-reflexive (≡-sym (+-three-assoc {i} {1} {r})) ⟩
+          i + suc r
+        ≤⟨ ≤-down2 pin ⟩
+          n
+        ≤∎
+      rec = F-canonize-p< (suc n) r i (s≤s z≤n) prn (s≤s 1+i+r≤n)
+
+      1+i≤n : 1 + i ≤ n
+      1+i≤n = ≤-down-+ 1+i+r≤n
+  in
+    ≃begin
+      suc n ∷ (suc n ↓ r) ++ i ∷ []
+    ≃⟨ prepend (suc n) rec ⟩
+      suc n ∷ i ∷ (suc n ↓ r)
+    ≃⟨ ++-respects (swap (s≤s 1+i≤n)) refl ⟩
+      i ∷ suc n ∷ (suc n ↓ r)
+    ≃∎

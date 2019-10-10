@@ -9,6 +9,7 @@ open import Data.Nat.Properties
 open import Data.Product using (∃; Σ; _×_; _,_; _,′_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
+open import Function
 
 open import General
 open import Relation.Nullary
@@ -90,17 +91,17 @@ canonize-swap (suc n) (suc r) i prn pni =
        ≃∎
 
 -- REMEMBER - i is (suc i)
-canonize-p> : (n r1 r2 : ℕ)
+canonize-p>' : (n r1 r2 : ℕ)
               -> {i : ℕ}
               -> ((suc zero) ≤ r2)
               -> (r1 + r2 < n)
               -> {i ≡ n ∸ (2 + r1)}
               -> (((n ↓ r1) ++ [ 1 + i ] ++ (1 + i) ↓ r2) ++ [ 1 + i ]) ≃ (i ∷ (n ↓ (1 + r1 + r2)))
 -- again, weeding out small, impossible case
-canonize-p> (suc zero) r1 (suc r2) {i} pr2 prn = ≤-abs (≤-remove-+ {r1} (≤-down2 prn))
+canonize-p>' (suc zero) r1 (suc r2) {i} pr2 prn = ≤-abs (≤-remove-+ {r1} (≤-down2 prn))
 -- now, induction
 -- base case on r1 and r2
-canonize-p> (suc (suc n)) zero (suc r2) {i} pr2 prn {pinr} rewrite pinr = -- induction on r2
+canonize-p>' (suc (suc n)) zero (suc r2) {i} pr2 prn {pinr} rewrite pinr = -- induction on r2
   let rec = canonize-swap n r2 (1 + n) (≤-down2 (≤-down2 prn)) (s≤s (≤-reflexive refl))
   in  ≃begin
          (1 + n) ∷ n ∷ (n ↓ r2) ++ (1 + n) ∷ []
@@ -109,8 +110,8 @@ canonize-p> (suc (suc n)) zero (suc r2) {i} pr2 prn {pinr} rewrite pinr = -- ind
        ≃⟨ ++-respects (comm braid) refl  ⟩
          n ∷ suc n ∷ n ∷ (n ↓ r2)
        ≃∎
-canonize-p> (suc (suc n)) (suc r1) (suc r2) {i} pr2 prn {pinr} = -- induction on r1
-  let rec = canonize-p> (suc n) r1 (suc r2) {i} pr2 (≤-down2 prn) {pinr}
+canonize-p>' (suc (suc n)) (suc r1) (suc r2) {i} pr2 prn {pinr} = -- induction on r1
+  let rec = canonize-p>' (suc n) r1 (suc r2) {i} pr2 (≤-down2 prn) {pinr}
       1+r1≤n : suc r1 ≤ n
       1+r1≤n = ≤-down2 (≤-down2 (
         begin-≤
@@ -176,3 +177,19 @@ canonize-p>-lemma (suc (suc n)) zero r2 {i} pr2 prn {pirn} rewrite pirn = refl
 canonize-p>-lemma (suc (suc n)) (suc r1) r2 {i} pr2 (s≤s prn) {pirn} =
   let rec =  canonize-p>-lemma (suc n) r1 r2 {i} pr2 prn {pirn}
   in  cong (λ l -> suc n ∷ l) rec
+
+
+canonize-p> : (n r1 r2 : ℕ)
+              -> {i : ℕ}
+              -> ((suc zero) ≤ r2)
+              -> (r1 + r2 < n)
+              -> {i ≡ n ∸ (2 + r1)}
+              -> ((n ↓ suc (r1 + r2)) ++ [ suc i ]) ≃ (i ∷ (n ↓ (1 + r1 + r2)))
+canonize-p> n r1 r2 {i} pr2 prn {pirn} =
+  ≃begin
+    (n ↓ suc (r1 + r2)) ++ suc i ∷ []
+  ≃⟨ refl≡ (cong (λ l -> l ++ [ suc i ]) (canonize-p>-lemma n r1 r2 {i} pr2 prn {pirn})) ⟩
+    ((n ↓ r1) ++ suc i ∷ (suc i ↓ r2)) ++ suc i ∷ []
+  ≃⟨ canonize-p>' n r1 r2 {i} pr2 prn {pirn} ⟩
+    i ∷ (n ↓ suc (r1 + r2))
+  ≃∎
