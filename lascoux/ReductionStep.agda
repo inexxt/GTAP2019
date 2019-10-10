@@ -85,17 +85,25 @@ n<i+r w w' n r i pin prn q =
 all-reduce : (w : List ℕ)
              -> (w' : List ℕ)
              -> (n : ℕ)
+             -> (zero < n)
              -> (r : ℕ)
-             -> (r ≤ n)
+             -> (r ≤ (suc n))
              -> (ww : n >> w)
              -> (ww' : (suc n) >> w')
-             -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ (n ↓ r')) ≃ (w ++ (n ↓ r) ++ w'))
-all-reduce w [] n r prn ww [] = (w , r) , (ww , refl≡ (≡-sym (++-unit2 w (n ↓ r))) )
-all-reduce w (0 ∷ w') n r prn ww (.0 :⟨ p ⟩: ww') = {!!}
-all-reduce w ((suc i) ∷ w') n r prn ww (.(suc i) :⟨ (s≤s p) ⟩: ww') with (n <? (suc i) + r) with (n ≟ (suc i) + r) with (n ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? n)
+             -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ ((suc n) ↓ r')) ≃ (w ++ ((suc n) ↓ r) ++ w'))
+all-reduce w [] n pn r prn ww [] = (w , r) , (ww , refl≡ (≡-sym (++-unit2 w ((suc n) ↓ r))) ) -- base of induction
+all-reduce w (i ∷ w') (suc n) pn zero prn ww (.i :⟨ p ⟩: ww') with i ≟ (suc n)
+... | yes q = -- the case when there's no n, but it appears
+  let (w'' , r') , (ww'' , pp) = all-reduce w  w' (suc n) pn (suc zero) (s≤s z≤n) ww ww'
+  in (w'' , r') , ww'' , trans pp (refl≡ (cong (λ k -> w ++ k ∷ w') (≡-sym q)) )
+... | no q = -- the case when there's no n
+  let (w'' , r') , (ww'' , pp) = all-reduce (w ++ [ i ])  w' (suc n) pn zero prn ((>>-++ ww (i :⟨ (≤-≠-≤ p λ x → q (≡-down2 _ _ x)) ⟩: []))) ww'
+  in (w'' , r') , ww'' , trans pp (refl≡ ( ++-assoc w (i ∷ []) w'))
+all-reduce w (0 ∷ w') n pn r prn ww (.0 :⟨ p ⟩: ww') = {!!}
+all-reduce w ((suc i) ∷ w') n pn r prn ww (.(suc i) :⟨ p ⟩: ww') with ((suc n) <? (suc i) + r) with ((suc n) ≟ (suc i) + r) with ((suc n) ≟ (suc i) + (1 + r)) with ((suc i) + (1 + r) <? (suc n))
 ... | yes q | _ | _ | _ =
-  let (w'' , r') , (ww'' , pp)  = all-reduce (w ++ [ i ]) w' n r prn (>>-++ ww (i :⟨ p ⟩: [])) ww'
-  in (w'' , r') , (ww'' , trans pp (n<i+r w w' n r i {!!} {!!} q)) -- p>
+  let (w'' , r') , (ww'' , pp) = all-reduce (w ++ [ i ]) w' n pn r prn (>>-++ ww (i :⟨ ≤-down2 p ⟩: [])) ww'
+  in (w'' , r') , (ww'' , trans pp (n<i+r w w' (suc n) r i (s≤s (≤-down2 p)) prn q)) -- p>
 ... | _ | yes q | _ | _ = {!!} -- reduction
 ... | _ | _ | yes q | _ = {!!} -- p1
 ... | _ | _ | _ | yes q = {!!} -- p<
