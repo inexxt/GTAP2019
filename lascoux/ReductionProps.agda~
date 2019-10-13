@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 module Reduction where
 
 open import Data.List
@@ -17,7 +19,7 @@ open import Coxeter hiding (n; l)
 open import Arithmetic hiding (n)
 open import Canonization hiding (n; l)
 open import CanonizationInterface hiding (n; l)
-open import ReductionStep using (all-reduce; _>>_; >>-++)
+open import ReductionStep using (all-reduce; _>>_)
 
 open _≃_
 open ≃-Reasoning

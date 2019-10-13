@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 module ReductionStep where
 
 open import Data.List
@@ -36,7 +34,6 @@ data _>>_ : ℕ -> List ℕ -> Set where
 >>-++ : {l1 l2 : List ℕ} -> n >> l1 -> n >> l2 -> n >> (l1 ++ l2)
 >>-++ {n} {[]} {l2} ll1 ll2 = ll2
 >>-++ {n} {x ∷ l1} {l2} (.x :⟨ p ⟩: ll1) ll2 = x :⟨ p ⟩: (>>-++ ll1 ll2)
-
 
 all-reduce : {w : List ℕ}
            -> {w' : List ℕ}
