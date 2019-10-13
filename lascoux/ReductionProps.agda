@@ -41,29 +41,50 @@ variable
 >>-↓ {n} {zero} {suc r} kn = []
 >>-↓ {n} {suc k} {suc r} kn = k :⟨ kn ⟩: (>>-↓ (≤-down kn))
 
->>-lift : {m : ℕ} -> (n ≤ m) -> (n >> l) -> (m >> l)
->>-lift {m = m} nm [] = []
->>-lift {m = m} nm (k :⟨ p ⟩: l') = k :⟨ (≤-trans p nm) ⟩: >>-lift nm l'
+-- >>-lift : {m : ℕ} -> (n ≤ m) -> (n >> l) -> (m >> l)
+-- >>-lift {m = m} nm [] = []
+-- >>-lift {m = m} nm (k :⟨ p ⟩: l') = k :⟨ (≤-trans p nm) ⟩: >>-lift nm l'
 
-canonical-lift : {m : ℕ} -> (n ≤ m) -> (cl : Canonical n) -> Σ (Canonical m) (λ cll -> immersion {n} cl ≡ immersion {m} cll)
-canonical-lift {.0} nm CanZ = ?
-canonical-lift {m} nm (CanS cl x x₁) = ?
+>>-suc : (n >> l) -> ((suc n) >> l)
+>>-suc  [] = []
+>>-suc  (k :⟨ p ⟩: l') = k :⟨ ≤-up p ⟩: >>-suc l'
 
-immersion->> : {n : ℕ} -> Canonical n -> ∃ (λ l -> n >> l)
+++-≡2 : {la lb lc ld : List ℕ} -> (la ≡ lb) -> (lc ≡ ld) -> (la ++ lc) ≡ (lb ++ ld)
+++-≡2 {la} {lb} {lc} {ld} pab pcd = {!!}
+
+-- canonical-lift : {m : ℕ} -> (n ≤ m) -> (cl : Canonical n) -> Σ (Canonical m) (λ cll -> immersion {n} cl ≡ immersion {m} cll)
+-- canonical-lift {n} {m} nm cl = {!!}
+
+canonical-suc : (cl : Canonical n) -> Σ (Canonical (suc n)) (λ cll -> immersion {n} cl ≡ immersion {suc n} cll)
+canonical-suc {n} cl = (CanS cl {r = 0} z≤n) , ≡-sym ++-unit
+
+immersion->> : {n : ℕ} -> Canonical n -> ∃ (λ l -> (suc n) >> l)
 immersion->> {.0} CanZ = [] , []
-immersion->> {n} (CanS {n'} cl {k} {r} nk rk) =
+immersion->> {n} (CanS {n'} cl {r} rn) =
   let (l , p) = immersion->> {n'} cl
-  in  l ++ (k ↓ r) , >>-++ (>>-lift (≤-down nk) p) (>>-↓ (≤-reflexive refl))
+  in  l ++ ((suc n) ↓ r) , >>-++ (>>-suc p) (>>-↓ (≤-reflexive refl))
+
+postulate
+  ≡-canonical : {cl1 cl2 : Canonical n} -> {r1 r2 : ℕ} -> (rn1 : r1 ≤ (suc n)) -> (rn2 : r2 ≤ (suc n)) -> (cl1 ≡ cl2) -> (r1 ≡ r2) -> (CanS cl1 rn1) ≡ (CanS cl2 rn2)
+
 
 only-one-canonical : (cl1 cl2 : Canonical n) -> (immersion {n} cl1) ≃ (immersion {n} cl2) -> cl1 ≡ cl2
 only-one-canonical {.0} CanZ CanZ pr = refl
-only-one-canonical {n} (CanS cl1 x x₁) (CanS cl2 x₂ x₃) pr =
-  let n'' = {!!}
-      rec = only-one-canonical {n''} {!!} {!!} pr
-  in  {!!}
+only-one-canonical {.(suc n1)} (CanS {n1} cl1 {zero} rn1) (CanS {.n1} cl2 {zero} rn2) pr =
+  let rec = only-one-canonical cl1 cl2 (trans (refl≡ (≡-sym ++-unit)) (trans pr (refl≡ ++-unit)))
+  in  ≡-canonical rn1 rn2 rec refl
+only-one-canonical {.(suc n1)} (CanS {n1} cl1 {zero} rn1) (CanS {.n1} cl2 {suc r2} rn2) pr = {!!} -- contradiction
+only-one-canonical {.(suc n1)} (CanS {n1} cl1 {suc r1} rn1) (CanS {.n1} cl2 {zero} rn2) pr = {!!} -- contradiction
+only-one-canonical {.(suc n1)} (CanS {n1} cl1 {suc r1} rn1) (CanS {.n1} cl2 {suc r2} rn2) pr =
+  let rec = only-one-canonical cl1 cl2 {!!}
+  in  ≡-canonical rn1 rn2 rec {!!}
 
-identity-on-canonical-forms : (cl : Canonical n) -> (proj₁ (canonical-form-lemma (proj₂ (immersion->> {n} cl)))) ≡ cl
-identity-on-canonical-forms {.0} CanZ = refl
-identity-on-canonical-forms {n} (CanS {n'} cl x x₁) =
-  let rec = identity-on-canonical-forms {n'} cl
-  in  {!!}
+  -- let n'' = {!!}
+  --     rec = only-one-canonical {n''} {!!} {!!} pr
+  -- in  {!!}
+
+-- identity-on-canonical-forms : (cl : Canonical n) -> (proj₁ (canonical-form-lemma (proj₂ (immersion->> {n} cl)))) ≡ cl
+-- identity-on-canonical-forms {.0} CanZ = refl
+-- identity-on-canonical-forms {n} (CanS {n'} cl x) =
+--   let rec = identity-on-canonical-forms {n'} cl
+--   in  {!!}

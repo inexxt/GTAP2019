@@ -30,11 +30,11 @@ variable
 
 data Canonical : (n : ℕ) -> Set where
   CanZ : Canonical 0
-  CanS : {n : ℕ} -> (l : Canonical n) -> {k r : ℕ} -> (n < k) -> (r ≤ k) -> Canonical k
+  CanS : {n : ℕ} -> (l : Canonical n) -> {r : ℕ} -> (r ≤ suc n) -> Canonical (suc n)
 
 immersion : {n : ℕ} -> Canonical n -> List ℕ
 immersion {zero} CanZ = []
-immersion {suc n} (CanS l {k} {r} n<k r≤k) = (immersion l) ++ (k ↓ r)
+immersion {suc n} (CanS l {r} r≤1+n) = (immersion l) ++ ((suc n) ↓ r)
 
 step : (0 < n) -> (ll : (suc n) >> l) -> Σ (List ℕ × ℕ) (λ (l' , r) -> (n >> l') × (r ≤ (suc n)) × (l' ++ ((suc n) ↓ r)) ≃ l)
 step {n} {l} pn ll = all-reduce {[]} {l} {n} pn {0} z≤n [] ll
@@ -42,8 +42,8 @@ step {n} {l} pn ll = all-reduce {[]} {l} {n} pn {0} z≤n [] ll
 open import Data.Fin
 
 canonical-form-zeros : (1 >> l) -> ∃ (λ cl -> l ≃ (immersion {1} cl))
-canonical-form-zeros {[]} [] = (CanS CanZ (s≤s z≤n) z≤n) , refl
-canonical-form-zeros {.0 ∷ []} (.0 :⟨ s≤s z≤n ⟩: []) = CanS CanZ {k = 1} {r = 1} (s≤s z≤n) (s≤s z≤n) , refl
+canonical-form-zeros {[]} [] = CanS CanZ z≤n , refl
+canonical-form-zeros {.0 ∷ []} (.0 :⟨ s≤s z≤n ⟩: []) = CanS CanZ (s≤s z≤n) , refl
 canonical-form-zeros {.0 ∷ .0 ∷ l} (.0 :⟨ s≤s z≤n ⟩: (.0 :⟨ s≤s z≤n ⟩: l')) =
   let (cl , p) = canonical-form-zeros l'
   in  cl , ++-respects cancel p
@@ -64,6 +64,6 @@ canonical-form-lemma {suc (suc n)} {l} l' =
         ≃⟨ ++-≃ pp refl ⟩
           immersion cl ++ suc (suc n) ↓ r
         ≃∎
-  in  CanS cl {suc (suc n)} {r} (s≤s (≤-reflexive refl)) pr , trans (comm p) lemma
+  in  CanS cl {r} pr , trans (comm p) lemma
 
 -- canonical-form-lemma-Free : (l : List ℕ) -> ∃ (λ n -> ∃ (λ cl -> l ≃ (immersion {n} cl)))
