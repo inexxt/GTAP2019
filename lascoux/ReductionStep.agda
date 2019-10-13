@@ -53,14 +53,19 @@ n=i+r   : {!   !}
 n=i+1+r : {!   !}
 
 n>i+1+r : {!   !}
-n<i+r   : {!!}
 
--- n<i+r : (w w' : List ℕ)
---         -> (n r i : ℕ)
---         -> (suc i < n)
---         -> (r ≤ n)
---         -> (n < (suc i) + r)
---         -> ((w ++ i ∷ []) ++ (n ↓ r) ++ w') ≃ (w ++ (n ↓ r) ++ suc i ∷ w')
+n<i+r : {w : List ℕ}
+        -> {w' : List ℕ}
+        -> {n : ℕ}
+        -> (zero < n)
+        -> {r : ℕ}
+        -> (r ≤ (suc n))
+        -> {i : ℕ}
+        -> (i < (suc n))
+        -> (ww : n >> w)
+        -> (ww' : (suc n) >> w')
+        -> ((suc n) < i + r)
+        -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ ((suc n) ↓ r')) ≃ (w ++ ((suc n) ↓ r) ++ (i ∷ w')))
 
 absurd-nowhere : {n r i : ℕ}
                  -> ¬ (n < i + r)
@@ -71,23 +76,27 @@ absurd-nowhere : {n r i : ℕ}
 n=i+1+r = {!!}
 n=i+r = {!!}
 n>i+1+r = {!!}
-n<i+r = {!!}
 
--- n<i+r w w' n r i pin prn q =
---   let lemma0 : ((i ∷ []) ++ (n ↓ r)) ≃ ((n ↓ r) ++ [ suc i ])
---       lemma0 = comm (F-canonize-p> n r i prn pin q) -- IMPORTANT : r has to be large enough for this to work, probably > 2
---       in
---         ≃begin
---           ((w ++ i ∷ []) ++ (n ↓ r) ++ w')
---         ≃⟨ refl≡ (++-assoc w (i ∷ []) _)  ⟩
---           (w ++ (i ∷ [] ++ (n ↓ r) ++ w'))
---         ≃⟨ refl ⟩
---           (w ++ (i ∷ [] ++ (n ↓ r)) ++ w')
---         ≃⟨ ++-≃ refl (++-≃ lemma0 refl) ⟩
---           (w ++ ((n ↓ r) ++ [ suc i ]) ++ w')
---         ≃⟨ ++-≃ {w} {w} refl (refl≡ (++-assoc (n ↓ r) _ _)) ⟩
---           (w ++ (n ↓ r) ++ suc i ∷ w')
---         ≃∎
+n<i+r {w} {w'} {n} pn {suc r} (s≤s prn) {zero} pi ww ww' (s≤s q) = ⊥-elim (1+n≰n (≤-trans q prn))
+n<i+r {w} {w'} {n} pn {r} prn {suc i} pi ww ww' q =
+  let lemma0 : ((i ∷ []) ++ ((suc n) ↓ r)) ≃ (((suc n) ↓ r) ++ [ suc i ])
+      lemma0 = comm (F-canonize-p> (suc n) r i prn pi q)
+
+      lemma1 =
+         ≃begin
+          ((w ++ i ∷ []) ++ ((suc n) ↓ r) ++ w')
+        ≃⟨ refl≡ (++-assoc w (i ∷ []) _)  ⟩
+          (w ++ (i ∷ [] ++ ((suc n) ↓ r) ++ w'))
+        ≃⟨ refl ⟩
+          (w ++ (i ∷ [] ++ ((suc n) ↓ r)) ++ w')
+        ≃⟨ ++-≃ refl (++-≃ lemma0 refl) ⟩
+          (w ++ (((suc n) ↓ r) ++ [ suc i ]) ++ w')
+        ≃⟨ ++-≃ {w} {w} refl (refl≡ (++-assoc ((suc n) ↓ r) _ _)) ⟩
+          (w ++ ((suc n) ↓ r) ++ suc i ∷ w')
+        ≃∎
+
+      (w'' , r') , (ww'' , pp) = all-reduce {w ++ [ i ]} {w'} {n} pn {r} prn (>>-++ ww (i :⟨ ≤-down2 pi ⟩: [])) ww'
+  in  (w'' , r') , (ww'' , trans pp lemma1)
 
 absurd-nowhere {n} {r} {i} p1 p2 p3 p4 =
   let lemma : i + suc r ≡ suc i + r
@@ -100,8 +109,8 @@ absurd-nowhere {n} {r} {i} p1 p2 p3 p4 =
 
 
 all-reduce {w} {[]} {n} pn {r} prn ww [] = (w , r) , (ww , refl≡ (≡-sym (++-unit2 w ((suc n) ↓ r))) ) -- base of induction
-all-reduce {w} {i ∷ w'} {suc n} pn {r} prn ww (.i :⟨ p ⟩: ww') with ((suc n) <? i + r) with ((suc n) ≟ i + r) with ((suc n) ≟ i + (1 + r)) with (i + (1 + r) <? (suc n))
-... | yes q | _ | _ | _ =  n<i+r {w} {i ∷ w'} {suc n} pn {r} prn ww (.i :⟨ p ⟩: ww') q
+all-reduce {w} {i ∷ w'} {n} pn {r} prn ww (.i :⟨ pi ⟩: ww') with ((suc n) <? i + r) with ((suc n) ≟ i + r) with ((suc n) ≟ i + (1 + r)) with (i + (1 + r) <? (suc n))
+... | yes q | _ | _ | _ = n<i+r {w} {w'} {n} pn {r} prn {i} pi ww ww' q
 ... | _ | yes q | _ | _ = {!   !}
 ... | _ | _ | yes q | _ = {!   !}
 ... | _ | _ | _ | yes q = {!   !}
