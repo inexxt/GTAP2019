@@ -56,7 +56,14 @@ open ≃-Reasoning
 
 postulate
     ++-unit : l ++ [] ≡ l
+    ++-≃ : {l l' w w' : List ℕ} -> (l ≃ l') -> (w ≃ w') -> (l ++ w) ≃ (l' ++ w')
 
 
 refl≡ : {l l' : List ℕ} -> (l ≡ l') -> l ≃ l'
 refl≡ refl = refl
+
+
+++-unit2 : (l1 l2 : List ℕ) -> (l1 ++ (l2 ++ [])) ≡ (l1 ++ l2)
+++-unit2 l1 l2 = let xx = ++-assoc l1 l2 []
+                     yy = ++-unit {l1 ++ l2}
+                 in ≡-trans (≡-sym xx) yy

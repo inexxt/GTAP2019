@@ -58,3 +58,7 @@ postulate
 
 postulate
     nowhere : {n k : ℕ} -> (¬ (n < k)) -> (¬ (n ≡ k)) -> (¬ (n ≡ 1 + k)) -> (¬ (1 + k < n)) -> ⊥
+
+≤-≠-≤ : {n m : ℕ} -> (n ≤ suc m) -> ¬ (n ≡ suc m) -> (n ≤ m)
+≤-≠-≤ z≤n q = z≤n
+≤-≠-≤ (s≤s p) q = {!!}
