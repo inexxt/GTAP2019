@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 module Canonization where
 
 open import Data.List
@@ -42,37 +40,6 @@ nnl=l : {l : List ℕ} -> {n : ℕ} -> (n ∷ n ∷ l) ≃ l
 nnl=l = ++-respects cancel refl
 l++nn=l : {l : List ℕ} -> {n : ℕ} -> (l ++ (n ∷ n ∷ [])) ≃ l
 l++nn=l = trans (++-respects refl cancel) (refl≡ ++-unit)
-
--- canonize-p< : (n r1 r2 : ℕ)
---               -> {i : ℕ}
---               -> ((suc zero) ≤ r2)
---               -> ((r1 + r2) < n)
---               -> {i ≡ n ∸ (2 + r1 + r2)}
---               -> ((n ↓ r1) ++ [ i ]) ≃ (i ∷ (n ↓ r1))
--- -- unfortunately, we have to weed out some impossible cases
--- canonize-p< (suc n) zero r2 {i} pr2 pinr = refl
--- canonize-p< (suc zero) (suc zero) r2 {zero} pr2 pinr = refl
--- canonize-p< (suc zero) (suc (suc r1)) r2 {zero} pr2 pinr = refl
--- canonize-p< (suc (suc zero)) (suc zero) (suc r2) {i} pr2 (s≤s (s≤s ())) {pinr}
--- canonize-p< (suc (suc zero)) (suc (suc r1)) (suc r2) {i} pr2 (s≤s (s≤s prn)) {pinr} = ≤-abs prn
--- canonize-p< (suc (suc (suc zero))) (suc (suc r1)) (suc r2) {i} pr2 (s≤s (s≤s (s≤s prn))) {pinr} = ≤-abs (≤-remove-+ prn)
--- -- and now the induction
--- canonize-p< (suc (suc (suc zero))) (suc zero) (suc r2) {i} pr2 prn {pinr} rewrite pinr = swap (s≤s (s≤s z≤n)) -- base case
--- canonize-p< (suc (suc (suc (suc n)))) (suc r1) (suc r2) {i} pr2 (s≤s prn) {pinr} = -- inductive case
---   let rec = prepend (3 + n) (canonize-p< (suc (suc (suc n))) r1 (suc r2) {i} pr2 prn {pinr})
-
---       i≤1+n : i ≤ (suc n)
---       i≤1+n = ∸-implies-≤ {_} {_} {r1 + suc r2} pinr
-
---       lemma =
---         ≃begin
---           ((3 + n) ∷ ((3 + n) ↓ r1) ++ [ i ])
---         ≃⟨ rec ⟩
---           (3 + n) ∷ i ∷ ((3 + n) ↓ r1)
---         ≃⟨ ++-respects (swap (s≤s (s≤s i≤1+n))) refl ⟩
---           (i ∷ 3 + n ∷ (3 + n) ↓ r1)
---         ≃∎
---   in lemma
 
 canonize-swap : (n r i : ℕ)
                 -> (r ≤ n)

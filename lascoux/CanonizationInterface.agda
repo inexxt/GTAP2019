@@ -1,4 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 module CanonizationInterface where
 
 open import Data.List
@@ -67,8 +66,36 @@ F-canonize-p> (suc n) (suc (suc r)) i (s≤s prn) (s≤s pin) (s≤s pirn) =
 
       call = canonize-p> (suc n) r1 r2 {i} pr2 (s≤s pirn') {pin'}
 
+      n<1+i+1+r : n ≤ suc (i + suc r)
+      n<1+i+1+r = ≤-down (≤-trans pirn (≤-reflexive (+-three-assoc {i} {1} {suc r})))
+
       lemma : suc r ≡ ((n ∸ suc i) + (suc i ∸ (n ∸ suc r)))
-      lemma = {!!}
+      lemma =
+        begin
+          suc r
+        ≡⟨ +-comm zero (suc r) ⟩
+          suc r + zero
+        ≡⟨ cong (λ x -> suc r + x) (≡-sym (∸-to-zero (refl {x = suc i}))) ⟩
+          (suc r) + (suc i ∸ suc i)
+        ≡⟨ ≡-sym (+-∸-assoc (suc r) {suc i} {suc i} (≤-reflexive refl)) ⟩
+          ((suc r) + suc i) ∸ suc i
+        ≡⟨ cong (λ x → x ∸ suc i) (+-comm (suc r) (suc i)) ⟩
+          (suc i + suc r) ∸ suc i
+        ≡⟨ cong (λ x -> x ∸ suc i) (+-comm zero (suc (i + suc r))) ⟩
+          ((suc i + suc r) + zero) ∸ suc i
+        ≡⟨ cong (λ x -> ((suc i + suc r) + x) ∸ suc i) (≡-sym (∸-to-zero (refl {x = n}))) ⟩
+          ((suc i + suc r) + (n ∸ n)) ∸ suc i
+        ≡⟨ cong (λ x -> x ∸ suc i) (≡-sym (+-∸-assoc (suc (i + suc r)) {n} {n} (≤-reflexive refl))) ⟩
+          (((suc i + suc r) + n) ∸ n) ∸ suc i
+        ≡⟨ cong (λ x → x ∸ n ∸ suc i) (+-comm (suc (i + suc r)) n) ⟩
+          ((n + (suc i + suc r)) ∸ n) ∸ suc i
+        ≡⟨ cong (λ x -> x ∸ suc i) (+-∸-assoc n {suc (i + suc r)} {n} n<1+i+1+r) ⟩
+          (n + ((suc i + suc r) ∸ n)) ∸ suc i
+        ≡⟨ +-∸-comm {n} (suc (i + suc r) ∸ n) {suc i} pin ⟩
+          (n ∸ suc i) + ((suc i + suc r) ∸ n)
+        ≡⟨ cong (λ x -> n ∸ suc i + x) (≡-sym (∸-∸-+ prn n<1+i+1+r)) ⟩
+          n ∸ suc i + (suc i ∸ (n ∸ suc r))
+        ∎
 
       left : n ∷ (n ↓ suc r) ++ suc i ∷ [] ≡ n ∷ (n ↓ (n ∸ suc i + (suc i ∸ (n ∸ suc r)))) ++ suc i ∷ []
       left = cong (λ l -> n ∷ l ++ [ suc i ]) (cong (λ k -> n ↓ k) lemma)
@@ -87,8 +114,7 @@ F-canonize-p> (suc n) (suc (suc r)) i (s≤s prn) (s≤s pin) (s≤s pirn) =
       i ∷ n ∷ (n ↓ suc r)
     ≃∎
 
-
--- TODO move the impossible cases up
+-- now, the small, impossible cases up
 -- r ≤ 1
 F-canonize-p> (suc n) zero i prn (s≤s pin) (s≤s pirn) =
   let tt = begin-≤
@@ -131,6 +157,7 @@ F-canonize-p≡ n r i prn pirn =
            ∎
   in  canonize-p≡ n r i prn (introduce-∸ prn tx)
 
+
 F-canonize-p< : (n r i : ℕ)
                 -> (r ≤ n)
                 -> ((1 + i + r) < n)
@@ -159,6 +186,7 @@ F-canonize-p< (suc (suc n)) (suc r) i (s≤s prn) (s≤s pin) =
     ≃⟨ ++-respects (swap (s≤s 1+i≤n)) refl ⟩
       i ∷ suc n ∷ (suc n ↓ r)
     ≃∎
+
 
 F-canonize-red : (n r i : ℕ)
                  -> ((suc r) ≤ n)
