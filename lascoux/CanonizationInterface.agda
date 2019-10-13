@@ -159,3 +159,13 @@ F-canonize-p< (suc (suc n)) (suc r) i (s≤s prn) (s≤s pin) =
     ≃⟨ ++-respects (swap (s≤s 1+i≤n)) refl ⟩
       i ∷ suc n ∷ (suc n ↓ r)
     ≃∎
+
+F-canonize-red : (n r i : ℕ)
+                 -> ((suc r) ≤ n)
+                 -> (i + (suc r) ≡ n)
+                 -> ((n ↓ (suc r)) ++ [ i ]) ≃ (n ↓ r)
+F-canonize-red (suc zero) zero i prn pirn rewrite (≡-down2 (≡-trans (+-comm 1 i) pirn)) = cancel
+F-canonize-red (suc (suc n)) zero i prn pirn rewrite (≡-down2 (≡-trans (+-comm 1 i) pirn)) = cancel
+F-canonize-red (suc n) (suc r) i (s≤s prn) pirn =
+  let rec = F-canonize-red n r i prn (≡-down2 (≡-trans (≡-sym (+-three-assoc {i} {1} {suc r})) pirn))
+  in  ++-≃ refl rec

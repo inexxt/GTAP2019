@@ -124,30 +124,27 @@ n=i+1+r {w} {w'} {n} pn {r} prn {i} pi ww ww' q =
 n=i+r {w} {w'} {suc n} pn {zero} prn {i} pi ww ww' q =
   -- impossible
   {!!}
-n=i+r {w} {w'} {suc n} pn {suc zero} prn {i} pi ww ww' q =
-  -- reduction
-  let i=n : i ≡ suc n
-      i=n = ≡-down2 (≡-trans (+-comm 1 i) (≡-sym q))
-
-      (w'' , r') , (ww'' , pp) = all-reduce {w} {w'} {suc n} pn {zero} z≤n ww ww'
-
+n=i+r {w} {w'} {suc n} pn {suc r} prn {i} pi ww ww' q =
+  let (w'' , r') , (ww'' , pp) = all-reduce {w} {w'} {suc n} pn {r} (≤-down prn) ww ww'
+      can = F-canonize-red (suc (suc n)) r i prn (≡-sym q)
       lemma =
         ≃begin
-          w'
-        ≃⟨ ++-respects (comm (cancel {i})) refl ⟩
-          i ∷ i ∷ w'
-        ≃⟨ refl≡ (cong (λ x → x ∷ i ∷ w') i=n) ⟩
-          suc n ∷ i ∷ w'
+          (suc (suc n) ↓ r) ++ w'
+        ≃⟨ ++-≃ (comm can) (refl {w'})  ⟩
+          suc n ∷ ((suc n ↓ r) ++ i ∷ []) ++ w'
+        ≃⟨ refl≡ (++-assoc (suc n ∷ (suc n ↓ r)) (i ∷ []) w') ⟩
+          suc n ∷ (suc n ↓ r) ++ i ∷ w'
         ≃∎
-  in  (w'' , r') , ww'' , (trans pp (++-≃ refl lemma))
 
--- n=i+r {w} {w'} {suc n} pn {suc zero} prn {i} pi ww ww' q =
+      in  (w'' , r') , (ww'' , trans pp (++-≃ (refl {w}) lemma))
+
+-- n=i+r {w} {w'} {suc n} pn {suc r} prn {i} pi ww ww' q =
 --   -- reduction
 --   let i=n : i ≡ suc n
 --       i=n = ≡-down2 (≡-trans (+-comm 1 i) (≡-sym q))
-
+--
 --       (w'' , r') , (ww'' , pp) = all-reduce {w} {w'} {suc n} pn {zero} z≤n ww ww'
-
+--
 --       lemma =
 --         ≃begin
 --           w'
@@ -157,6 +154,10 @@ n=i+r {w} {w'} {suc n} pn {suc zero} prn {i} pi ww ww' q =
 --           suc n ∷ i ∷ w'
 --         ≃∎
 --   in  (w'' , r') , ww'' , (trans pp (++-≃ refl lemma))
+-- n=i+r {w} {w'} {suc (suc n)} pn {suc (suc r)} (s≤s (s≤s prn)) {i} pi ww ww' q =
+--   -- reduction
+--   let (w'' , r') , (ww'' , pp) = all-reduce {w} {w'} {suc (suc n)} {!   !}  {suc r} (s≤s (≤-up prn)) ww ww'
+--   in  (w'' , r') , ww'' , (trans pp (++-≃ (refl {w}) {!   !}))
 
 
 -- ... | no q = -- the case when there's no n and it doesn't appear on the right
