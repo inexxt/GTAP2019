@@ -141,10 +141,23 @@ n=i+r {w} {w'} {suc n} pn {suc zero} prn {i} pi ww ww' q =
         ≃∎
   in  (w'' , r') , ww'' , (trans pp (++-≃ refl lemma))
 
-n=i+r {w} {w'} {n} pn {suc (suc r)} prn {i} pi ww ww' q =
-  -- impossible
-  let i=0 : i \==
-  {!!}
+-- n=i+r {w} {w'} {suc n} pn {suc zero} prn {i} pi ww ww' q =
+--   -- reduction
+--   let i=n : i ≡ suc n
+--       i=n = ≡-down2 (≡-trans (+-comm 1 i) (≡-sym q))
+
+--       (w'' , r') , (ww'' , pp) = all-reduce {w} {w'} {suc n} pn {zero} z≤n ww ww'
+
+--       lemma =
+--         ≃begin
+--           w'
+--         ≃⟨ ++-respects (comm (cancel {i})) refl ⟩
+--           i ∷ i ∷ w'
+--         ≃⟨ refl≡ (cong (λ x → x ∷ i ∷ w') i=n) ⟩
+--           suc n ∷ i ∷ w'
+--         ≃∎
+--   in  (w'' , r') , ww'' , (trans pp (++-≃ refl lemma))
+
 
 -- ... | no q = -- the case when there's no n and it doesn't appear on the right
 --   let (w'' , r') , (ww'' , pp) = all-reduce (w ++ [ i ])  w' (suc n) pn zero prn ((>>-++ ww (i :⟨ (≤-≠-≤ p λ x → q (≡-down2 _ _ x)) ⟩: []))) ww'
