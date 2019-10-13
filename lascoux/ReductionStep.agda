@@ -16,7 +16,7 @@ open import Data.Empty
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
 open import Coxeter hiding (n; l)
-open import Arithmetic hiding (n; l)
+open import Arithmetic hiding (n)
 open import Canonization hiding (n; l)
 open import CanonizationInterface hiding (n; l)
 
@@ -123,7 +123,8 @@ n=i+1+r {w} {w'} {n} pn {r} prn {i} pi ww ww' q =
 
 n=i+r {w} {w'} {suc n} pn {zero} prn {i} pi ww ww' q =
   -- impossible
-  {!!}
+  ⊥-elim (1+n≰n (≤-trans (≤-reflexive (≡-trans (cong suc q) (cong suc (+-comm i zero)))) pi))
+
 n=i+r {w} {w'} {suc n} pn {suc r} prn {i} pi ww ww' q =
   let (w'' , r') , (ww'' , pr' , pp) = all-reduce {w} {w'} {suc n} pn {r} (≤-down prn) ww ww'
       can = F-canonize-red (suc (suc n)) r i prn (≡-sym q)
@@ -201,30 +202,3 @@ all-reduce {w} {i ∷ w'} {n} pn {r} prn ww (.i :⟨ pi ⟩: ww') with ((suc n) 
 ... | _ | _ | yes q | _ = n=i+1+r {w} {w'} {n} pn {r} prn {i} pi ww ww' q
 ... | _ | _ | _ | yes q = i+1+r<n {w} {w'} {n} pn {r} prn {i} pi ww ww' q
 ... | no p1 | no p2 | no p3 | no p4  = ⊥-elim (absurd-nowhere p1 p2 p3 p4)
-
-
--- step : (ll : (suc n) >> l) -> Σ (List ℕ × ℕ) (λ (l' , r) -> (n >> l') × (l' ++ ((suc (suc n)) ↓ r)) ≃ l)
--- step {n} {.[]} [] = ([] , 0) , ([] , refl)
--- step {n} {k ∷ l} (_ :⟨ x ⟩: ll) with (suc k) ≟ (suc n)
--- step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | yes p =
---   let xx = all-reduce {!!}  {!!} {!!} {!!} {!!} {!!}
---   in  {!!}
--- step {n} {k ∷ l} (.k :⟨ x ⟩: ll) | no ¬p =
---   let k≤n : k < n
---       k≤n = ≤-≠-≤ x ¬p
---       (l' , r) , (ll' , pp) = step ll
---   in ((k ∷ l') , r) , ((k :⟨ k≤n ⟩: ll') , (prepend k pp))
---
--- data Canonical : (n : ℕ) -> Set where
---   CanZ : Canonical 0
---   CanS : {n : ℕ} -> (k r : ℕ) -> (n < k) -> (r ≤ k) -> (l : Canonical n) -> Canonical k
---
--- immersion : {n : ℕ} -> Canonical n -> List ℕ
--- immersion {zero} CanZ = []
--- immersion {suc n} (CanS k r n<k r≤k l) = (k ↓ r) ++ immersion l
---
--- open import Data.Fin
---
--- canonical-form-lemma : {n : ℕ} -> (l : List (Fin n)) -> ∃ (λ cl -> (map (λ x -> toℕ x) l) ≃ (immersion {n} cl))
---
--- canonical-form-lemma-Free : (l : List ℕ) -> ∃ (λ n -> ∃ (λ cl -> l ≃ (immersion {n} cl)))

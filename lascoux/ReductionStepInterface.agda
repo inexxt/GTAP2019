@@ -43,16 +43,9 @@ step {n} {l} pn ll = all-reduce {[]} {l} {n} pn {0} z≤n [] ll
 
 open import Data.Fin
 
-canonical-form-zeros : (1 >> l) -> ∃ (λ cl -> l ≃ (immersion {1} cl))
-canonical-form-zeros {[]} [] = (CanS CanZ (s≤s z≤n) z≤n) , refl
-canonical-form-zeros {.0 ∷ []} (.0 :⟨ s≤s z≤n ⟩: []) = CanS CanZ {k = 1} {r = 1} (s≤s z≤n) (s≤s z≤n) , refl
-canonical-form-zeros {.0 ∷ .0 ∷ l} (.0 :⟨ s≤s z≤n ⟩: (.0 :⟨ s≤s z≤n ⟩: l')) =
-  let (cl , p) = canonical-form-zeros l'
-  in  cl , ++-respects cancel p
-
 canonical-form-lemma : {n : ℕ} -> {l : List ℕ} -> (l' : n >> l) -> ∃ (λ cl -> l ≃ (immersion {n} cl))
 canonical-form-lemma {0} {.[]} [] = CanZ , refl
-canonical-form-lemma {1} {l} l' = canonical-form-zeros l'
+canonical-form-lemma {1} {l} l' = {!!}
 canonical-form-lemma {suc (suc n)} {l} l' =
   let (w , r) , (w' , pr , p) = step {suc n} {l} (s≤s z≤n) l'
       (cl , pp) = canonical-form-lemma {suc n} {w} w'
@@ -68,4 +61,4 @@ canonical-form-lemma {suc (suc n)} {l} l' =
         ≃∎
   in  CanS cl {suc (suc n)} {r} (s≤s (≤-reflexive refl)) pr , trans (comm p) lemma
 
--- canonical-form-lemma-Free : (l : List ℕ) -> ∃ (λ n -> ∃ (λ cl -> l ≃ (immersion {n} cl)))
+canonical-form-lemma-Free : (l : List ℕ) -> ∃ (λ n -> ∃ (λ cl -> l ≃ (immersion {n} cl)))
