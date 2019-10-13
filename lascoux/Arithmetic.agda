@@ -34,7 +34,7 @@ postulate
     ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
     ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)
     introduce-≤-from-+ : {p q r : ℕ} -> (p + q ≡ r) -> (p ≤ r)
-    ≡-down2 : (p q : ℕ) -> suc p ≡ suc q -> p ≡ q
+    ≡-down2 : {p q : ℕ} -> suc p ≡ suc q -> p ≡ q
     +-three-assoc : {k i r : ℕ} -> k + (i + r) ≡ (i + k) + r
     introduce-∸ : {p q r : ℕ} -> (r ≤ q) -> (p + r ≡ q) -> (p ≡ q ∸ r)
     eliminate-∸ : {p q r : ℕ} -> (r ≤ q) -> (p ≡ q ∸ r) -> (p + r ≡ q)

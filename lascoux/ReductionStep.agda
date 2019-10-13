@@ -48,11 +48,44 @@ all-reduce : {w : List ℕ}
            -> (ww' : (suc n) >> w')
            -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ ((suc n) ↓ r')) ≃ (w ++ ((suc n) ↓ r) ++ w'))
 
-n=i+r   : {!   !}
+n=i+r : {w : List ℕ}
+          -> {w' : List ℕ}
+          -> {n : ℕ}
+          -> (zero < n)
+          -> {r : ℕ}
+          -> (r ≤ (suc n))
+          -> {i : ℕ}
+          -> (i < (suc n))
+          -> (ww : n >> w)
+          -> (ww' : (suc n) >> w')
+          -> ((suc n) ≡ i + r)
+          -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ ((suc n) ↓ r')) ≃ (w ++ ((suc n) ↓ r) ++ (i ∷ w')))
 
-n=i+1+r : {!   !}
+n=i+1+r : {w : List ℕ}
+          -> {w' : List ℕ}
+          -> {n : ℕ}
+          -> (zero < n)
+          -> {r : ℕ}
+          -> (r ≤ (suc n))
+          -> {i : ℕ}
+          -> (i < (suc n))
+          -> (ww : n >> w)
+          -> (ww' : (suc n) >> w')
+          -> ((suc n) ≡ i + (suc r))
+          -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ ((suc n) ↓ r')) ≃ (w ++ ((suc n) ↓ r) ++ (i ∷ w')))
 
-n>i+1+r : {!   !}
+i+1+r<n : {w : List ℕ}
+          -> {w' : List ℕ}
+          -> {n : ℕ}
+          -> (zero < n)
+          -> {r : ℕ}
+          -> (r ≤ (suc n))
+          -> {i : ℕ}
+          -> (i < (suc n))
+          -> (ww : n >> w)
+          -> (ww' : (suc n) >> w')
+          -> (i + (suc r) < (suc n))
+          -> Σ ((List ℕ) × ℕ) (λ (w'' , r') -> (n >> w'') × (w'' ++ ((suc n) ↓ r')) ≃ (w ++ ((suc n) ↓ r) ++ (i ∷ w')))
 
 n<i+r : {w : List ℕ}
         -> {w' : List ℕ}
@@ -73,9 +106,74 @@ absurd-nowhere : {n r i : ℕ}
                  -> ¬ (n ≡ i + (1 + r))
                  -> ¬ (i + (1 + r) < n)
                  -> ⊥
-n=i+1+r = {!!}
-n=i+r = {!!}
-n>i+1+r = {!!}
+
+n=i+1+r {w} {w'} {n} pn {r} prn {i} pi ww ww' q =
+  let r+i=n : r + i ≡ n
+      r+i=n = ≡-down2 (≡-sym (≡-trans q (+-comm i (suc r))))
+
+      r≤n : r ≤ n
+      r≤n = introduce-≤-from-+ r+i=n
+
+      (w'' , r') , (ww'' , pp) = all-reduce {w} {w'} {n} pn {suc r} (s≤s r≤n) ww ww'
+
+      pp' = F-canonize-p≡ (suc n) r i (s≤s r≤n) (≡-trans (+-assoc i 1 r) (≡-sym q))
+      pp'' = ≡-sym (cong (λ l -> w ++ l ++ w') pp')
+  in (w'' , r') , (ww'' , trans pp (refl≡ (≡-trans pp'' (cong (λ l → w ++ l) (++-assoc (suc n ↓ r) (i ∷ []) w'))))) -- p≡
+
+
+n=i+r {w} {w'} {suc n} pn {zero} prn {i} pi ww ww' q =
+  -- impossible
+  {!!}
+n=i+r {w} {w'} {suc n} pn {suc zero} prn {i} pi ww ww' q =
+  -- reduction
+  let i=n : i ≡ suc n
+      i=n = ≡-down2 (≡-trans (+-comm 1 i) (≡-sym q))
+
+      (w'' , r') , (ww'' , pp) = all-reduce {w} {w'} {suc n} pn {zero} z≤n ww ww'
+
+      lemma =
+        ≃begin
+          w'
+        ≃⟨ ++-respects (comm (cancel {i})) refl ⟩
+          i ∷ i ∷ w'
+        ≃⟨ refl≡ (cong (λ x → x ∷ i ∷ w') i=n) ⟩
+          suc n ∷ i ∷ w'
+        ≃∎
+  in  (w'' , r') , ww'' , (trans pp (++-≃ refl lemma))
+
+n=i+r {w} {w'} {n} pn {suc (suc r)} prn {i} pi ww ww' q =
+  -- impossible
+  let i=0 : i \==
+  {!!}
+
+-- ... | no q = -- the case when there's no n and it doesn't appear on the right
+--   let (w'' , r') , (ww'' , pp) = all-reduce (w ++ [ i ])  w' (suc n) pn zero prn ((>>-++ ww (i :⟨ (≤-≠-≤ p λ x → q (≡-down2 _ _ x)) ⟩: []))) ww'
+--   in (w'' , r') , ww'' , trans pp (refl≡ ( ++-assoc w (i ∷ []) w'))
+
+
+i+1+r<n {w} {w'} {n} pn {r} prn {i} pi ww ww' q =
+  let 1+i+r=i+1+r : 1 + (i + r) ≡ i + (1 + r)
+      1+i+r=i+1+r = ≡-sym (+-three-assoc {i} {1} {r})
+
+      i<n : i < n
+      i<n = ≤-down2 (≤-down-+ (≤-trans (s≤s (≤-reflexive 1+i+r=i+1+r)) q))
+
+      (w'' , r') , (ww'' , pp) = all-reduce {w ++ [ i ]} {w'} {n} pn {r} prn (>>-++ ww (i :⟨ i<n ⟩: [])) ww'
+      pp' = F-canonize-p< (suc n) r i prn (≤-trans (s≤s (≤-reflexive 1+i+r=i+1+r)) q)
+
+      lemma =
+        ≃begin
+          (w ++ [ i ]) ++ ((suc n ↓ r) ++ w')
+        ≃⟨ refl≡ (++-assoc w (i ∷ []) ((suc n ↓ r) ++ w')) ⟩
+          w ++ (([ i ] ++ (suc n ↓ r)) ++ w')
+        ≃⟨ ++-≃ refl (++-≃ (comm pp') refl)   ⟩
+          w ++ (((suc n ↓ r) ++ [ i ]) ++ w')
+        ≃⟨ refl≡ (cong (λ l → w ++ l) (++-assoc (suc n ↓ r) (i ∷ []) w')) ⟩
+          w ++ ((suc n ↓ r) ++ ([ i ] ++  w'))
+        ≃∎
+
+  in (w'' , r') , (ww'' , trans pp lemma)
+
 
 n<i+r {w} {w'} {n} pn {suc r} (s≤s prn) {zero} pi ww ww' (s≤s q) = ⊥-elim (1+n≰n (≤-trans q prn))
 n<i+r {w} {w'} {n} pn {r} prn {suc i} pi ww ww' q =
@@ -98,6 +196,7 @@ n<i+r {w} {w'} {n} pn {r} prn {suc i} pi ww ww' q =
       (w'' , r') , (ww'' , pp) = all-reduce {w ++ [ i ]} {w'} {n} pn {r} prn (>>-++ ww (i :⟨ ≤-down2 pi ⟩: [])) ww'
   in  (w'' , r') , (ww'' , trans pp lemma1)
 
+
 absurd-nowhere {n} {r} {i} p1 p2 p3 p4 =
   let lemma : i + suc r ≡ suc i + r
       lemma = +-three-assoc {i} {1} {r}
@@ -111,9 +210,9 @@ absurd-nowhere {n} {r} {i} p1 p2 p3 p4 =
 all-reduce {w} {[]} {n} pn {r} prn ww [] = (w , r) , (ww , refl≡ (≡-sym (++-unit2 w ((suc n) ↓ r))) ) -- base of induction
 all-reduce {w} {i ∷ w'} {n} pn {r} prn ww (.i :⟨ pi ⟩: ww') with ((suc n) <? i + r) with ((suc n) ≟ i + r) with ((suc n) ≟ i + (1 + r)) with (i + (1 + r) <? (suc n))
 ... | yes q | _ | _ | _ = n<i+r {w} {w'} {n} pn {r} prn {i} pi ww ww' q
-... | _ | yes q | _ | _ = {!   !}
-... | _ | _ | yes q | _ = {!   !}
-... | _ | _ | _ | yes q = {!   !}
+... | _ | yes q | _ | _ = n=i+r {w} {w'} {n} pn {r} prn {i} pi ww ww' q
+... | _ | _ | yes q | _ = n=i+1+r {w} {w'} {n} pn {r} prn {i} pi ww ww' q
+... | _ | _ | _ | yes q = i+1+r<n {w} {w'} {n} pn {r} prn {i} pi ww ww' q
 ... | no p1 | no p2 | no p3 | no p4  = ⊥-elim (absurd-nowhere p1 p2 p3 p4)
 
 

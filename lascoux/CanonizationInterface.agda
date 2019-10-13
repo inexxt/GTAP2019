@@ -119,18 +119,17 @@ F-canonize-p> (suc n) (suc zero) i prn (s≤s pin) (s≤s pirn) =
 
 F-canonize-p≡ : (n r i : ℕ)
                 -> (r < n)
-                -> ((suc i) < n)
-                -> (((suc i) + 1 + r) ≡ n)
-                -> ((n ↓ r) ++ [ suc i ]) ≡ (n ↓ (1 + r))
-F-canonize-p≡ n r i prn pin pirn =
+                -> ((i + 1 + r) ≡ n)
+                -> ((n ↓ r) ++ [ i ]) ≡ (n ↓ (1 + r))
+F-canonize-p≡ n r i prn pirn =
   let tx = begin
-             (suc i) + suc r
-           ≡⟨ cong suc (≡-sym (+-assoc i 1 r)) ⟩
-             suc ((i + 1) + r)
+             i + suc r
+           ≡⟨ ≡-sym (+-assoc i 1 r) ⟩
+             i + 1 + r
            ≡⟨ pirn ⟩
              n
            ∎
-  in  canonize-p≡ n r (suc i) prn (introduce-∸ prn tx)
+  in  canonize-p≡ n r i prn (introduce-∸ prn tx)
 
 F-canonize-p< : (n r i : ℕ)
                 -> (r ≤ n)
