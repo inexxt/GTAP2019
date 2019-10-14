@@ -67,13 +67,16 @@ immersion->> {n} (CanS {n'} cl {r} rn) =
 postulate
   ≡-canonical : {cl1 cl2 : Canonical n} -> {r1 r2 : ℕ} -> (rn1 : r1 ≤ (suc n)) -> (rn2 : r2 ≤ (suc n)) -> (cl1 ≡ cl2) -> (r1 ≡ r2) -> (CanS cl1 rn1) ≡ (CanS cl2 rn2)
 
+≃-abs : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
+≃-abs p = {!!}
 
 only-one-canonical : (cl1 cl2 : Canonical n) -> (immersion {n} cl1) ≃ (immersion {n} cl2) -> cl1 ≡ cl2
 only-one-canonical {.0} CanZ CanZ pr = refl
 only-one-canonical {.(suc n1)} (CanS {n1} cl1 {zero} rn1) (CanS {.n1} cl2 {zero} rn2) pr =
   let rec = only-one-canonical cl1 cl2 (trans (refl≡ (≡-sym ++-unit)) (trans pr (refl≡ ++-unit)))
   in  ≡-canonical rn1 rn2 rec refl
-only-one-canonical {.(suc n1)} (CanS {n1} cl1 {zero} rn1) (CanS {.n1} cl2 {suc r2} rn2) pr = {!!} -- contradiction
+only-one-canonical {.1} (CanS {.0} CanZ {zero} rn1) (CanS {.0} CanZ {suc r2} rn2) pr = {!!}
+only-one-canonical {.(suc (suc _))} (CanS {.(suc _)} (CanS cl1 x) {zero} rn1) (CanS {.(suc _)} cl2 {suc r2} rn2) pr = {!!} -- contradiction
 only-one-canonical {.(suc n1)} (CanS {n1} cl1 {suc r1} rn1) (CanS {.n1} cl2 {zero} rn2) pr = {!!} -- contradiction
 only-one-canonical {.(suc n1)} (CanS {n1} cl1 {suc r1} rn1) (CanS {.n1} cl2 {suc r2} rn2) pr =
   let rec = only-one-canonical cl1 cl2 {!!}
