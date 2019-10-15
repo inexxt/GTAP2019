@@ -37,9 +37,9 @@ suc n ↓ suc r = n ∷ n ↓ r
 open Σ
 
 nnl=l : {l : List ℕ} -> {n : ℕ} -> (n ∷ n ∷ l) ≃ l
-nnl=l = ++-respects cancel refl
+nnl=l {l} = ++-respects-l cancel
 l++nn=l : {l : List ℕ} -> {n : ℕ} -> (l ++ (n ∷ n ∷ [])) ≃ l
-l++nn=l = trans (++-respects refl cancel) (refl≡ ++-unit)
+l++nn=l = trans (++-respects-r cancel) (refl≡ ++-unit)
 
 canonize-swap : (n r i : ℕ)
                 -> (r ≤ n)
@@ -51,9 +51,9 @@ canonize-swap (suc n) (suc r) i prn pni =
   let rec = canonize-swap n r i (≤-down2 prn) (≤-down pni)
   in  ≃begin
          n ∷ (n ↓ r) ++ i ∷ []
-       ≃⟨ prepend n rec ⟩
+       ≃⟨ ++-respects-r {l = [ n ]} rec ⟩
          n ∷ i ∷ (n ↓ r)
-       ≃⟨ ++-respects (comm (swap pni)) refl ⟩
+       ≃⟨ ++-respects-l (comm (swap pni))  ⟩
          i ∷ n ∷ (n ↓ r)
        ≃∎
 
@@ -72,9 +72,9 @@ canonize-p>' (suc (suc n)) zero (suc r2) {i} pr2 prn {pinr} rewrite pinr = -- in
   let rec = canonize-swap n r2 (1 + n) (≤-down2 (≤-down2 prn)) (s≤s (≤-reflexive refl))
   in  ≃begin
          (1 + n) ∷ n ∷ (n ↓ r2) ++ (1 + n) ∷ []
-       ≃⟨ (prepend (1 + n) (prepend n rec)) ⟩
+       ≃⟨ ++-respects-r {l = (1 + n) ∷ [ n ]} rec ⟩
          (1 + n) ∷ n ∷ (1 + n) ∷ (n ↓ r2)
-       ≃⟨ ++-respects (comm braid) refl  ⟩
+       ≃⟨ ++-respects-l (comm braid)  ⟩
          n ∷ suc n ∷ n ∷ (n ↓ r2)
        ≃∎
 canonize-p>' (suc (suc n)) (suc r1) (suc r2) {i} pr2 prn {pinr} = -- induction on r1
@@ -103,9 +103,9 @@ canonize-p>' (suc (suc n)) (suc r1) (suc r2) {i} pr2 prn {pinr} = -- induction o
         ∎
   in ≃begin
          (1 + n) ∷ (((1 + n) ↓ r1) ++ (1 + i) ∷ i ∷ (i ↓ r2)) ++ (1 + i) ∷ []
-       ≃⟨ prepend (1 + n) rec ⟩
+       ≃⟨ ++-respects-r {l = [ 1 + n ]} rec ⟩
          (1 + n) ∷ i ∷ n ∷ ( n ↓ (r1 + (1 + r2)))
-       ≃⟨ ++-respects (swap (s≤s (introduce-≤-from-+ lemma))) (refl {n ∷ (n ↓ (r1 + (1 + r2)))} ) ⟩
+       ≃⟨ ++-respects-l (swap (s≤s (introduce-≤-from-+ lemma)))  ⟩
          i ∷ (1 + n) ∷ n ∷ (n ↓ (r1 + (1 + r2)))
        ≃∎
 

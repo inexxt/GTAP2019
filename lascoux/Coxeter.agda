@@ -17,8 +17,8 @@ data _≃_ : List ℕ -> List ℕ -> Set where
     cancel : (n ∷ n ∷ []) ≃ []
     swap : {k : ℕ} -> (suc k < n) -> (n ∷ k ∷ []) ≃ (k ∷ n ∷ [])
     braid : (n ∷ (suc n) ∷ n ∷ []) ≃ ((suc n) ∷ n ∷ (suc n) ∷ [])
-    prepend : (k : ℕ) -> {l l' : List ℕ} -> (l ≃ l') -> (k ∷ l) ≃ (k ∷ l')
-    ++-respects : {l l' m m' : List ℕ} -> (l ≃ l') -> (m ≃ m') -> (l ++ m) ≃ (l' ++ m')
+    ++-respects-r : {l r r' : List ℕ} -> (r ≃ r') -> (l ++ r) ≃ (l ++ r')
+    ++-respects-l : {l l' r : List ℕ} -> (l ≃ l') -> (l ++ r) ≃ (l' ++ r)
     refl : {l : List ℕ} -> l ≃ l
     comm : {l l' : List ℕ} -> (l ≃ l') -> l' ≃ l
     trans : {l l' l'' : List ℕ} -> (l ≃ l') -> (l' ≃ l'') -> l ≃ l''
@@ -53,6 +53,16 @@ module ≃-Reasoning where
     x ≃∎  =  refl
 
 open ≃-Reasoning
+
+++-respects : {l l' m m' : List ℕ} -> (l ≃ l') -> (m ≃ m') -> (l ++ m) ≃ (l' ++ m')
+++-respects {l} {l'} {m} {m'} ll mm =
+  ≃begin
+    l ++ m
+  ≃⟨ ++-respects-l ll ⟩
+    l' ++ m
+  ≃⟨ ++-respects-r mm ⟩
+    l' ++ m'
+  ≃∎
 
 postulate
     ++-unit : l ++ [] ≡ l

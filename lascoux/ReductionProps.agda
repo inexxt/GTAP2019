@@ -50,7 +50,14 @@ variable
 >>-suc  (k :⟨ p ⟩: l') = k :⟨ ≤-up p ⟩: >>-suc l'
 
 ++-≡2 : {la lb lc ld : List ℕ} -> (la ≡ lb) -> (lc ≡ ld) -> (la ++ lc) ≡ (lb ++ ld)
-++-≡2 {la} {lb} {lc} {ld} pab pcd = {!!}
+++-≡2 {la} {lb} {lc} {ld} pab pcd =
+  begin
+    la ++ lc
+  ≡⟨ cong (λ x -> x ++ lc) pab ⟩
+    lb ++ lc
+  ≡⟨ cong (λ x -> lb ++ x) pcd ⟩
+    lb ++ ld
+  ∎
 
 -- canonical-lift : {m : ℕ} -> (n ≤ m) -> (cl : Canonical n) -> Σ (Canonical m) (λ cll -> immersion {n} cl ≡ immersion {m} cll)
 -- canonical-lift {n} {m} nm cl = {!!}
@@ -68,7 +75,16 @@ postulate
   ≡-canonical : {cl1 cl2 : Canonical n} -> {r1 r2 : ℕ} -> (rn1 : r1 ≤ (suc n)) -> (rn2 : r2 ≤ (suc n)) -> (cl1 ≡ cl2) -> (r1 ≡ r2) -> (CanS cl1 rn1) ≡ (CanS cl2 rn2)
 
 ≃-abs : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
-≃-abs p = {!!}
+≃-abs {n} p with p
+... | x = {!!}
+
+-- ≃-abs (trans {x ∷ []} {l'} {[]} (l≃l') (l'≃l'')) = ?
+-- ≃-abs {suc x} p = {!!}
+-- ≃-abs (++-respects-r {l} {m} {m'} (m≃m')) = ?
+-- ≃-abs (++-respects-l {l} {l'} {m} (l≃l')) = ?
+-- ≃-abs (comm {l} {l'} (l≃l')) = ?
+-- ≃-abs (trans {l} {l'} {l''} (l≃l') (l'≃l'')) = ?
+
 
 only-one-canonical : (cl1 cl2 : Canonical n) -> (immersion {n} cl1) ≃ (immersion {n} cl2) -> cl1 ≡ cl2
 only-one-canonical {.0} CanZ CanZ pr = refl
