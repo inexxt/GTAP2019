@@ -181,12 +181,11 @@ F-canonize-p< (suc (suc n)) (suc r) i (s≤s prn) (s≤s pin) =
   in
     ≃begin
       suc n ∷ (suc n ↓ r) ++ i ∷ []
-    ≃⟨ prepend (suc n) rec ⟩
+    ≃⟨ ++-respects-r {l = [ suc n ]} rec ⟩
       suc n ∷ i ∷ (suc n ↓ r)
-    ≃⟨ ++-respects (swap (s≤s 1+i≤n)) refl ⟩
+    ≃⟨ ++-respects-l (swap (s≤s 1+i≤n)) ⟩
       i ∷ suc n ∷ (suc n ↓ r)
     ≃∎
-
 
 F-canonize-red : (n r i : ℕ)
                  -> ((suc r) ≤ n)
