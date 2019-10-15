@@ -74,9 +74,21 @@ immersion->> {n} (CanS {n'} cl {r} rn) =
 postulate
   ≡-canonical : {cl1 cl2 : Canonical n} -> {r1 r2 : ℕ} -> (rn1 : r1 ≤ (suc n)) -> (rn2 : r2 ≤ (suc n)) -> (cl1 ≡ cl2) -> (r1 ≡ r2) -> (CanS cl1 rn1) ≡ (CanS cl2 rn2)
 
-≃-abs : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
-≃-abs {n} p with p
-... | x = {!!}
+≃-abs-l : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
+≃-abs-r : {x : ℕ} -> [] ≃ (x ∷ []) -> ⊥
+
+
+≃-abs-l {n} (respects-r [] {r' = []} p refl x₁) = ≃-abs-l p
+≃-abs-l {n} (respects-l {x₁ ∷ []} {l' = []} .[] p x refl) = ≃-abs-l p
+≃-abs-l {n} (comm p) = ≃-abs-r p
+≃-abs-l {n} (trans {l' = []} p q) = ≃-abs-l p
+≃-abs-l {n} (trans {l' = x ∷ l'} p q) = {!!}
+
+≃-abs-r {x} (respects-r [] {r' = x ∷ .[]} p refl refl) = ≃-abs-r p
+≃-abs-r {n} (respects-l {[]} {y ∷ []} [] p x q) = ≃-abs-r p
+≃-abs-r {n} (comm p) = ≃-abs-l p
+≃-abs-r {n} (trans {l' = []} p q) = ≃-abs-r q
+≃-abs-r {n} (trans {l' = x ∷ l'} p q) = {!!}
 
 -- ≃-abs (trans {x ∷ []} {l'} {[]} (l≃l') (l'≃l'')) = ?
 -- ≃-abs {suc x} p = {!!}
