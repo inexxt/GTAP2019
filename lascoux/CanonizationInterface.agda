@@ -195,4 +195,4 @@ F-canonize-red (suc zero) zero i prn pirn rewrite (≡-down2 (≡-trans (+-comm 
 F-canonize-red (suc (suc n)) zero i prn pirn rewrite (≡-down2 (≡-trans (+-comm 1 i) pirn)) = cancel
 F-canonize-red (suc n) (suc r) i (s≤s prn) pirn =
   let rec = F-canonize-red n r i prn (≡-down2 (≡-trans (≡-sym (+-three-assoc {i} {1} {suc r})) pirn))
-  in  ++-≃ refl rec
+  in  ++-respects refl rec

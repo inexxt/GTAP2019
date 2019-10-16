@@ -18,24 +18,36 @@ variable
 ∷-down2 {m1} {.m1} {x1} {.x1} refl = refl , refl
 
 data _≅_ : List ℕ -> List ℕ -> Set where
-    cancel : (n ∷ n ∷ []) ≅ []
-    swap : {k : ℕ} -> (suc k < n) -> (n ∷ k ∷ []) ≅ (k ∷ n ∷ [])
-    braid : ((suc n) ∷ n ∷ (suc n) ∷ []) ≅ (n ∷ (suc n) ∷ n ∷ [])
+    cancel≅ : (n ∷ n ∷ []) ≅ []
+    swap≅ : {k : ℕ} -> (suc k < n) -> (n ∷ k ∷ []) ≅ (k ∷ n ∷ [])
+    braid≅ : ((suc n) ∷ n ∷ (suc n) ∷ []) ≅ (n ∷ (suc n) ∷ n ∷ [])
     respects=r : (l : List ℕ) -> {r r' lr lr' : List ℕ} -> (r ≅ r') -> (lr ≡ l ++ r) -> (lr' ≡ l ++ r') -> lr ≅ lr'
     respects=l : {l l' : List ℕ} -> (r : List ℕ) ->{lr l'r : List ℕ} -> (l ≅ l') -> (lr ≡ l ++ r) -> (l'r ≡ l' ++ r) -> lr ≅ l'r
+    comm≅ : {m1 m2 : List ℕ} -> (m1 ≅ m2) -> m2 ≅ m1
 
 data _≃_ : List ℕ -> List ℕ -> Set where
     refl : {m : List ℕ} -> m ≃ m
     trans≅ : {m1 m2 m3 : List ℕ} -> (m1 ≃ m2) -> (m2 ≅ m3) -> m1 ≃ m3
-    -- respects-r : (l : List ℕ) -> {r r' lr lr' : List ℕ} -> (r ≃ r') -> (l ++ r ≡ lr) -> (l ++ r' ≡ lr') -> lr ≃ lr'
-    -- respects-l : {l l' : List ℕ} -> (r : List ℕ) ->{lr l'r : List ℕ} -> (l ≃ l') -> (l ++ r ≡ lr) -> (l' ++ r ≡ l'r) -> lr ≃ l'r
 
 ext : {l l' : List ℕ} -> l ≅ l' -> l ≃ l'
 ext p = trans≅ refl p
 
+cancel : (n ∷ n ∷ []) ≃ []
+cancel = ext cancel≅
+
+swap : {k : ℕ} -> (suc k < n) -> (n ∷ k ∷ []) ≃ (k ∷ n ∷ [])
+swap p = ext (swap≅ p)
+
+braid : ((suc n) ∷ n ∷ (suc n) ∷ []) ≃ (n ∷ (suc n) ∷ n ∷ [])
+braid = ext braid≅
+
 trans : {m1 m2 m3 : List ℕ} -> (m1 ≃ m2) -> (m2 ≃ m3) -> m1 ≃ m3
 trans p refl = p
 trans p (trans≅ q x) = trans≅ (trans p q) x
+
+comm : {m1 m2 : List ℕ} -> (m1 ≃ m2) -> (m2 ≃ m1)
+comm refl = refl
+comm (trans≅ p x) = trans (ext (comm≅ x)) (comm p)
 
 respects-r : (l : List ℕ) -> {r r' lr lr' : List ℕ} -> (r ≃ r') -> (lr ≡ l ++ r) -> (lr' ≡ l ++ r') -> lr ≃ lr'
 respects-r l refl e1 e2 rewrite e1 rewrite e2 = refl
@@ -73,7 +85,7 @@ module ≃-Reasoning where
              → y ≃ z
                -----
              → x ≃ z
-    x ≃⟨ x≃y ⟩ y≃z  =  trans x≃y y≃z
+    x ≃⟨ x≃y ⟩ y≃z  = trans x≃y y≃z
 
     _≃∎ : ∀ (x : List ℕ)
            -----

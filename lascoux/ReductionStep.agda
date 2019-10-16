@@ -128,13 +128,13 @@ n=i+r {w} {w'} {suc n} pn {suc r} prn {i} pi ww ww' q =
       lemma =
         ≃begin
           (suc (suc n) ↓ r) ++ w'
-        ≃⟨ ++-≃ (comm can) (refl {w'})  ⟩
+        ≃⟨ ++-respects (comm can) (refl {w'})  ⟩
           suc n ∷ ((suc n ↓ r) ++ i ∷ []) ++ w'
         ≃⟨ refl≡ (++-assoc (suc n ∷ (suc n ↓ r)) (i ∷ []) w') ⟩
           suc n ∷ (suc n ↓ r) ++ i ∷ w'
         ≃∎
 
-      in  (w'' , r') , (ww'' , pr' , trans pp (++-≃ (refl {w}) lemma))
+      in  (w'' , r') , (ww'' , pr' , trans pp (++-respects (refl {w}) lemma))
 
 
 i+1+r<n {w} {w'} {n} pn {r} prn {i} pi ww ww' q =
@@ -152,7 +152,7 @@ i+1+r<n {w} {w'} {n} pn {r} prn {i} pi ww ww' q =
           (w ++ [ i ]) ++ ((suc n ↓ r) ++ w')
         ≃⟨ refl≡ (++-assoc w (i ∷ []) ((suc n ↓ r) ++ w')) ⟩
           w ++ (([ i ] ++ (suc n ↓ r)) ++ w')
-        ≃⟨ ++-≃ refl (++-≃ (comm pp') refl)   ⟩
+        ≃⟨ ++-respects refl (++-respects (comm pp') refl)   ⟩
           w ++ (((suc n ↓ r) ++ [ i ]) ++ w')
         ≃⟨ refl≡ (cong (λ l → w ++ l) (++-assoc (suc n ↓ r) (i ∷ []) w')) ⟩
           w ++ ((suc n ↓ r) ++ ([ i ] ++  w'))
@@ -172,9 +172,9 @@ n<i+r {w} {w'} {n} pn {r} prn {suc i} pi ww ww' q =
           (w ++ (i ∷ [] ++ ((suc n) ↓ r) ++ w'))
         ≃⟨ refl ⟩
           (w ++ (i ∷ [] ++ ((suc n) ↓ r)) ++ w')
-        ≃⟨ ++-≃ refl (++-≃ lemma0 refl) ⟩
+        ≃⟨ ++-respects refl (++-respects lemma0 refl) ⟩
           (w ++ (((suc n) ↓ r) ++ [ suc i ]) ++ w')
-        ≃⟨ ++-≃ {w} {w} refl (refl≡ (++-assoc ((suc n) ↓ r) _ _)) ⟩
+        ≃⟨ ++-respects {w} {w} refl (refl≡ (++-assoc ((suc n) ↓ r) _ _)) ⟩
           (w ++ ((suc n) ↓ r) ++ suc i ∷ w')
         ≃∎
 

@@ -61,7 +61,7 @@ canonical-form-lemma {suc (suc n)} {l} l' =
       lemma =
         ≃begin
           w ++ (suc (suc n) ↓ r)
-        ≃⟨ ++-≃ pp refl ⟩
+        ≃⟨ ++-respects pp refl ⟩
           immersion cl ++ suc (suc n) ↓ r
         ≃∎
   in  CanS cl {r} pr , trans (comm p) lemma
