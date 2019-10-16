@@ -68,104 +68,105 @@ immersion->> {n} (CanS {n'} cl {r} rn) =
 postulate
   canonical-eta : {cl1 cl2 : Canonical n} -> {r1 r2 : ℕ} -> (rn1 : r1 ≤ (suc n)) -> (rn2 : r2 ≤ (suc n)) -> (cl1 ≡ cl2) -> (r1 ≡ r2) -> (CanS cl1 rn1) ≡ (CanS cl2 rn2)
 
-≃-abs-l : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
-≃-abs-r : {x : ℕ} -> [] ≃ (x ∷ []) -> ⊥
+≃-abs-l : {x : ℕ} -> (x ∷ []) ≅ [] -> ⊥
+≃-abs-r : {x : ℕ} -> [] ≅ (x ∷ []) -> ⊥
 
+≃-abs-l {n} (respects=r [] {r' = []} p refl x₁) = ≃-abs-l p
+≃-abs-l {n} (respects=l {x₁ ∷ []} {l' = []} .[] p x refl) = ≃-abs-l p
+≃-abs-l {n} (comm≅ p) = ≃-abs-r p
 
-≃-abs-l {n} (respects-r [] {r' = []} p refl x₁) = ≃-abs-l p
-≃-abs-l {n} (respects-l {x₁ ∷ []} {l' = []} .[] p x refl) = ≃-abs-l p
-≃-abs-l {n} (comm p) = ≃-abs-r p
-≃-abs-l {n} (trans {l' = []} p q) = ≃-abs-l p
-≃-abs-l {n} (trans {l' = x ∷ []} p q) = ≃-abs-l q
-≃-abs-l {n} (trans {l' = x ∷ x₁ ∷ l'} p q) = {!!}
+≃-abs-r {x} (respects=r [] {r' = x ∷ .[]} p refl refl) = ≃-abs-r p
+≃-abs-r {n} (respects=l {[]} {y ∷ []} [] p x q) = ≃-abs-r p
+≃-abs-r {n} (comm≅ p) = ≃-abs-l p
 
-≃-abs-r {x} (respects-r [] {r' = x ∷ .[]} p refl refl) = ≃-abs-r p
-≃-abs-r {n} (respects-l {[]} {y ∷ []} [] p x q) = ≃-abs-r p
-≃-abs-r {n} (comm p) = ≃-abs-l p
-≃-abs-r {n} (trans {l' = []} p q) = ≃-abs-r q
-≃-abs-r {n} (trans {l' = x ∷ []} p q) = ≃-abs-r p
-≃-abs-r {n} (trans {l' = x ∷ x₁ ∷ l'} p q) = {!!}
+≃-abs : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
+≃-abs (trans≅ p x) = {!!}
 
-
-≃-reverse : (l1 l2 : List ℕ) -> (l1 ≃ l2) -> (reverse l1 ≃ reverse l2)
-≃-reverse .(_ ∷ _ ∷ []) .[] cancel = cancel
-≃-reverse .(_ ∷ _ ∷ []) .(_ ∷ _ ∷ []) (swap x) = comm (swap x)
-≃-reverse .(_ ∷ suc _ ∷ _ ∷ []) .(suc _ ∷ _ ∷ suc _ ∷ []) braid = braid
-≃-reverse l1 l2 (respects-r l {r1} {r2} p e1 e2) =
+≅-reverse : {l1 l2 : List ℕ} -> (l1 ≅ l2) -> (reverse l1 ≃ reverse l2)
+≅-reverse .{_ ∷ _ ∷ []} {.[]} cancel≅ = cancel
+≅-reverse .{_ ∷ _ ∷ []} .{_ ∷ _ ∷ []} (swap≅ x) = comm (swap x)
+≅-reverse .{suc _ ∷ _ ∷ suc _ ∷ []} .{_ ∷ suc _ ∷ _ ∷ []} braid≅ = braid
+≅-reverse {l1} {l2} (respects=r l {r1} {r2} p e1 e2) =
   ≃begin
     reverse l1
-  ≃⟨ refl≡ (cong (λ x -> reverse x) (≡-sym e1)) ⟩
+  ≃⟨ refl≡ (cong (λ x -> reverse x) e1) ⟩
     reverse (l ++ r1)
   ≃⟨ refl≡ (reverse-++-commute l r1) ⟩
     reverse r1 ++ reverse l
-  ≃⟨ ++-respects-l (≃-reverse _ _ p) ⟩
+  ≃⟨ ++-respects-l (≅-reverse p) ⟩
     reverse r2 ++ reverse l
   ≃⟨ refl≡ (≡-sym (reverse-++-commute l r2)) ⟩
     reverse (l ++ r2)
-  ≃⟨ refl≡ (cong (λ x -> reverse x) e2) ⟩
+  ≃⟨ refl≡ (cong (λ x -> reverse x) (≡-sym e2)) ⟩
     reverse l2
   ≃∎
-≃-reverse l1 l2 (respects-l {l} {l'} r p e1 e2) =
+≅-reverse {l1} {l2} (respects=l {l} {l'} r p e1 e2) =
   ≃begin
     reverse l1
-  ≃⟨ refl≡ (cong (λ x -> reverse x) (≡-sym e1)) ⟩
+  ≃⟨ refl≡ (cong (λ x -> reverse x) e1) ⟩
     reverse (l ++ r)
   ≃⟨ refl≡ (reverse-++-commute l r) ⟩
     reverse r ++ reverse l
-  ≃⟨ ++-respects-r (≃-reverse _ _ p) ⟩
+  ≃⟨ ++-respects-r (≅-reverse p) ⟩
     reverse r ++ reverse l'
   ≃⟨ refl≡ (≡-sym (reverse-++-commute l' r)) ⟩
     reverse (l' ++ r)
-  ≃⟨ refl≡ (cong (λ x -> reverse x) e2) ⟩
+  ≃⟨ refl≡ (cong (λ x -> reverse x) (≡-sym e2)) ⟩
     reverse l2
   ≃∎
-≃-reverse l1 .l1 refl = refl
-≃-reverse l1 l2 (comm p) = comm (≃-reverse l2 l1 p)
-≃-reverse l1 l2 (trans {m1} {m2} {m3} p p₃) = trans (≃-reverse m1 m2 p) (≃-reverse m2 m3 p₃)
+≅-reverse {l1} {l2} (comm≅ p) = comm (≅-reverse p)
+
+≃-reverse : {l1 l2 : List ℕ} -> (l1 ≃ l2) -> (reverse l1 ≃ reverse l2)
+≃-reverse {l1} {.l1} refl = refl
+≃-reverse {l1} {l2} (trans≅ p x) =
+ let rec-l = ≃-reverse p
+     rec-r = ≅-reverse x
+ in  trans rec-l rec-r
 
 
 stupid-lemma : {l r : List ℕ} -> {x : ℕ} -> n >> (x ∷ (l ++ r)) -> n >> (l ++ r) × (n > x)
 stupid-lemma (x :⟨ p ⟩: m) = m , p
 
->>-part : {m : List ℕ} -> (l r : List ℕ) -> (l ++ r ≡ m) -> (n >> m) -> ((n >> l) × (n >> r))
->>-part {n} {m} [] r p mm rewrite p = [] , mm
->>-part {n} {m} (x ∷ l) r p mm =
-  let (m , px) = stupid-lemma {n} {l} {r} (subst (λ y -> n >> y) (≡-sym p) mm)
+-- >>-part : {m : List ℕ} -> (l r : List ℕ) -> (l ++ r ≡ m) -> (n >> m) -> ((n >> l) × (n >> r))
+-- >>-part {n} {m} [] r p mm rewrite p = [] , mm
+-- >>-part {n} {m} (x ∷ l) r p mm =
+--   let (m , px) = stupid-lemma {n} {l} {r} (subst (λ y -> n >> y) (≡-sym p) mm)
 
-      recl , recr = >>-part l r refl m
-  in  (x :⟨ px ⟩: recl) , recr
+--       recl , recr = >>-part l r refl m
+--   in  (x :⟨ px ⟩: recl) , recr
 
--- this is not true :/
--- >>-≃-r : (l : List ℕ) -> (n >> l) -> (l2 : List ℕ) -> (l ≃ l2) -> (n >> l2)
--- >>-≃-r .(_ ∷ _ ∷ []) ll .[] cancel = []
--- >>-≃-r .(k ∷ k₁ ∷ []) (k :⟨ x₁ ⟩: (k₁ :⟨ x₂ ⟩: ll)) .(k₁ ∷ k ∷ []) (swap x) = k₁ :⟨ x₂ ⟩: (k :⟨ x₁ ⟩: ll)
--- >>-≃-r .(k ∷ suc k ∷ k ∷ []) (k :⟨ x ⟩: (.(suc k) :⟨ x₁ ⟩: (.k :⟨ x₂ ⟩: ll))) .(suc k ∷ k ∷ suc k ∷ []) braid = suc k :⟨ x₁ ⟩: (k :⟨ x₂ ⟩: (suc k :⟨ x₁ ⟩: ll))
--- >>-≃-r {n} l ll l2 (respects-r m {r} {r'} p x q) rewrite (≡-sym q) =
---   let lp , rp = >>-part m r x ll
---       rec = >>-≃-r r rp r' p
---   in  >>-++ {n} {m} {r'} lp rec
--- >>-≃-r {n} l ll l2 (respects-l {m} {m'} r p x q) rewrite (≡-sym q) =
---   let lp , rp = >>-part m r x ll
---       rec = >>-≃-r m lp m' p
---   in  >>-++ {n} {m'} {r} rec rp
--- >>-≃-r l ll .l refl = ll
--- >>-≃-r l ll l2 (trans {l} {l'} p p₃) = >>-≃-r l' (>>-≃-r l ll l' p) l2 p₃
--- >>-≃-r l ll l2 (comm p) = >>-≃-l l ll l2 p
+-- -- this is not true :/
+-- -- >>-≃-r : (l : List ℕ) -> (n >> l) -> (l2 : List ℕ) -> (l ≃ l2) -> (n >> l2)
+-- -- >>-≃-r .(_ ∷ _ ∷ []) ll .[] cancel = []
+-- -- >>-≃-r .(k ∷ k₁ ∷ []) (k :⟨ x₁ ⟩: (k₁ :⟨ x₂ ⟩: ll)) .(k₁ ∷ k ∷ []) (swap x) = k₁ :⟨ x₂ ⟩: (k :⟨ x₁ ⟩: ll)
+-- -- >>-≃-r .(k ∷ suc k ∷ k ∷ []) (k :⟨ x ⟩: (.(suc k) :⟨ x₁ ⟩: (.k :⟨ x₂ ⟩: ll))) .(suc k ∷ k ∷ suc k ∷ []) braid = suc k :⟨ x₁ ⟩: (k :⟨ x₂ ⟩: (suc k :⟨ x₁ ⟩: ll))
+-- -- >>-≃-r {n} l ll l2 (respects-r m {r} {r'} p x q) rewrite (≡-sym q) =
+-- --   let lp , rp = >>-part m r x ll
+-- --       rec = >>-≃-r r rp r' p
+-- --   in  >>-++ {n} {m} {r'} lp rec
+-- -- >>-≃-r {n} l ll l2 (respects-l {m} {m'} r p x q) rewrite (≡-sym q) =
+-- --   let lp , rp = >>-part m r x ll
+-- --       rec = >>-≃-r m lp m' p
+-- --   in  >>-++ {n} {m'} {r} rec rp
+-- -- >>-≃-r l ll .l refl = ll
+-- -- >>-≃-r l ll l2 (trans {l} {l'} p p₃) = >>-≃-r l' (>>-≃-r l ll l' p) l2 p₃
+-- -- >>-≃-r l ll l2 (comm p) = >>-≃-l l ll l2 p
 
-only-one-canonical : (cl1 cl2 : Canonical n) -> (immersion {n} cl1) ≃ (immersion {n} cl2) -> cl1 ≡ cl2
+only-one-canonical : (cl1 cl2 : Canonical n) -> (immersion {n} cl1) ≅ (immersion {n} cl2) -> cl1 ≡ cl2
 only-one-canonical {.0} CanZ CanZ p = refl
 only-one-canonical {suc n} (CanS cl1 {zero} pr1) (CanS cl2 {zero} pr2) p =
-  let q = subst ((λ y -> (immersion cl1) ≃ y)) ++-unit (subst (λ x -> x ≃ (immersion cl2 ++ [])) ++-unit p)
+  let q = subst ((λ y -> (immersion cl1) ≅ y)) ++-unit (subst (λ x -> x ≅ (immersion cl2 ++ [])) ++-unit p)
       rec = only-one-canonical cl1 cl2 q
   in  canonical-eta pr1 pr2 rec refl
 only-one-canonical {suc n} (CanS cl1 {zero} pr1) (CanS cl2 {suc r2} pr2) p = {!!}
-only-one-canonical {suc n} (CanS cl1 {suc r1} pr1) (CanS cl2 {r2} pr2) p = {!!}
-  -- let rec = only-one-canonical cl1 cl2 {!!}
-  -- in  {!!}
+only-one-canonical {suc n} (CanS cl1 {suc r1} pr1) (CanS cl2 {zero} pr2) p = {!!}
+only-one-canonical {suc n} (CanS cl1 {suc r1} pr1) (CanS cl2 {suc r2} pr2) p =
+  let rec = only-one-canonical {suc n} (CanS cl1 {r1} (≤-down pr1)) (CanS cl2 {r2} (≤-down pr2)) {!!}
+  in  {!!}
 
 
--- identity-on-canonical-forms : (cl : Canonical n) -> (proj₁ (canonical-form-lemma (proj₂ (immersion->> {n} cl)))) ≡ cl
--- identity-on-canonical-forms {.0} CanZ = refl
--- identity-on-canonical-forms {n} (CanS {n'} cl x) =
---   let rec = identity-on-canonical-forms {n'} cl
---   in  {!!}
+-- -- identity-on-canonical-forms : (cl : Canonical n) -> (proj₁ (canonical-form-lemma (proj₂ (immersion->> {n} cl)))) ≡ cl
+-- -- identity-on-canonical-forms {.0} CanZ = refl
+-- -- identity-on-canonical-forms {n} (CanS {n'} cl x) =
+-- --   let rec = identity-on-canonical-forms {n'} cl
+-- --   in  {!!}
