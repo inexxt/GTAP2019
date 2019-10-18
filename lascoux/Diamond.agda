@@ -308,6 +308,12 @@ cancel-reduction (x ∷ x₁ ∷ x₂ ∷ m) p =
   in  ⊥-elim (1+n≰n (≤-down-+ rec))
 
 
+diamond-separate : {l r l' r' ml mr : List ℕ} -> (ml ≡ l' ++ r) -> (mr ≡ l ++ r') -> (l ≅ l') -> (r ≅ r') -> (ml ≅ (l' ++ r')) × (mr ≅ (l' ++ r'))
+diamond-separate {l' = l'} {r' = r'} mle mre lp rp rewrite mle rewrite mre = respects=r l' rp refl refl , respects=l r' lp refl refl
+
+-- diamond-separate : {l r l' r' ml mr : List ℕ} -> (ml ≡ l' ++ r) -> (mr ≡ l ++ r') -> (l ≅ l') -> (r ≅ r') -> (ml ≅ (l' ++ r')) × (mr ≅ (l' ++ r'))
+-- diamond-separate {l' = l'} {r' = r'} mle mre lp rp rewrite mle rewrite mre = respects=r l' rp refl refl , respects=l r' lp refl refl
+
 
 diamond : (m1 m2 m3 : List ℕ) -> (m1 ≅ m2) -> (m1 ≅ m3) -> ∃ (λ m -> (m2 ≃ m) × (m3 ≃ m))
 diamond m1 m2 m3 p q = {!!}
