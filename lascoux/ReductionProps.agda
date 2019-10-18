@@ -21,6 +21,7 @@ open import Reduction using (Canonical; immersion; canonical-form-lemma)
 
 open _≃_
 open ≃-Reasoning
+open ≤-Reasoning renaming (begin_ to ≤-begin_; _∎ to ≤∎) hiding (_≡⟨_⟩_; _≡⟨⟩_)
 open Σ
 open _>>_
 open Canonical
@@ -68,19 +69,45 @@ immersion->> {n} (CanS {n'} cl {r} rn) =
 postulate
   canonical-eta : {cl1 cl2 : Canonical n} -> {r1 r2 : ℕ} -> (rn1 : r1 ≤ (suc n)) -> (rn2 : r2 ≤ (suc n)) -> (cl1 ≡ cl2) -> (r1 ≡ r2) -> (CanS cl1 rn1) ≡ (CanS cl2 rn2)
 
-≃-abs-l : {x : ℕ} -> (x ∷ []) ≅ [] -> ⊥
-≃-abs-r : {x : ℕ} -> [] ≅ (x ∷ []) -> ⊥
+≅-abs-l : {x : ℕ} -> (x ∷ []) ≅ [] -> ⊥
+≅-abs-r : {x : ℕ} -> [] ≅ (x ∷ []) -> ⊥
 
-≃-abs-l {n} (respects=r [] {r' = []} p refl x₁) = ≃-abs-l p
-≃-abs-l {n} (respects=l {x₁ ∷ []} {l' = []} .[] p x refl) = ≃-abs-l p
-≃-abs-l {n} (comm≅ p) = ≃-abs-r p
+≅-abs-l {n} (respects=r [] {r' = []} p refl x₁) = ≅-abs-l p
+≅-abs-l {n} (respects=l {x₁ ∷ []} {l' = []} .[] p x refl) = ≅-abs-l p
+≅-abs-l {n} (comm≅ p) = ≅-abs-r p
 
-≃-abs-r {x} (respects=r [] {r' = x ∷ .[]} p refl refl) = ≃-abs-r p
-≃-abs-r {n} (respects=l {[]} {y ∷ []} [] p x q) = ≃-abs-r p
-≃-abs-r {n} (comm≅ p) = ≃-abs-l p
+≅-abs-r {x} (respects=r [] {r' = x ∷ .[]} p refl refl) = ≅-abs-r p
+≅-abs-r {n} (respects=l {[]} {y ∷ []} [] p x q) = ≅-abs-r p
+≅-abs-r {n} (comm≅ p) = ≅-abs-l p
+
+≅-len : {m1 m2 : List ℕ} -> (m1 ≅ m2) -> (length m2 ≤ length m1)
+≅-len {.(_ ∷ _ ∷ [])} {.[]} cancel≅ = z≤n
+≅-len {.(_ ∷ _ ∷ [])} {.(_ ∷ _ ∷ [])} (swap≅ x) = s≤s (s≤s z≤n)
+≅-len {.(suc _ ∷ _ ∷ suc _ ∷ [])} {.(_ ∷ suc _ ∷ _ ∷ [])} braid≅ = s≤s (s≤s (s≤s z≤n))
+≅-len {m1} {m2} (respects=r l {r} {r'} p e1 e2) rewrite e1 rewrite e2 rewrite (length-++ l {r}) rewrite (length-++ l {r'}) =
+  let rec = ≅-len p
+  in  ≤-up2-+ rec
+≅-len {m1} {m2} (respects=l {l} {l'} r p e1 e2) rewrite e1 rewrite e2 rewrite (length-++ l {r}) rewrite (length-++ l' {r}) =
+  let rec = ≅-len p
+  in ≤-up2-r-+ rec
+≅-len {m1} {m2} (comm≅ p) = {!≅-len p!}
 
 ≃-abs : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
-≃-abs (trans≅ p x) = {!!}
+≃-abs (trans≅ x refl) = ≅-abs-l x
+≃-abs (trans≅ {m2 = []} x q) = ?
+≃-abs (trans≅ {m2 = x₁ ∷ m2} x q) = ?
+
+ZeroCanonical : (n : ℕ) -> Canonical n
+ZeroCanonical zero = CanZ
+ZeroCanonical (suc n) = CanS (ZeroCanonical n) z≤n
+
+≃-canonize : (cl : Canonical n) -> (l : List ℕ) -> (l' : (suc n) >> l) -> ((l , l') ≡ immersion->> {n} cl) -> (l ≅ []) -> cl ≡ ZeroCanonical n
+≃-canonize cl .(proj₁ (immersion->> cl)) .(proj₂ (immersion->> cl)) refl q = {!!}
+
+≃-down2 : {l1 l2 : List ℕ} -> ((n ∷ l1) ≃ (n ∷ l2)) -> (l1 ≃ l2)
+≃-down2 {n} {[]} {[]} p = refl
+≃-down2 {n} {[]} {x ∷ l2} p = {!!}
+≃-down2 {n} {x ∷ l1} {l2} p = {!!}
 
 ≅-reverse : {l1 l2 : List ℕ} -> (l1 ≅ l2) -> (reverse l1 ≃ reverse l2)
 ≅-reverse .{_ ∷ _ ∷ []} {.[]} cancel≅ = cancel
@@ -119,21 +146,21 @@ postulate
 ≃-reverse : {l1 l2 : List ℕ} -> (l1 ≃ l2) -> (reverse l1 ≃ reverse l2)
 ≃-reverse {l1} {.l1} refl = refl
 ≃-reverse {l1} {l2} (trans≅ p x) =
- let rec-l = ≃-reverse p
-     rec-r = ≅-reverse x
+ let rec-l = ≅-reverse p
+     rec-r = ≃-reverse x
  in  trans rec-l rec-r
 
 
 stupid-lemma : {l r : List ℕ} -> {x : ℕ} -> n >> (x ∷ (l ++ r)) -> n >> (l ++ r) × (n > x)
 stupid-lemma (x :⟨ p ⟩: m) = m , p
 
--- >>-part : {m : List ℕ} -> (l r : List ℕ) -> (l ++ r ≡ m) -> (n >> m) -> ((n >> l) × (n >> r))
--- >>-part {n} {m} [] r p mm rewrite p = [] , mm
--- >>-part {n} {m} (x ∷ l) r p mm =
---   let (m , px) = stupid-lemma {n} {l} {r} (subst (λ y -> n >> y) (≡-sym p) mm)
+>>-part : {m : List ℕ} -> (l r : List ℕ) -> (l ++ r ≡ m) -> (n >> m) -> ((n >> l) × (n >> r))
+>>-part {n} {m} [] r p mm rewrite p = [] , mm
+>>-part {n} {m} (x ∷ l) r p mm =
+  let (m , px) = stupid-lemma {n} {l} {r} (subst (λ y -> n >> y) (≡-sym p) mm)
 
---       recl , recr = >>-part l r refl m
---   in  (x :⟨ px ⟩: recl) , recr
+      recl , recr = >>-part l r refl m
+  in  (x :⟨ px ⟩: recl) , recr
 
 -- -- this is not true :/
 -- -- >>-≃-r : (l : List ℕ) -> (n >> l) -> (l2 : List ℕ) -> (l ≃ l2) -> (n >> l2)

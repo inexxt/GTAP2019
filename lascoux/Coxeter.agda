@@ -27,10 +27,10 @@ data _≅_ : List ℕ -> List ℕ -> Set where
 
 data _≃_ : List ℕ -> List ℕ -> Set where
     refl : {m : List ℕ} -> m ≃ m
-    trans≅ : {m1 m2 m3 : List ℕ} -> (m1 ≃ m2) -> (m2 ≅ m3) -> m1 ≃ m3
+    trans≅ : {m1 m2 m3 : List ℕ} -> (m1 ≅ m2) -> (m2 ≃ m3) -> m1 ≃ m3
 
 ext : {l l' : List ℕ} -> l ≅ l' -> l ≃ l'
-ext p = trans≅ refl p
+ext p = trans≅ p refl
 
 cancel : (n ∷ n ∷ []) ≃ []
 cancel = ext cancel≅
@@ -42,25 +42,25 @@ braid : ((suc n) ∷ n ∷ (suc n) ∷ []) ≃ (n ∷ (suc n) ∷ n ∷ [])
 braid = ext braid≅
 
 trans : {m1 m2 m3 : List ℕ} -> (m1 ≃ m2) -> (m2 ≃ m3) -> m1 ≃ m3
-trans p refl = p
-trans p (trans≅ q x) = trans≅ (trans p q) x
+trans refl p  = p
+trans (trans≅ x q) p = trans≅ x (trans q p)
 
 comm : {m1 m2 : List ℕ} -> (m1 ≃ m2) -> (m2 ≃ m1)
 comm refl = refl
-comm (trans≅ p x) = trans (ext (comm≅ x)) (comm p)
+comm (trans≅ p x) = trans (comm x) (ext (comm≅ p))
 
 respects-r : (l : List ℕ) -> {r r' lr lr' : List ℕ} -> (r ≃ r') -> (lr ≡ l ++ r) -> (lr' ≡ l ++ r') -> lr ≃ lr'
 respects-r l refl e1 e2 rewrite e1 rewrite e2 = refl
 respects-r l (trans≅ {m2 = lhs} {m3 = rhs} rr' x) e1 e2 rewrite e1 rewrite e2 =
-  let rec-l = respects-r l  rr' e1 refl
-      rec-r = respects=r l {lr = l ++ lhs} {lr' = l ++ rhs} x refl refl
-  in  trans≅ (subst (λ y -> y ≃ (l ++ lhs)) e1 rec-l) rec-r
+  let rec-l = respects=r l rr' e1 refl
+      rec-r = respects-r l {lr = l ++ lhs} {lr' = l ++ rhs} x refl refl
+  in  trans≅ (subst (λ y -> y ≅ (l ++ lhs)) e1 rec-l) rec-r
 
 respects-l : {l l' : List ℕ} -> (r : List ℕ) ->{lr l'r : List ℕ} -> (l ≃ l') -> (lr ≡ l ++ r) -> (l'r ≡ l' ++ r) -> lr ≃ l'r
 respects-l l refl e1 e2 rewrite e1 rewrite e2 = refl
 respects-l r (trans≅ {m2 = lhs} {m3 = rhs} rr' x) e1 e2 rewrite e1 rewrite e2 =
-  let rec-l = respects-l r rr' refl refl
-      rec-r = respects=l r {lr = lhs ++ r} {l'r = rhs ++ r} x refl refl
+  let rec-l = respects=l r rr' refl refl
+      rec-r = respects-l r {lr = lhs ++ r} {l'r = rhs ++ r} x refl refl
   in  trans≅ rec-l rec-r
 
 module ≃-Reasoning where
