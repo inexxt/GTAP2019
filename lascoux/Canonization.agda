@@ -9,7 +9,6 @@ open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 open import Function
 
-open import General
 open import Relation.Nullary
 open import Data.Empty
 open Relation.Binary.PropositionalEquality.≡-Reasoning

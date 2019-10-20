@@ -8,7 +8,6 @@ open import Data.Product using (∃; Σ; _×_; _,_; _,′_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 
-open import General
 open import Relation.Nullary
 open import Data.Empty
 open Relation.Binary.PropositionalEquality.≡-Reasoning
@@ -59,7 +58,7 @@ F-canonize-p> (suc n) (suc (suc r)) i (s≤s prn) (s≤s pin) (s≤s pirn) =
       pr2 = introduce-∸-≤ (introduce-∸-≤l prn (≤-up n≤i+1+r)) (s≤s (introduce-∸-≤l prn n≤i+1+r))
 
       pirn' : n ∸ suc i + (suc i ∸ (n ∸ suc r)) ≤ n
-      pirn' = eliminate-∸-≤ (introduce-∸-≤l (introduce-∸-≤l {n} {suc i} {r = suc r} prn (≤-up n≤i+1+r)) (≤-up-+ pin)) (∸-anti-≤ (∸-implies-≤ {r = n ∸ suc r} refl) pin)
+      pirn' = eliminate-∸-≤ (introduce-∸-≤l (introduce-∸-≤l {n} {suc i} {r = suc r} prn (≤-up n≤i+1+r)) (≤-up-r-+ pin)) (∸-anti-≤ (∸-implies-≤ {r = n ∸ suc r} refl) pin)
 
       r1 = (suc n) ∸ (1 + (suc i))
       r2 = (1 + i) ∸ ((suc n) ∸ (suc (suc r)))

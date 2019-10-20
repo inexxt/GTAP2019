@@ -8,7 +8,6 @@ open import Data.Product using (∃; Σ; _×_; _,_; _,′_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 
-open import General
 open import Relation.Nullary
 open import Data.Empty
 open Relation.Binary.PropositionalEquality.≡-Reasoning
@@ -80,29 +79,30 @@ postulate
 ≅-abs-r {n} (respects=l {[]} {y ∷ []} [] p x q) = ≅-abs-r p
 ≅-abs-r {n} (comm≅ p) = ≅-abs-l p
 
-≅-len : {m1 m2 : List ℕ} -> (m1 ≅ m2) -> (length m2 ≤ length m1)
-≅-len {.(_ ∷ _ ∷ [])} {.[]} cancel≅ = z≤n
-≅-len {.(_ ∷ _ ∷ [])} {.(_ ∷ _ ∷ [])} (swap≅ x) = s≤s (s≤s z≤n)
-≅-len {.(suc _ ∷ _ ∷ suc _ ∷ [])} {.(_ ∷ suc _ ∷ _ ∷ [])} braid≅ = s≤s (s≤s (s≤s z≤n))
-≅-len {m1} {m2} (respects=r l {r} {r'} p e1 e2) rewrite e1 rewrite e2 rewrite (length-++ l {r}) rewrite (length-++ l {r'}) =
-  let rec = ≅-len p
-  in  ≤-up2-+ rec
-≅-len {m1} {m2} (respects=l {l} {l'} r p e1 e2) rewrite e1 rewrite e2 rewrite (length-++ l {r}) rewrite (length-++ l' {r}) =
-  let rec = ≅-len p
-  in ≤-up2-r-+ rec
-≅-len {m1} {m2} (comm≅ p) = {!≅-len p!}
+-- ≅-len : {m1 m2 : List ℕ} -> (m1 ≅ m2) -> (length m2 ≤ length m1)
+-- ≅-len {.(_ ∷ _ ∷ [])} {.[]} cancel≅ = z≤n
+-- ≅-len {.(_ ∷ _ ∷ [])} {.(_ ∷ _ ∷ [])} (swap≅ x) = s≤s (s≤s z≤n)
+-- ≅-len {.(suc _ ∷ _ ∷ suc _ ∷ [])} {.(_ ∷ suc _ ∷ _ ∷ [])} braid≅ = s≤s (s≤s (s≤s z≤n))
+-- ≅-len {m1} {m2} (respects=r l {r} {r'} p e1 e2) rewrite e1 rewrite e2 rewrite (length-++ l {r}) rewrite (length-++ l {r'}) =
+--   let rec = ≅-len p
+--   in  ≤-up2-+ rec
+-- ≅-len {m1} {m2} (respects=l {l} {l'} r p e1 e2) rewrite e1 rewrite e2 rewrite (length-++ l {r}) rewrite (length-++ l' {r}) =
+--   let rec = ≅-len p
+--   in ≤-up2-r-+ rec
+-- ≅-len {m1} {m2} (comm≅ p) = {!≅-len p!}
 
 ≃-abs : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
 ≃-abs (trans≅ x refl) = ≅-abs-l x
-≃-abs (trans≅ {m2 = []} x q) = ?
-≃-abs (trans≅ {m2 = x₁ ∷ m2} x q) = ?
+≃-abs (trans≅ {m2 = []} x q) = ≅-abs-l x
+≃-abs (trans≅ {m2 = x₁ ∷ m2} x q) = {!!}
 
 ZeroCanonical : (n : ℕ) -> Canonical n
 ZeroCanonical zero = CanZ
 ZeroCanonical (suc n) = CanS (ZeroCanonical n) z≤n
 
 ≃-canonize : (cl : Canonical n) -> (l : List ℕ) -> (l' : (suc n) >> l) -> ((l , l') ≡ immersion->> {n} cl) -> (l ≅ []) -> cl ≡ ZeroCanonical n
-≃-canonize cl .(proj₁ (immersion->> cl)) .(proj₂ (immersion->> cl)) refl q = {!!}
+≃-canonize CanZ .[] .[] refl q = refl
+≃-canonize (CanS cl x) .(proj₁ (immersion->> cl) ++ (suc (suc _) ↓ _)) .(>>-++ (>>-suc (proj₂ (immersion->> cl))) (>>-↓ (s≤s (s≤s (≤-reflexive refl))))) refl q = {!!}
 
 ≃-down2 : {l1 l2 : List ℕ} -> ((n ∷ l1) ≃ (n ∷ l2)) -> (l1 ≃ l2)
 ≃-down2 {n} {[]} {[]} p = refl
