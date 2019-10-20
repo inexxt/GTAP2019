@@ -45,6 +45,35 @@ data _>>_ : ℕ -> List ℕ -> Set where
   [] : {n : ℕ} -> n >> []
   _:⟨_⟩:_ : {n : ℕ} -> {l : List ℕ} -> (k : ℕ) -> (k < n) -> n >> l -> n >> (k ∷ l)
 
+extract-proof : {a : ℕ} -> (n >> (a ∷ l)) -> (a < n)
+extract-proof (_ :⟨ p ⟩: _) = p
+
+>>-++ : {l1 l2 : List ℕ} -> n >> l1 -> n >> l2 -> n >> (l1 ++ l2)
+>>-++ {n} {[]} {l2} ll1 ll2 = ll2
+>>-++ {n} {x ∷ l1} {l2} (.x :⟨ p ⟩: ll1) ll2 = x :⟨ p ⟩: (>>-++ ll1 ll2)
+
+>>-↓ : {n k r : ℕ} -> (k ≤ n) -> (n >> (k ↓ r))
+>>-↓ {n} {zero} {zero} kn = []
+>>-↓ {n} {suc k} {zero} kn = []
+>>-↓ {n} {zero} {suc r} kn = []
+>>-↓ {n} {suc k} {suc r} kn = k :⟨ kn ⟩: (>>-↓ (≤-down kn))
+
+>>-suc : (n >> l) -> ((suc n) >> l)
+>>-suc  [] = []
+>>-suc  (k :⟨ p ⟩: l') = k :⟨ ≤-up p ⟩: >>-suc l'
+
+immersion->> : {n : ℕ} -> (cl : Canonical n) -> n >> immersion cl
+immersion->> {.0} CanZ = []
+immersion->> {suc n} (CanS {n} cl {r} rn) =
+  let p = immersion->> {n} cl
+  in  >>-++ (>>-suc p) (>>-↓ (≤-reflexive refl))
+
+reverse->> : n >> l -> n >> reverse l
+reverse->> {n} {[]} ll = ll
+reverse->> {n} {x ∷ l} (.x :⟨ x₁ ⟩: ll) rewrite (reverse-++-commute [ x ] l) =
+  let rec = reverse->> {n} {l} ll
+  in  >>-++ {l1 = reverse l} {l2 = [ x ]} rec (x :⟨ x₁ ⟩: [])
+
 cut-head : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (l1 ≡ l2)
 cut-head {a1} {.a1} {l1} {.l1} refl = refl
 
@@ -93,8 +122,13 @@ lemma-l++2++r : (a : ℕ) -> (l1 r1 l2 r2 : List ℕ) -> (l1 ++ r1 ≡ l2 ++ a �
                    (Σ (List ℕ × List ℕ) (λ (ll2 , lr2) -> (l2 ≡ ll2 ++ lr2) × (l1 ≡ ll2) × (r1 ≡ lr2 ++ a ∷ a ∷ r2))) || -- the case when both a ∷ a are in right
                    ((l1 ≡ l2 ++ [ a ]) × (r1 ≡ a ∷ r2)) -- the case when one a is in left, and one in right
 lemma-l++2++r a [] r1 l2 r2 p = R2 (([] , l2) , (refl , (refl , p)))
-lemma-l++2++r a (x ∷ []) r1 [] r2 p = {!!}
-lemma-l++2++r a (x ∷ x₁ ∷ l1) r1 [] r2 p = {!!}
+lemma-l++2++r a (x ∷ []) r1 [] r2 p =
+  let h = cut-tail p
+  in  R3 ((cong [_] h) , (cut-head p))
+lemma-l++2++r a (x ∷ x₁ ∷ l1) r1 [] r2 p =
+  let h1 = cut-tail p
+      h2 = cut-tail (cut-head p)
+  in  R1 ((l1 , r1) , (cut-head (cut-head (≡-sym p)) , (head+tail h1 (head+tail h2 refl)) , refl))
 lemma-l++2++r a (x ∷ l1) r1 (x₁ ∷ l2) r2 p with lemma-l++2++r a l1 r1 l2 r2 (cut-head p)
 ... | R1 ((fst , snd) , fst₁ , fst₂ , snd₁) = R1 ((fst , snd) , (fst₁ , ((head+tail (cut-tail p) fst₂) , snd₁)))
 ... | R2 ((fst , snd) , fst₁ , fst₂ , snd₁) = R2 (((x₁ ∷ fst) , snd) , ((cong (λ e -> x₁ ∷ e) fst₁) , ((head+tail (cut-tail p) fst₂) , snd₁)))
@@ -104,7 +138,14 @@ lemma-l++2++r a (x ∷ l1) r1 (x₁ ∷ l2) r2 p with lemma-l++2++r a l1 r1 l2 r
 abs-const-many-↓ : (n a : ℕ) -> (l r : List ℕ) -> (cl : Canonical n) -> (immersion {n} cl) ≡ (l ++ a ∷ a ∷ r) -> ⊥
 abs-const-many-↓ .0 a [] r CanZ ()
 abs-const-many-↓ .0 a (x ∷ l) r CanZ ()
-abs-const-many-↓ (suc n) a l r (CanS cl x) p = {!!}
+abs-const-many-↓ (suc n) a l r (CanS cl x) p with lemma-l++2++r _ (immersion cl) (suc n ↓ _) _ _ p
+... | R1 ((fst , snd) , fst₁ , fst₂ , snd₁) = abs-const-many-↓ _ _ _ fst cl fst₂
+... | R2 ((fst , snd) , fst₁ , fst₂ , snd₁) = abs-const-↓ _ _ _ snd r snd₁
+abs-const-many-↓ (suc n) a l r (CanS cl {suc r₁} x) p | R3 (fst , snd) =
+  let h = cut-tail snd
+      n>cl = immersion->> cl
+      n>a = subst (λ e -> n >> e) (reverse-++-commute l [ a ]) (reverse->> (subst (λ e -> n >> e) fst n>cl))
+  in  ⊥-elim (1+n≰n (≤-trans (≤-reflexive (cong suc h)) (extract-proof n>a)))
 
 abs-braid-many-↓ : (n a : ℕ) -> (l r : List ℕ) -> (cl : Canonical n) -> (immersion {n} cl) ≡ (l ++ suc a ∷ a ∷ suc a ∷ r) -> ⊥
 abs-braid-many-↓ .0 a [] r CanZ ()
@@ -167,25 +208,6 @@ only-one-canonical≅ cl m (braid≅ l r .(immersion cl) .m defm defmf) = abs-br
       hh , tt = ≡-++↓ m1 m2 n k1 k2 ml1 ml2 pk1 pk2 t
   in  hh , subst (λ z → x ∷ m1 ≡ z ∷ m2) h (cong (λ e -> x ∷ e) tt)
 
->>-++ : {l1 l2 : List ℕ} -> n >> l1 -> n >> l2 -> n >> (l1 ++ l2)
->>-++ {n} {[]} {l2} ll1 ll2 = ll2
->>-++ {n} {x ∷ l1} {l2} (.x :⟨ p ⟩: ll1) ll2 = x :⟨ p ⟩: (>>-++ ll1 ll2)
-
->>-↓ : {n k r : ℕ} -> (k ≤ n) -> (n >> (k ↓ r))
->>-↓ {n} {zero} {zero} kn = []
->>-↓ {n} {suc k} {zero} kn = []
->>-↓ {n} {zero} {suc r} kn = []
->>-↓ {n} {suc k} {suc r} kn = k :⟨ kn ⟩: (>>-↓ (≤-down kn))
-
->>-suc : (n >> l) -> ((suc n) >> l)
->>-suc  [] = []
->>-suc  (k :⟨ p ⟩: l') = k :⟨ ≤-up p ⟩: >>-suc l'
-
-immersion->> : {n : ℕ} -> (cl : Canonical n) -> n >> immersion cl
-immersion->> {.0} CanZ = []
-immersion->> {suc n} (CanS {n} cl {r} rn) =
-  let p = immersion->> {n} cl
-  in  >>-++ (>>-suc p) (>>-↓ (≤-reflexive refl))
 
 ≡immersion : (cl1 cl2 : Canonical n) -> (immersion {n} cl1 ≡ immersion {n} cl2) -> cl1 ≡ cl2
 ≡immersion CanZ CanZ refl = refl
