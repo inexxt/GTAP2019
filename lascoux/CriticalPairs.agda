@@ -12,7 +12,7 @@ open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
 open import Data.Bool hiding (_<_; _≤_)
-open import Data.Bool.Properties hiding (≤-reflexive)
+open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 
 open import Arithmetic hiding (n)
 open import Diamond hiding (n; l)
@@ -26,46 +26,115 @@ variable
   n : ℕ
   l : List ℕ
 
---- critical pairs
-
 ∷-≡1 : {n1 n2 : ℕ} -> {l1 l2 : List ℕ} -> (n1 ∷ l1 ≡ n2 ∷ l2) -> (n1 ≡ n2)
 ∷-≡1 refl = refl
 
 ∷-≡2 : {n1 n2 : ℕ} -> {l1 l2 : List ℕ} -> (n1 ∷ l1 ≡ n2 ∷ l2) -> (l1 ≡ l2)
 ∷-≡2 refl = refl
 
+force-x : (a x : ℕ) -> (l1 l2 : List ℕ) -> (a ∷ a ∷ a ∷ [] ≡ l1 ++ x ∷ l2) -> (a ≡ x)
+force-x a .a [] .(a ∷ a ∷ []) refl = refl
+force-x a .a (.a ∷ []) .(a ∷ []) refl = refl
+force-x a .a (.a ∷ .a ∷ []) .[] refl = refl
+force-x a x (x₁ ∷ x₂ ∷ x₃ ∷ []) l2 ()
+force-x a x (x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ l1) l2 ()
 
-cc : (a : ℕ) -> (m m1 m2 : List ℕ) -> (m ≡ a ∷ a ∷ a ∷ []) -> (m ≅ m1) -> (m ≅ m2) -> ∃ (λ mm -> (m1 ≃ mm) × (m2 ≃ mm))
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r l x pm1 x₁ x₂) (respects=r l₁ x₃ pm2 x₄ x₅) = {!!}
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r (.a ∷ []) (nonempty-l .a .[]) cancel≅ refl x₂) (respects=l r x₃ pm2 x₄ x₅) rewrite x₂ rewrite x₅ =
-  a ∷ [] , refl , trans {_ ++ r} {a ∷ a ∷ a ∷ []} {a ∷ []}  (trans {!!} {!refl≡ (≡-sym x₄)!}) (++-respects-r (nonempty-l a []) cancel)
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r .(x ∷ x₆ ∷ l) (nonempty-l x (x₆ ∷ l)) cancel≅ x₁ x₂) (respects=l r x₃ pm2 x₄ x₅) = {!!}
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r l x (swap≅ x₆) x₁ x₂) (respects=l r x₃ pm2 x₄ x₅) = {!!}
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r l x braid≅ x₁ x₂) (respects=l r x₃ pm2 x₄ x₅) = {!!}
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r l x (respects=r l₁ x₆ pm1 x₇ x₈) x₁ x₂) (respects=l r x₃ pm2 x₄ x₅) = {!!}
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r l x (respects=l r₁ x₆ pm1 x₇ x₈) x₁ x₂) (respects=l r x₃ pm2 x₄ x₅) = {!!}
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=l r x pm1 x₁ x₂) (respects=r l x₃ pm2 x₄ x₅) = {!!}
-cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=l r x pm1 x₁ x₂) (respects=l r₁ x₃ pm2 x₄ x₅) = {!!}
+abs-suc : {A : Set} -> suc n < n -> A
+abs-suc {n} p = ⊥-elim (1+n≰n (≤-down p))
+
+abs-≤ : {A : Set} -> n < n -> A
+abs-≤ {n} p = ⊥-elim (1+n≰n p)
+
+2-1++ : {a b c : ℕ} -> (l r : List ℕ) -> a ∷ b ∷ [] ≡ c ∷ l ++ r -> length r ≤ 1
+2-1++ [] .(_ ∷ []) refl = s≤s z≤n
+2-1++ (x ∷ []) .[] refl = z≤n
+
+2-++1 : {a b c : ℕ} -> (l r : List ℕ) -> a ∷ b ∷ [] ≡ l ++ c ∷ r -> length l ≤ 1
+2-++1 [] .(_ ∷ []) refl = z≤n
+2-++1 (x ∷ []) .[] refl = s≤s z≤n
+2-++1 (x ∷ x₁ ∷ []) r ()
+
+postulate
+  3-++2 : {a b c d e : ℕ} -> (l r : List ℕ) -> a ∷ b ∷ c ∷  [] ≡ l ++ d ∷ e ∷ r -> length l ≤ 1
+  3-2++ : {a b c d e : ℕ} -> (l r : List ℕ) -> a ∷ b ∷ c ∷  [] ≡ d ∷ e ∷ l ++ r -> length r ≤ 1
 
 
--- ss : (a b c : ℕ) -> (m m1 m2 : List ℕ) -> (a > suc b) -> (b > suc c) -> (m ≡ a ∷ b ∷ c ∷ []) -> (m ≅ m1) -> (m ≅ m2) -> ∃ (λ mm -> (m1 ≃ mm) × (m2 ≃ mm))
--- ss .(suc b) b .(suc b) .(suc b ∷ b ∷ suc b ∷ []) .(b ∷ suc b ∷ b ∷ []) m2 pab pbc refl braid≅ pm2 = ⊥-elim (1+n≰n pab)
--- ss .(suc b) b .(suc b) .(suc b ∷ b ∷ suc b ∷ []) m1 .(b ∷ suc b ∷ b ∷ []) pab pbc refl (respects=r l x pm1 x₁ x₂) braid≅ = ⊥-elim (1+n≰n pab)
--- ss a b c .(a ∷ b ∷ c ∷ []) m1 m2 pab pbc refl (respects=r .(a1 ∷ l1) (nonempty-l a1 l1) {r1} pm1 e1 e2) (respects=r .(a2 ∷ l2) (nonempty-l a2 l2) {r2} pm2 e3 e4) =
---   let a=a1 : a ≡ a1
---       a=a1 = ∷-≡1 e1
---       a=a2 : a ≡ a2
---       a=a2 = ∷-≡1 e3
+≅-2 : {m1 m2 : List ℕ} -> m1 ≅ m2 -> 2 ≤ length m1
+≅-2 cancel≅ = s≤s (s≤s z≤n)
+≅-2 (swap≅ x) = s≤s (s≤s z≤n)
+≅-2  braid≅ = s≤s (s≤s z≤n)
+≅-2  (respects=r l nl {r} p deflr deflr') rewrite deflr rewrite (length-++ l {r}) =
+  let rec = ≅-2 p
+  in  ≤-up-+ rec
+≅-2  (respects=l {l} r nr p deflr defl'r) rewrite deflr rewrite (length-++ l {r}) =
+  let rec = ≅-2 p
+  in  ≤-up-r-+ rec
 
---       l1++r1=bc : b ∷ c ∷ [] ≡ l1 ++ r1
---       l1++r1=bc = ∷-≡2 e1
+--- critical pairs
 
---       l2++r2=bc : b ∷ c ∷ [] ≡ l2 ++ r2
---       l2++r2=bc = ∷-≡2 e3
+cc : (a : ℕ) -> (m m1 m2 : List ℕ) -> (defm : m ≡ a ∷ a ∷ a ∷ []) -> (p1 : m ≅ m1) -> (p2 : m ≅ m2) -> ∃ (λ mm -> (m1 ≃ mm) × (m2 ≃ mm))
+-- trivial, solved with two-two-reduction
+cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r .(x ∷ l) (nonempty-l x l) p1 deflr deflr') (respects=r .(x₁ ∷ l₁) (nonempty-l x₁ l₁) p2 deflr₁ deflr'') = {!!}
+cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=l .(x ∷ l) (nonempty-l x l) p1 deflr defl'r) (respects=l .(x₁ ∷ l₁) (nonempty-l x₁ l₁) p2 deflr₁ defl'r₁) = {!!}
+-- interesting - this is the case when i do (a(aa) -> a; (aa)a -> a)
+cc _ .(x₁ ∷ x₁ ∷ x₁ ∷ []) m1 m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) cancel≅ refl deflr') (respects=l {.x₁ ∷ .x₁ ∷ []} (x₁ ∷ []) (nonempty-l .x₁ .[]) cancel≅ refl defl'r) rewrite (defl'r) rewrite deflr' = [ x₁ ] , (refl , refl)
 
---   in {!!} -- this is the easy case when two-two-reduction works
--- ss a b c .(a ∷ b ∷ c ∷ []) m1 m2 pab pbc refl (respects=r l x pm1 x₁ x₂) (respects=l r x₃ pm2 x₄ x₅) = {!!}
--- ss .(suc b) b .(suc b) .(suc b ∷ b ∷ suc b ∷ []) m1 .(b ∷ suc b ∷ b ∷ []) pab pbc refl (respects=l r x pm1 x₁ x₂) braid≅ = ⊥-elim (1+n≰n pab)
--- ss a b c .(a ∷ b ∷ c ∷ []) m1 m2 pab pbc refl (respects=l .(x ∷ l₁) (nonempty-l x l₁) pm1 e1 e2) (respects=r .(x₁ ∷ l) (nonempty-l x₁ l) pm2 e3 e4) = {!!}
--- ss a b c .(a ∷ b ∷ c ∷ []) m1 m2 pab pbc refl (respects=l .(a1 ∷ l1) (nonempty-l a1 l1) {r1} pm1 e1 e2) (respects=l .(a2 ∷ l2) (nonempty-l a2 l2) {r2} pm2 e3 e4) =
---   {!!} -- this is again the easy case when two-two-reduction worksw
+-- false
+cc _ .(x₁ ∷ x₁ ∷ x₁ ∷ []) m1 m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) cancel≅ refl deflr') (respects=l {.x₁ ∷ .x₁ ∷ []} (x₁ ∷ []) (nonempty-l .x₁ .[]) (swap≅ x) refl defl'r) = abs-suc x
+cc _ .(_ ∷ _ ∷ _ ∷ []) .(_ ∷ []) m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) cancel≅ refl refl) (respects=l {_ ∷ _ ∷ []} (_ ∷ []) (nonempty-l _ .[]) (respects=r (x ∷ l) (nonempty-l .x .l) {r} p2 deflr deflr'') refl defl'r) =
+  let 2≤lenr : 2 ≤ length r
+      2≤lenr = ≅-2 p2
+
+      lenr≤1 : length r ≤ 1
+      lenr≤1 = 2-1++ l r deflr
+  in  abs-≤ (≤-trans 2≤lenr lenr≤1)
+cc _ .(_ ∷ _ ∷ _ ∷ []) .(_ ∷ []) m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) cancel≅ refl refl) (respects=l {_ ∷ _ ∷ []} (_ ∷ []) (nonempty-l _ .[]) (respects=l {l} (x ∷ r) (nonempty-l .x .r) p2 deflr defl'r₁) refl defl'r) =
+  let 2≤lenl : 2 ≤ length l
+      2≤lenl = ≅-2 p2
+
+      lenl≤1 : length l ≤ 1
+      lenl≤1 = 2-++1 l r deflr
+  in  abs-≤ (≤-trans 2≤lenl lenl≤1)
+
+-- false
+cc _ .(x₁ ∷ x₁ ∷ x₁ ∷ []) m1 m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) (swap≅ x) refl deflr') (respects=l {.x₁ ∷ .x₁ ∷ []} (x₁ ∷ []) (nonempty-l .x₁ .[]) p2 refl defl'r) = abs-suc x
+cc _ .(x₁ ∷ x₁ ∷ x₁ ∷ []) m1 m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) (respects=r .(x ∷ l) (nonempty-l x l) {r} p1 deflr deflr'') refl deflr') (respects=l {.x₁ ∷ .x₁ ∷ []} (x₁ ∷ []) (nonempty-l .x₁ .[]) p2 refl defl'r) =
+  let 2≤lenr : 2 ≤ length r
+      2≤lenr = ≅-2 p1
+
+      lenr≤1 : length r ≤ 1
+      lenr≤1 = 2-1++ l r deflr
+  in  abs-≤ (≤-trans 2≤lenr lenr≤1)
+cc _ .(x₁ ∷ x₁ ∷ x₁ ∷ []) m1 m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) (respects=l {l} .(x ∷ r) (nonempty-l x r) p1 deflr defl'r₁) refl deflr') (respects=l {.x₁ ∷ .x₁ ∷ []} (x₁ ∷ []) (nonempty-l .x₁ .[]) p2 refl defl'r) =
+  let 2≤lenl : 2 ≤ length l
+      2≤lenl = ≅-2 p1
+
+      lenl≤1 : length l ≤ 1
+      lenl≤1 = 2-++1 l r deflr
+  in  abs-≤ (≤-trans 2≤lenl lenl≤1)
+
+-- false
+cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r (x ∷ x₂ ∷ r) (nonempty-l .x .(x₂ ∷ r)) {r₂} p1 deflr deflr') (respects=l {l} (x₁ ∷ r₁) (nonempty-l .x₁ .r₁) p2 deflr₁ defl'r) =
+  let 2≤lenr : 2 ≤ length r₂
+      2≤lenr = ≅-2 p1
+
+      lenr≤1 : length r₂ ≤ 1
+      lenr≤1 = 3-2++ r r₂ deflr
+  in  abs-≤ (≤-trans 2≤lenr lenr≤1)
+cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=r (x ∷ []) (nonempty-l .x .[]) p1 deflr deflr') (respects=l {l} (x₁ ∷ x₂ ∷ r) (nonempty-l .x₁ .(x₂ ∷ r)) p2 deflr₁ defl'r) =
+  let 2≤lenl : 2 ≤ length l
+      2≤lenl = ≅-2 p2
+
+      lenl≤1 : length l ≤ 1
+      lenl≤1 = 3-++2 l r deflr₁
+  in  abs-≤ (≤-trans 2≤lenl lenl≤1)
+
+
+-- interesting - this is the case when i do ((aa)a -> a; a(aa) -> a)
+cc a .(a ∷ a ∷ a ∷ []) m1 m2 refl (respects=l r nr p1 deflr defl'r) (respects=r l nl p2 deflr₁ deflr') =
+  let rec , rec1 , rec2 = cc a (a ∷ a ∷ a ∷ []) m2 m1 refl (respects=r l nl p2 deflr₁ deflr') (respects=l r nr p1 deflr defl'r)
+  in  rec , rec2 , rec1
+
+-- absurd
+cc _ .(_ ∷ _ ∷ _ ∷ []) m1 m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) p1 refl deflr') (respects=l {x ∷ x₂ ∷ x₃ ∷ []} (x₁ ∷ []) (nonempty-l .x₁ .[]) p2 () defl'r)
+cc _ .(_ ∷ _ ∷ _ ∷ []) m1 m2 refl (respects=r (_ ∷ []) (nonempty-l _ .[]) p1 refl deflr') (respects=l {x ∷ x₂ ∷ x₃ ∷ x₄ ∷ l} (x₁ ∷ []) (nonempty-l .x₁ .[]) p2 () defl'r)

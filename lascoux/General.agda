@@ -7,8 +7,8 @@ module General where
     variable
         ι ℓ lv : Level
 
-    _∘_ : {A : Set ℓ} -> {B : Set ι} -> {C : Set lv} -> (B -> C) -> (A -> B) -> A -> C
-    f ∘ g = λ x -> f (g x)
+    -- _∘_ : {A : Set ℓ} -> {B : Set ι} -> {C : Set lv} -> (B -> C) -> (A -> B) -> A -> C
+    -- f ∘ g = λ x -> f (g x)
 
     data _==_ {A : Set ℓ} (a : A) : (b : A) ->  Set ℓ where
         idp : a == a

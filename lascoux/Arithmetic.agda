@@ -46,7 +46,8 @@ postulate
     ∸-down2 : {n r : ℕ} -> {r ≤ n} -> ((suc n) ∸ (suc r)) ≡ n ∸ r
     ≤-up2-+ : {p q r : ℕ} -> (p ≤ q) -> (r + p ≤ r + q)
     ≤-up2-r-+ : {p q r : ℕ} -> (p ≤ q) -> (p + r ≤ q + r)
-    ≤-up-+ : {p q r : ℕ} -> (p ≤ q) -> (p ≤ q + r)
+    ≤-up-r-+ : {p q r : ℕ} -> (p ≤ q) -> (p ≤ q + r)
+    ≤-up-+ : {p q r : ℕ} -> (p ≤ q) -> (p ≤ r + q)
     ≤-down-+ : {p q r : ℕ} -> (p + r ≤ q) -> (p ≤ q)
     ∸-anti-≤ : {p q r : ℕ} -> (q ≤ p) -> (p ≤ r) -> (r ∸ p) ≤ (r ∸ q)
 

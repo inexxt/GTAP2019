@@ -32,8 +32,8 @@ data _≅_ : List ℕ -> List ℕ -> Set where
     cancel≅ : (n ∷ n ∷ []) ≅ []
     swap≅ : {k : ℕ} -> (suc k < n) -> (n ∷ k ∷ []) ≅ (k ∷ n ∷ [])
     braid≅ : ((suc n) ∷ n ∷ (suc n) ∷ []) ≅ (n ∷ (suc n) ∷ n ∷ [])
-    respects=r : (l : List ℕ) -> (nonempty l) -> {r r' lr lr' : List ℕ} -> (r ≅ r') -> (lr ≡ l ++ r) -> (lr' ≡ l ++ r') -> lr ≅ lr'
-    respects=l : {l l' : List ℕ} -> (r : List ℕ) -> (nonempty r) -> {lr l'r : List ℕ} -> (l ≅ l') -> (lr ≡ l ++ r) -> (l'r ≡ l' ++ r) -> lr ≅ l'r
+    respects=r : (l : List ℕ) -> (nl : nonempty l) -> {r r' lr lr' : List ℕ} -> (rr : r ≅ r') -> (deflr : lr ≡ l ++ r) -> (deflr' : lr' ≡ l ++ r') -> lr ≅ lr'
+    respects=l : {l l' : List ℕ} -> (r : List ℕ) -> (nr : nonempty r) -> {lr l'r : List ℕ} -> (ll : l ≅ l') -> (deflr : lr ≡ l ++ r) -> (defl'r : l'r ≡ l' ++ r) -> lr ≅ l'r
 
 data _≃_ : List ℕ -> List ℕ -> Set where
     refl : {m : List ℕ} -> m ≃ m
