@@ -5,7 +5,7 @@ open import Data.List
 open import Data.Nat
 open import Data.List.Properties
 open import Data.Nat.Properties
-open import Data.Product using (∃; _×_; _,_)
+open import Data.Product using (Σ; ∃; _×_; _,_)
 open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
@@ -45,18 +45,18 @@ data _>>_ : ℕ -> List ℕ -> Set where
   [] : {n : ℕ} -> n >> []
   _:⟨_⟩:_ : {n : ℕ} -> {l : List ℕ} -> (k : ℕ) -> (k < n) -> n >> l -> n >> (k ∷ l)
 
-cut-head : (a1 a2 : ℕ) -> (l1 l2 : List ℕ) -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (l1 ≡ l2)
-cut-head a1 .a1 l1 .l1 refl = refl
+cut-head : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (l1 ≡ l2)
+cut-head {a1} {.a1} {l1} {.l1} refl = refl
 
-cut-tail : (a1 a2 : ℕ) -> (l1 l2 : List ℕ) -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (a1 ≡ a2)
-cut-tail a1 .a1 l1 .l1 refl = refl
+cut-tail : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (a1 ≡ a2)
+cut-tail {a1} {.a1} {l1} {.l1} refl = refl
 
 abs-const-↓ : (n k a : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ a ∷ a ∷ r) -> ⊥
 abs-const-↓ zero k a (x ∷ l) r ()
 abs-const-↓ (suc zero) (suc k) a [] r ()
 abs-const-↓ (suc (suc n)) (suc zero) a [] r ()
 abs-const-↓ (suc (suc n)) (suc (suc k)) a [] r ()
-abs-const-↓ (suc n) (suc k) a (x ∷ l) r p  = abs-const-↓ n k a l r (cut-head n x (n ↓ k) (l ++ a ∷ a ∷ r) p)
+abs-const-↓ (suc n) (suc k) a (x ∷ l) r p  = abs-const-↓ n k a l r (cut-head  p)
 
 abs-inc-↓ : (n k a : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ a ∷ suc a ∷ r) -> ⊥
 abs-inc-↓ n k a l r p = {!!}
@@ -71,7 +71,7 @@ abs-const2-↓ zero k1 n2 k2 a pnn l r p = abs-const-↓ _ _ _ l r p
 abs-const2-↓ (suc n1) zero n2 k2 a pnn l r p = abs-const-↓ _ _ _ l r p
 abs-const2-↓ (suc zero) (suc k1) (suc .0) (suc k2) .0 (s≤s ()) [] .[] refl
 abs-const2-↓ (suc (suc n1)) (suc zero) (suc .(suc n1)) (suc k2) .(suc n1) pnn [] .(suc n1 ↓ k2) refl = (⊥-elim (1+n≰n pnn))
-abs-const2-↓ (suc n1) (suc k1) n2 k2 a pnn (x ∷ l) r p = abs-const2-↓ n1 k1 n2 k2 a (≤-down pnn) l r (cut-head _ _ _ _ p)
+abs-const2-↓ (suc n1) (suc k1) n2 k2 a pnn (x ∷ l) r p = abs-const2-↓ n1 k1 n2 k2 a (≤-down pnn) l r (cut-head p)
 
 abs-braid2-↓ : (n1 k1 n2 k2 a : ℕ) -> (n1 < n2) -> (l r : List ℕ) -> (n1 ↓ k1) ++ (n2 ↓ k2) ≡ (l ++ suc a ∷ a ∷ suc a ∷ r) -> ⊥
 abs-braid2-↓ n1 k1 n2 k2 a pnn l r p = {!!}
@@ -79,17 +79,32 @@ abs-braid2-↓ n1 k1 n2 k2 a pnn l r p = {!!}
 abs-jump2-↓ : (n1 k1 n2 k2 a b : ℕ) -> (n1 < n2) -> (suc a < b) -> (l r : List ℕ) -> (n1 ↓ k1) ++ (n2 ↓ k2) ≡ (l ++ b ∷ a ∷ r) -> ⊥
 abs-jump2-↓ n1 k1 n2 k2 a b pnn pab l r p = {!!}
 
+data _||_||_ (A : Set) (B : Set) (C : Set) : Set where
+  R1 : A -> A || B || C
+  R2 : B -> A || B || C
+  R3 : C -> A || B || C
+
+head+tail : {h1 h2 : ℕ} -> {t1 t2 : List ℕ} -> (h1 ≡ h2) -> (t1 ≡ t2) -> (h1 ∷ t1) ≡ (h2 ∷ t2)
+head+tail p1 p2 = {!!}
+
+-- some technical lemmas about lists
+lemma-l++2++r : (a : ℕ) -> (l1 r1 l2 r2 : List ℕ) -> (l1 ++ r1 ≡ l2 ++ a ∷ a ∷ r2)
+                -> (Σ (List ℕ × List ℕ) (λ (rl2 , rr2) -> (r2 ≡ rl2 ++ rr2) × (l1 ≡ l2 ++ a ∷ a ∷ rl2) × (r1 ≡ rr2))) || -- the case when both a ∷ a are in left
+                   (Σ (List ℕ × List ℕ) (λ (ll2 , lr2) -> (l2 ≡ ll2 ++ lr2) × (l1 ≡ ll2) × (r1 ≡ lr2 ++ a ∷ a ∷ r2))) || -- the case when both a ∷ a are in right
+                   ((l1 ≡ l2 ++ [ a ]) × (r1 ≡ a ∷ r2)) -- the case when one a is in left, and one in right
+lemma-l++2++r a [] r1 l2 r2 p = R2 (([] , l2) , (refl , (refl , p)))
+lemma-l++2++r a (x ∷ []) r1 [] r2 p = {!!}
+lemma-l++2++r a (x ∷ x₁ ∷ l1) r1 [] r2 p = {!!}
+lemma-l++2++r a (x ∷ l1) r1 (x₁ ∷ l2) r2 p with lemma-l++2++r a l1 r1 l2 r2 (cut-head p)
+... | R1 ((fst , snd) , fst₁ , fst₂ , snd₁) = R1 ((fst , snd) , (fst₁ , ((head+tail (cut-tail p) fst₂) , snd₁)))
+... | R2 ((fst , snd) , fst₁ , fst₂ , snd₁) = R2 (((x₁ ∷ fst) , snd) , ((cong (λ e -> x₁ ∷ e) fst₁) , ((head+tail (cut-tail p) fst₂) , snd₁)))
+... | R3 (fst , snd) = R3 (head+tail (cut-tail p) fst , snd)
+
 --- and versions for many-↓
 abs-const-many-↓ : (n a : ℕ) -> (l r : List ℕ) -> (cl : Canonical n) -> (immersion {n} cl) ≡ (l ++ a ∷ a ∷ r) -> ⊥
 abs-const-many-↓ .0 a [] r CanZ ()
 abs-const-many-↓ .0 a (x ∷ l) r CanZ ()
-abs-const-many-↓ .1 a l r (CanS CanZ x) p = abs-const-↓ _ _ _ l r p
-abs-const-many-↓ .(suc _) a l r (CanS cl {zero} x) p =
-  let cl0 = ≡-trans (≡-sym ++-unit) p
-  in  abs-const-many-↓ _ _ l r cl cl0
-abs-const-many-↓ .(suc (suc _)) a l r (CanS (CanS cl {zero} x₁) {suc r₁} x) p = ?
-abs-const-many-↓ .(suc (suc _)) a l r (CanS (CanS cl {suc r₂} x₁) {suc r₁} x) p = ?
-
+abs-const-many-↓ (suc n) a l r (CanS cl x) p = {!!}
 
 abs-braid-many-↓ : (n a : ℕ) -> (l r : List ℕ) -> (cl : Canonical n) -> (immersion {n} cl) ≡ (l ++ suc a ∷ a ∷ suc a ∷ r) -> ⊥
 abs-braid-many-↓ .0 a [] r CanZ ()
@@ -134,21 +149,21 @@ only-one-canonical≅ cl m (braid≅ l r .(immersion cl) .m defm defmf) = abs-br
 ≡-↓ zero .0 .0 z≤n z≤n p = refl
 ≡-↓ (suc n) zero zero pk1 pk2 p = refl
 ≡-↓ (suc n) (suc k1) (suc k2) pk1 pk2 p =
-  let lemma = (cut-head n n (n ↓ k1) (n ↓ k2) p)
+  let lemma = (cut-head p)
       rec = ≡-↓ _ _ _ (≤-down2 pk1) (≤-down2 pk2) lemma
   in  cong suc rec
 
 ≡-++↓ : (m1 m2 : List ℕ) -> (n k1 k2 : ℕ) -> (ml1 : n >> m1) -> (ml2 : n >> m2) -> (k1 ≤ suc n) -> (k2 ≤ suc n) -> (m1 ++ ((suc n) ↓ k1) ≡ m2 ++ ((suc n) ↓ k2)) -> (k1 ≡ k2) × (m1 ≡ m2)
 ≡-++↓ [] [] n k1 k2 ml1 ml2 pk1 pk2 p = (≡-↓ _ _ _ pk1 pk2 p) , refl
 ≡-++↓ [] (x ∷ m2) (suc n) (suc k1) k2 ml1 (.x :⟨ x₁ ⟩: ml2) pk1 pk2 p =
-  let r = cut-tail _ _ _ _ p
+  let r = cut-tail  p
   in  ⊥-elim (1+n≰n (≤-trans (≤-reflexive r) (≤-down2 x₁)))
 ≡-++↓ (x ∷ m1) [] (suc n) k1 (suc k2) (.x :⟨ x₁ ⟩: ml1) ml2 pk1 pk2 p =
-  let r = cut-tail _ _ _ _ p
+  let r = cut-tail  p
   in  ⊥-elim (1+n≰n (≤-trans (≤-reflexive (≡-sym r)) (≤-down2 x₁)))
 ≡-++↓ (x ∷ m1) (x₁ ∷ m2) n k1 k2 (.x :⟨ x₂ ⟩: ml1) (.x₁ :⟨ x₃ ⟩: ml2) pk1 pk2 p =
-  let t = cut-head _ _ _ _ p
-      h = cut-tail _ _ _ _ p
+  let t = cut-head  p
+      h = cut-tail  p
       hh , tt = ≡-++↓ m1 m2 n k1 k2 ml1 ml2 pk1 pk2 t
   in  hh , subst (λ z → x ∷ m1 ≡ z ∷ m2) h (cong (λ e -> x ∷ e) tt)
 
