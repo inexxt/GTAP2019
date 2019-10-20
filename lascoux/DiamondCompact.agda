@@ -219,18 +219,42 @@ abs-bool ()
 postulate
   -- these are proved for the previous representation, it's possible to transport them to here
   mod2-+ : (n1 n2 : ℕ) -> mod2 (n1 + n2) ≡ not ((mod2 n1) xor (mod2 n2))
-  len-mod2 : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (mod2 (length m1) ≡ mod2 (length m2))
-  one-one-reduction : (n1 n2 : ℕ) -> ((n1 ∷ []) ≅ (n2 ∷ [])) -> n1 ≡ n2
-  two-two-reduction : (a b1 b2 : ℕ) -> ((a ∷ a ∷ []) ≅ (b1 ∷ b2 ∷ [])) -> (b1 ≡ b2) × (a ≡ b1)
-  len-nonincreasing : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (length m2 ≤ length m1)
-  one-reduction : (m : List ℕ) -> ((n ∷ []) ≅ m) -> m ≡ (n ∷ [])
-  cancel-reduction : (m : List ℕ) -> ((n ∷ n ∷ []) ≅ m) -> (m ≡ []) ⊎ (m ≡ (n ∷ n ∷ []))
+  len-mod2≅ : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (mod2 (length m1) ≡ mod2 (length m2))
+  len-nonincreasing≅ : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (length m2 ≤ length m1)
   diamond-separate : {l r l' r' ml mr : List ℕ} -> (ml ≡ l' ++ r) -> (mr ≡ l ++ r') -> (l ≅ l') -> (r ≅ r') -> (ml ≅ (l' ++ r')) × (mr ≅ (l' ++ r'))
 
-index-reduction-l : {m mf : List ℕ} -> (p : m ≅ mf) -> ℕ × ℕ
-index-reduction-l (cancel≅ l r m mf defm defmf) = length l , 3 + length l
-index-reduction-l (swap≅ x l r m mf defm defmf) = length l , 3 + length l
-index-reduction-l (braid≅ l r m mf defm defmf) = length l , 4 + length l
+  -- this ones are a little different (just because the new ≅ doesnt have reflexivity)
+  one-one-reduction : (n1 n2 : ℕ) -> ((n1 ∷ []) ≃ (n2 ∷ [])) -> n1 ≡ n2
+  two-two-reduction : (a b1 b2 : ℕ) -> ((a ∷ a ∷ []) ≃ (b1 ∷ b2 ∷ [])) -> (b1 ≡ b2) × (a ≡ b1)
+  cancel-reduction : (m : List ℕ) -> ((n ∷ n ∷ []) ≃ m) -> (m ≡ []) ⊎ (m ≡ (n ∷ n ∷ []))
+  one-reduction : (m : List ℕ) -> ((n ∷ []) ≃ m) -> m ≡ (n ∷ [])
 
+  -- these ones are extension to ≃
+  len-mod2 : (m1 m2 : List ℕ) -> (m1 ≃ m2) -> (mod2 (length m1) ≡ mod2 (length m2))
+  len-nonincreasing : (m1 m2 : List ℕ) -> (m1 ≃ m2) -> (length m2 ≤ length m1)
+
+-- this should encode something like "m up to (irl m mf _) is unchanged", so that I could apply diamond-separate if reduction indices are non-overlapping
+irl : {m mf : List ℕ} -> (p : m ≅ mf) -> ℕ
+irl (cancel≅ l r m mf defm defmf) = length l
+irl (swap≅ x l r m mf defm defmf) = length l
+irl (braid≅ l r m mf defm defmf) = length l
+
+-- this should encode something like "m after (irr m mf _) is unchanged", so that I could apply diamond-separate if reduction indices are non-overlapping
+irr : {m mf : List ℕ} -> (p : m ≅ mf) -> ℕ
+irr (cancel≅ l r m mf defm defmf) = 3 + length l
+irr (swap≅ x l r m mf defm defmf) = 3 + length l
+irr (braid≅ l r m mf defm defmf) = 4 + length l
+
+-- these are the two main technical lemmas
+force-crit-pair : (m1 m2 m3 : List ℕ) -> (length m1 ≤ 5) -> (p1 : m1 ≅ m2) -> (p2 : m1 ≅ m3) -> ∃ (λ m -> (m2 ≃ m) × (m3 ≃ m))
+force-crit-pair m1 m2 m3 lm p1 p2 = {!!}
+
+force-not-crit-pair : (m1 m2 m3 : List ℕ) -> (p1 : m1 ≅ m2) -> (p2 : m1 ≅ m3) -> (irr p1 < irl p2) -> ∃ (λ m -> (m2 ≃ m) × (m3 ≃ m))
+force-not-crit-pair m1 m2 m3 lm = {!!}
+
+
+
+-- and this should do something like: if ir1 = (ir p1) and ir2 = (ir p2) are non-overlapping, use diamond-separate
+-- otherwise, take the ir1 ∪ ir2 , force it into one of the critical pairs and then reduce critical pair
 diamond : (m1 m2 m3 : List ℕ) -> (m1 ≅ m2) -> (m1 ≅ m3) -> ∃ (λ m -> (m2 ≃ m) × (m3 ≃ m))
 diamond m1 m2 m3 p q = {!!}
