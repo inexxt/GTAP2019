@@ -10,7 +10,7 @@ open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
 open import Data.Bool hiding (_<_; _≤_)
-open import Data.Bool.Properties hiding (≤-reflexive)
+open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 open import Function
 
 open import Arithmetic hiding (n)
@@ -20,6 +20,7 @@ open ≤-Reasoning renaming (begin_ to ≤-begin_; _∎ to ≤∎) hiding (_≡�
 
 variable
   n : ℕ
+  l : List ℕ
 
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
@@ -37,8 +38,18 @@ immersion : {n : ℕ} -> Canonical n -> List ℕ
 immersion {zero} CanZ = []
 immersion {suc n} (CanS l {r} r≤1+n) = (immersion l) ++ ((suc n) ↓ r)
 
+postulate
+  canonical-eta : {cl1 cl2 : Canonical n} -> {r1 r2 : ℕ} -> (rn1 : r1 ≤ (suc n)) -> (rn2 : r2 ≤ (suc n)) -> (cl1 ≡ cl2) -> (r1 ≡ r2) -> (CanS cl1 rn1) ≡ (CanS cl2 rn2)
+
+data _>>_ : ℕ -> List ℕ -> Set where
+  [] : {n : ℕ} -> n >> []
+  _:⟨_⟩:_ : {n : ℕ} -> {l : List ℕ} -> (k : ℕ) -> (k < n) -> n >> l -> n >> (k ∷ l)
+
 cut-head : (a1 a2 : ℕ) -> (l1 l2 : List ℕ) -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (l1 ≡ l2)
 cut-head a1 .a1 l1 .l1 refl = refl
+
+cut-tail : (a1 a2 : ℕ) -> (l1 l2 : List ℕ) -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (a1 ≡ a2)
+cut-tail a1 .a1 l1 .l1 refl = refl
 
 abs-const-↓ : (n k a : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ a ∷ a ∷ r) -> ⊥
 abs-const-↓ zero k a (x ∷ l) r ()
@@ -72,7 +83,13 @@ abs-jump2-↓ n1 k1 n2 k2 a b pnn pab l r p = {!!}
 abs-const-many-↓ : (n a : ℕ) -> (l r : List ℕ) -> (cl : Canonical n) -> (immersion {n} cl) ≡ (l ++ a ∷ a ∷ r) -> ⊥
 abs-const-many-↓ .0 a [] r CanZ ()
 abs-const-many-↓ .0 a (x ∷ l) r CanZ ()
-abs-const-many-↓ .(suc _) a l r (CanS cl x) p = {!!}
+abs-const-many-↓ .1 a l r (CanS CanZ x) p = abs-const-↓ _ _ _ l r p
+abs-const-many-↓ .(suc _) a l r (CanS cl {zero} x) p =
+  let cl0 = ≡-trans (≡-sym ++-unit) p
+  in  abs-const-many-↓ _ _ l r cl cl0
+abs-const-many-↓ .(suc (suc _)) a l r (CanS (CanS cl {zero} x₁) {suc r₁} x) p = ?
+abs-const-many-↓ .(suc (suc _)) a l r (CanS (CanS cl {suc r₂} x₁) {suc r₁} x) p = ?
+
 
 abs-braid-many-↓ : (n a : ℕ) -> (l r : List ℕ) -> (cl : Canonical n) -> (immersion {n} cl) ≡ (l ++ suc a ∷ a ∷ suc a ∷ r) -> ⊥
 abs-braid-many-↓ .0 a [] r CanZ ()
@@ -113,9 +130,56 @@ only-one-canonical≅ cl m (cancel≅ l r .(immersion cl) .m defm defmf) = abs-c
 only-one-canonical≅ cl m (swap≅ x l r .(immersion cl) .m defm defmf) = abs-jump-many-↓ _ _ _ x l r cl defm
 only-one-canonical≅ cl m (braid≅ l r .(immersion cl) .m defm defmf) = abs-braid-many-↓ _ _ _ r cl defm
 
+≡-↓ : (n k1 k2 : ℕ) -> (k1 ≤ n) -> (k2 ≤ n) -> ((n ↓ k1) ≡ (n ↓ k2)) -> (k1 ≡ k2)
+≡-↓ zero .0 .0 z≤n z≤n p = refl
+≡-↓ (suc n) zero zero pk1 pk2 p = refl
+≡-↓ (suc n) (suc k1) (suc k2) pk1 pk2 p =
+  let lemma = (cut-head n n (n ↓ k1) (n ↓ k2) p)
+      rec = ≡-↓ _ _ _ (≤-down2 pk1) (≤-down2 pk2) lemma
+  in  cong suc rec
+
+≡-++↓ : (m1 m2 : List ℕ) -> (n k1 k2 : ℕ) -> (ml1 : n >> m1) -> (ml2 : n >> m2) -> (k1 ≤ suc n) -> (k2 ≤ suc n) -> (m1 ++ ((suc n) ↓ k1) ≡ m2 ++ ((suc n) ↓ k2)) -> (k1 ≡ k2) × (m1 ≡ m2)
+≡-++↓ [] [] n k1 k2 ml1 ml2 pk1 pk2 p = (≡-↓ _ _ _ pk1 pk2 p) , refl
+≡-++↓ [] (x ∷ m2) (suc n) (suc k1) k2 ml1 (.x :⟨ x₁ ⟩: ml2) pk1 pk2 p =
+  let r = cut-tail _ _ _ _ p
+  in  ⊥-elim (1+n≰n (≤-trans (≤-reflexive r) (≤-down2 x₁)))
+≡-++↓ (x ∷ m1) [] (suc n) k1 (suc k2) (.x :⟨ x₁ ⟩: ml1) ml2 pk1 pk2 p =
+  let r = cut-tail _ _ _ _ p
+  in  ⊥-elim (1+n≰n (≤-trans (≤-reflexive (≡-sym r)) (≤-down2 x₁)))
+≡-++↓ (x ∷ m1) (x₁ ∷ m2) n k1 k2 (.x :⟨ x₂ ⟩: ml1) (.x₁ :⟨ x₃ ⟩: ml2) pk1 pk2 p =
+  let t = cut-head _ _ _ _ p
+      h = cut-tail _ _ _ _ p
+      hh , tt = ≡-++↓ m1 m2 n k1 k2 ml1 ml2 pk1 pk2 t
+  in  hh , subst (λ z → x ∷ m1 ≡ z ∷ m2) h (cong (λ e -> x ∷ e) tt)
+
+>>-++ : {l1 l2 : List ℕ} -> n >> l1 -> n >> l2 -> n >> (l1 ++ l2)
+>>-++ {n} {[]} {l2} ll1 ll2 = ll2
+>>-++ {n} {x ∷ l1} {l2} (.x :⟨ p ⟩: ll1) ll2 = x :⟨ p ⟩: (>>-++ ll1 ll2)
+
+>>-↓ : {n k r : ℕ} -> (k ≤ n) -> (n >> (k ↓ r))
+>>-↓ {n} {zero} {zero} kn = []
+>>-↓ {n} {suc k} {zero} kn = []
+>>-↓ {n} {zero} {suc r} kn = []
+>>-↓ {n} {suc k} {suc r} kn = k :⟨ kn ⟩: (>>-↓ (≤-down kn))
+
+>>-suc : (n >> l) -> ((suc n) >> l)
+>>-suc  [] = []
+>>-suc  (k :⟨ p ⟩: l') = k :⟨ ≤-up p ⟩: >>-suc l'
+
+immersion->> : {n : ℕ} -> (cl : Canonical n) -> n >> immersion cl
+immersion->> {.0} CanZ = []
+immersion->> {suc n} (CanS {n} cl {r} rn) =
+  let p = immersion->> {n} cl
+  in  >>-++ (>>-suc p) (>>-↓ (≤-reflexive refl))
+
 ≡immersion : (cl1 cl2 : Canonical n) -> (immersion {n} cl1 ≡ immersion {n} cl2) -> cl1 ≡ cl2
 ≡immersion CanZ CanZ refl = refl
-≡immersion (CanS cl1 x) (CanS cl2 x₁) p = {!!}
+≡immersion {n} (CanS cl1 {r = r} x) (CanS cl2 {r = r₁} x₁) p =
+  let n>>cl1 = immersion->> cl1
+      n>>cl2 = immersion->> cl2
+      lemma-r , lemma-cl = ≡-++↓ _ _ _ _ _ n>>cl1 n>>cl2 x x₁ p
+      rec = ≡immersion cl1 cl2 lemma-cl
+  in  canonical-eta x x₁ rec lemma-r
 
 only-one-canonical≅* : (cl1 cl2 : Canonical n) -> (m1 m2 : List ℕ) -> (immersion {n} cl1 ≡ m1) -> (immersion {n} cl2 ≡ m2) -> (m1 ≅* m2)-> cl1 ≡ cl2
 only-one-canonical≅* cl1 cl2 m1 .m1 pm1 pm2 refl = ≡immersion _ _ (≡-trans pm1 (≡-sym pm2))
