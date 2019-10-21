@@ -71,8 +71,11 @@ diamond (a ∷ .(suc b) ∷ b ∷ .(suc b) ∷ m1) m2 m3 (swap≅ x [] .(b ∷ s
       left = trans (swap b<a [ suc b ] _) (trans (swap x (suc b ∷ b ∷ []) _) (braid [] (a ∷ m1) _ _))
       right = trans (swap b<a [] _) (trans (swap x [ b ] _) (swap b<a (b ∷ suc b ∷ []) _))
   in  b ∷ suc b ∷ b ∷ a ∷ m1 , (left , right)
-diamond m1 m2 m3 (braid≅ [] r .m1 .m2 defm defmf) (braid≅ (x ∷ x₁ ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- bb
-
+diamond (.(suc a) ∷ a ∷ .(suc a) ∷ .a ∷ .(suc a) ∷ m1) m2 m3 (braid≅ [] .(a ∷ suc a ∷ m1) .(suc a ∷ a ∷ suc a ∷ a ∷ suc a ∷ m1) .m2 refl defmf) (braid≅ (.(suc a) ∷ .a ∷ []) .m1 .(suc a ∷ a ∷ suc a ∷ a ∷ suc a ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ =
+  let left = trans (cancel (a ∷ suc a ∷ []) _) (cancel [ a ] _)
+      right = trans (cancel [ suc a ] _) (cancel [] _)
+  in  a ∷ m1 , left , right
 --- disjoint
 diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (cancel≅ (x ∷ x₁ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- cc-dis
 diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (swap≅ x (x₁ ∷ x₂ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- cs-dis
