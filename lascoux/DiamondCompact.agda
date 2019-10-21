@@ -77,9 +77,12 @@ diamond (.(suc a) ∷ a ∷ .(suc a) ∷ .a ∷ .(suc a) ∷ m1) m2 m3 (braid≅
       right = trans (cancel [ suc a ] _) (cancel [] _)
   in  a ∷ m1 , left , right
 
-diamond m1 m2 m3 (cancel≅ (x₁ ∷ l) r .m1 .m2 defm defmf) (swap≅ x [] r₁ .m1 .m3 defm₁ defmf₁) = {!!}
-diamond m1 m2 m3 (cancel≅ (x ∷ l) r .m1 .m2 defm defmf) (braid≅ [] r₁ .m1 .m3 defm₁ defmf₁) = {!!}
-diamond m1 m2 m3 (swap≅ x (x₁ ∷ l) r .m1 .m2 defm defmf) (braid≅ [] r₁ .m1 .m3 defm₁ defmf₁) = {!!}
+diamond (x₂ ∷ x₃ ∷ .x₃ ∷ m1) m2 m3 (cancel≅ (.x₂ ∷ []) .m1 .(x₂ ∷ x₃ ∷ x₃ ∷ m1) .m2 refl defmf) (swap≅ x [] .(x₃ ∷ m1) .(x₂ ∷ x₃ ∷ x₃ ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ = _ , (refl , trans (swap x [ x₃ ] _) (cancel [] _))
+diamond (x₁ ∷ x₂ ∷ .x₂ ∷ []) m2 m3 (cancel≅ (.x₁ ∷ []) .[] .(x₁ ∷ x₂ ∷ x₂ ∷ []) .m2 refl defmf) (braid≅ [] r₁ .(x₁ ∷ x₂ ∷ x₂ ∷ []) .m3 () defmf₁)
+diamond (x₁ ∷ x₂ ∷ .x₂ ∷ x₄ ∷ m1) m2 m3 (cancel≅ (.x₁ ∷ []) .(x₄ ∷ m1) .(x₁ ∷ x₂ ∷ x₂ ∷ x₄ ∷ m1) .m2 refl defmf) (braid≅ [] r₁ .(x₁ ∷ x₂ ∷ x₂ ∷ x₄ ∷ m1) .m3 () defmf₁)
+diamond (.(suc x₃) ∷ x₃ ∷ .(suc x₃) ∷ []) m2 m3 (swap≅ x (.(suc x₃) ∷ []) .[] .(suc x₃ ∷ x₃ ∷ suc x₃ ∷ []) .m2 refl defmf) (braid≅ [] .[] .(suc x₃ ∷ x₃ ∷ suc x₃ ∷ []) .m3 refl defmf₁) = abs-suc (≤-down x)
+diamond (.(suc x₃) ∷ x₃ ∷ .(suc x₃) ∷ x₅ ∷ m1) m2 m3 (swap≅ x (.(suc x₃) ∷ []) .(x₅ ∷ m1) .(suc x₃ ∷ x₃ ∷ suc x₃ ∷ x₅ ∷ m1) .m2 refl defmf) (braid≅ [] .(x₅ ∷ m1) .(suc x₃ ∷ x₃ ∷ suc x₃ ∷ x₅ ∷ m1) .m3 refl defmf₁) = abs-suc (≤-down x)
 
 --- disjoint
 diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (cancel≅ (x ∷ x₁ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- cc-dis
@@ -88,6 +91,9 @@ diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (braid≅ (x ∷ x₁ ∷ l
 diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (swap≅ x₁ (x₂ ∷ x₃ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- ss-dis
 diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (braid≅ (x₁ ∷ x₂ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- sb-dis
 diamond m1 m2 m3 (braid≅ [] r .m1 .m2 defm defmf) (braid≅ (x ∷ x₁ ∷ x₂ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- bb-dis
+diamond m1 m2 m3 (cancel≅ (x₁ ∷ x₂ ∷ l) r .m1 .m2 defm defmf) (swap≅ x [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
+diamond m1 m2 m3 (cancel≅ (x ∷ x₁ ∷ l) r .m1 .m2 defm defmf) (braid≅ [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
+diamond m1 m2 m3 (swap≅ x (x₁ ∷ x₂ ∷ l) r .m1 .m2 defm defmf) (braid≅ [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 
 --- identity
 diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (cancel≅ [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
