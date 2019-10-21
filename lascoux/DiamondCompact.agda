@@ -11,7 +11,7 @@ open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
 open import Data.Bool hiding (_<_; _≤_)
-open import Data.Bool.Properties hiding (≤-reflexive)
+open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 open import Function
 
 open import Arithmetic hiding (n)
@@ -51,11 +51,26 @@ force-not-crit-pair m1 m2 m3 lm = {!!}
 -- otherwise, take the ir1 ∪ ir2 , force it into one of the critical pairs and then reduce critical pair
 diamond : (m1 m2 m3 : List ℕ) -> (m1 ≅ m2) -> (m1 ≅ m3) -> ∃ (λ m -> (m2 ≅* m) × (m3 ≅* m))
 --- crit-pair
-diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (cancel≅ (x ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- cc
-diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (swap≅ x (x₁ ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- cs
-diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (braid≅ (x ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- cb
-diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (swap≅ x₁ (x₂ ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!    !} -- ss
-diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (braid≅ (x₁ ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- sb
+diamond (x₁ ∷ .x₁ ∷ .x₁ ∷ m1) m2 m3 (cancel≅ [] .(x₁ ∷ m1) .(x₁ ∷ x₁ ∷ x₁ ∷ m1) .m2 refl defmf) (cancel≅ (.x₁ ∷ []) .m1 .(x₁ ∷ x₁ ∷ x₁ ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ = (x₁ ∷ m1) , (refl , refl) -- cc
+diamond (x₂ ∷ .x₂ ∷ x₄ ∷ m1) m2 m3 (cancel≅ [] .(x₄ ∷ m1) .(x₂ ∷ x₂ ∷ x₄ ∷ m1) .m2 refl defmf) (swap≅ x (.x₂ ∷ []) .m1 .(x₂ ∷ x₂ ∷ x₄ ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ = (x₄ ∷ m1) , (refl , trans (swap x [] _) (cancel [ x₄ ] m1)) -- cs
+diamond (.(suc x₃) ∷ .(suc x₃) ∷ x₃ ∷ .(suc x₃) ∷ m1) m2 m3 (cancel≅ [] .(x₃ ∷ suc x₃ ∷ m1) .(suc x₃ ∷ suc x₃ ∷ x₃ ∷ suc x₃ ∷ m1) .m2 refl defmf) (braid≅ (.(suc x₃) ∷ []) .m1 .(suc x₃ ∷ suc x₃ ∷ x₃ ∷ suc x₃ ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ = (x₃ ∷ suc x₃ ∷ m1) , (refl , trans (braid [] ( x₃ ∷ m1 ) _ _ ) (cancel (x₃ ∷ suc x₃ ∷ []) m1)) -- cb
+diamond (c ∷ b ∷ a ∷ m1) m2 m3 (swap≅ b<c [] .(a ∷ m1) .(c ∷ b ∷ a ∷ m1) .m2 refl defmf) (swap≅ a<b (.c ∷ []) .m1 .(c ∷ b ∷ a ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ =
+  let a<c : suc a < c
+      a<c = ≤-down (≤-trans (s≤s a<b) (≤-down b<c))
+      left = trans (swap a<c [ b ] m1) (swap a<b [] _)
+      right = trans (swap a<c [] _) (swap b<c [ a ] _)
+   in a ∷ b ∷ c ∷ m1 , left , right
+diamond (a ∷ .(suc b) ∷ b ∷ .(suc b) ∷ m1) m2 m3 (swap≅ x [] .(b ∷ suc b ∷ m1) .(a ∷ suc b ∷ b ∷ suc b ∷ m1) .m2 refl defmf) (braid≅ (.a ∷ []) .m1 .(a ∷ suc b ∷ b ∷ suc b ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ =
+  let b<a : suc b < a
+      b<a = ≤-down x
+      left = trans (swap b<a [ suc b ] _) (trans (swap x (suc b ∷ b ∷ []) _) (braid [] (a ∷ m1) _ _))
+      right = trans (swap b<a [] _) (trans (swap x [ b ] _) (swap b<a (b ∷ suc b ∷ []) _))
+  in  b ∷ suc b ∷ b ∷ a ∷ m1 , (left , right)
 diamond m1 m2 m3 (braid≅ [] r .m1 .m2 defm defmf) (braid≅ (x ∷ x₁ ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- bb
 
 --- disjoint
