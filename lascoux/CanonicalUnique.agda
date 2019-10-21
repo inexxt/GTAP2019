@@ -14,6 +14,7 @@ open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 open import Function
 
 open import Arithmetic hiding (n)
+open import Compact hiding (n; l)
 open import DiamondCompact hiding (n ; l)
 
 open ≤-Reasoning renaming (begin_ to ≤-begin_; _∎ to ≤∎) hiding (_≡⟨_⟩_; _≡⟨⟩_)
@@ -74,12 +75,6 @@ reverse->> {n} {x ∷ l} (.x :⟨ x₁ ⟩: ll) rewrite (reverse-++-commute [ x 
   let rec = reverse->> {n} {l} ll
   in  >>-++ {l1 = reverse l} {l2 = [ x ]} rec (x :⟨ x₁ ⟩: [])
 
-cut-head : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (l1 ≡ l2)
-cut-head {a1} {.a1} {l1} {.l1} refl = refl
-
-cut-tail : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (a1 ≡ a2)
-cut-tail {a1} {.a1} {l1} {.l1} refl = refl
-
 abs-const-↓ : (n k a : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ a ∷ a ∷ r) -> ⊥
 abs-const-↓ zero k a (x ∷ l) r ()
 abs-const-↓ (suc zero) (suc k) a [] r ()
@@ -112,9 +107,6 @@ data _||_||_ (A : Set) (B : Set) (C : Set) : Set where
   R1 : A -> A || B || C
   R2 : B -> A || B || C
   R3 : C -> A || B || C
-
-head+tail : {h1 h2 : ℕ} -> {t1 t2 : List ℕ} -> (h1 ≡ h2) -> (t1 ≡ t2) -> (h1 ∷ t1) ≡ (h2 ∷ t2)
-head+tail p1 p2 = {!!}
 
 -- some technical lemmas about lists
 lemma-l++2++r : (a : ℕ) -> (l1 r1 l2 r2 : List ℕ) -> (l1 ++ r1 ≡ l2 ++ a ∷ a ∷ r2)
