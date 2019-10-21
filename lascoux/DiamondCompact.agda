@@ -10,8 +10,8 @@ open import Data.Product using (∃; _×_; _,_)
 open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
-open import Data.Bool hiding (_<_; _≤_)
-open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
+open import Data.Bool hiding (_<_; _≤_; _≟_)
+open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans; _≟_)
 open import Function
 
 open import Arithmetic hiding (n)
@@ -26,26 +26,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subs
 variable
     n : ℕ
     l : List ℕ
-
--- this should encode something like "m up to (irl m mf _) is unchanged"
-irl : {m mf : List ℕ} -> (p : m ≅ mf) -> ℕ
-irl (cancel≅ l r m mf defm defmf) = length l
-irl (swap≅ x l r m mf defm defmf) = length l
-irl (braid≅ l r m mf defm defmf) = length l
-
--- this should encode something like "m after (irr m mf _) is unchanged"
-irr : {m mf : List ℕ} -> (p : m ≅ mf) -> ℕ
-irr (cancel≅ l r m mf defm defmf) = 3 + length l
-irr (swap≅ x l r m mf defm defmf) = 3 + length l
-irr (braid≅ l r m mf defm defmf) = 4 + length l
-
--- these will be the two main technical lemmas
-force-crit-pair : (m1 m2 m3 : List ℕ) -> (length m1 ≤ 5) -> (p1 : m1 ≅ m2) -> (p2 : m1 ≅ m3) -> ∃ (λ m -> (m2 ≅* m) × (m3 ≅* m))
-force-crit-pair m1 m2 m3 lm p1 p2 = {!!}
-
-force-not-crit-pair : (m1 m2 m3 : List ℕ) -> (p1 : m1 ≅ m2) -> (p2 : m1 ≅ m3) -> (irr p1 < irl p2) -> ∃ (λ m -> (m2 ≅* m) × (m3 ≅* m))
-force-not-crit-pair m1 m2 m3 lm = {!!}
-
 
 -- and this should do something like: if ir1 = (ir p1) and ir2 = (ir p2) are non-overlapping, use force-non-crit-pair
 -- otherwise, take the ir1 ∪ ir2 , force it into one of the critical pairs and then reduce critical pair
@@ -78,8 +58,12 @@ diamond (.(suc a) ∷ a ∷ .(suc a) ∷ .a ∷ .(suc a) ∷ m1) m2 m3 (braid≅
   in  a ∷ m1 , left , right -- bb
 diamond (x₂ ∷ x₃ ∷ .x₃ ∷ m1) m2 m3 (cancel≅ (.x₂ ∷ []) .m1 .(x₂ ∷ x₃ ∷ x₃ ∷ m1) .m2 refl defmf) (swap≅ x [] .(x₃ ∷ m1) .(x₂ ∷ x₃ ∷ x₃ ∷ m1) .m3 refl defmf₁)
   rewrite defmf rewrite defmf₁ = _ , (refl , trans (swap x [ x₃ ] _) (cancel [] _)) -- cs
-diamond m1 m2 m3 (cancel≅ (x ∷ x₁ ∷ []) r .m1 .m2 defm defmf) (braid≅ [] r₁ .m1 .m3 defm₁ defmf₁) = {! m1  !} -- cb
-diamond m1 m2 m3 (swap≅ x (x₁ ∷ x₂ ∷ []) r .m1 .m2 defm defmf) (braid≅ [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- sb
+diamond (.(suc a) ∷ a ∷ .(suc a) ∷ .(suc a) ∷ m1) m2 m3 (cancel≅ (.(suc a) ∷ .a ∷ []) .m1 .(suc a ∷ a ∷ suc a ∷ suc a ∷ m1) .m2 refl defmf) (braid≅ [] .(suc a ∷ m1) .(suc a ∷ a ∷ suc a ∷ suc a ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ = suc a ∷ a ∷ m1 , (refl , trans (braid [ a ] _ _ _) (cancel [] _)) -- bc
+diamond (.(suc a) ∷ a ∷ .(suc a) ∷ b ∷ m1) m2 m3 (swap≅ x (.(suc a) ∷ .a ∷ []) r .(suc a ∷ a ∷ suc a ∷ b ∷ m1) .m2 refl defmf) (braid≅ [] .(b ∷ m1) .(suc a ∷ a ∷ suc a ∷ b ∷ m1) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ with suc b ≟ a
+... | yes p rewrite p = {!   !} , ({!   !} , {!   !})
+... | no p = {!   !}
 
 --- disjoint
 diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (cancel≅ (x ∷ x₁ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- cc-dis
