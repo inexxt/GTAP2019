@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 
 module Arithmetic where
 
