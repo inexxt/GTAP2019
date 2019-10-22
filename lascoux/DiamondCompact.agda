@@ -93,10 +93,16 @@ diamond : (m1 m2 m3 : List ℕ) -> (m1 ≅ m2) -> (m1 ≅ m3) -> ∃ (λ m -> (m
 -- diamond .(suc _ ∷ _ ∷ suc _ ∷ r) m2 m3 (braid≅ [] r .(suc _ ∷ _ ∷ suc _ ∷ r) .m2 refl defmf) (braid≅ (x ∷ x₁ ∷ x₂ ∷ l) r₁ .(suc _ ∷ _ ∷ suc _ ∷ r) .m3 d defmf₁)
 --     rewrite defmf rewrite defmf₁ rewrite (cut-h3 d) rewrite ≡-sym (cut-t1 d) rewrite ≡-sym (cut-t2 d) rewrite ≡-sym (cut-t3 d) =
 --     _ , ((braid (_ ∷ suc _ ∷ _ ∷ l) r₁ _ _) , (braid [] (l ++ _ ∷ suc _ ∷ _ ∷ r₁) _ _)) -- bb-dis
--- diamond .(_ ∷ _ ∷ r₁) m2 m3 (cancel≅ (x₁ ∷ x₂ ∷ l) r .(_ ∷ _ ∷ r₁) .m2 defm defmf) (swap≅ x [] r₁ .(_ ∷ _ ∷ r₁) .m3 refl defmf₁) = {!   !}
--- diamond .(suc _ ∷ _ ∷ suc _ ∷ r₁) m2 m3 (cancel≅ (x ∷ x₁ ∷ x₂ ∷ l) r .(suc _ ∷ _ ∷ suc _ ∷ r₁) .m2 defm defmf) (braid≅ [] r₁ .(suc _ ∷ _ ∷ suc _ ∷ r₁) .m3 refl defmf₁) = {!   !}
--- diamond .(suc _ ∷ _ ∷ suc _ ∷ r₁) m2 m3 (swap≅ x (x₁ ∷ x₂ ∷ x₃ ∷ l) r .(suc _ ∷ _ ∷ suc _ ∷ r₁) .m2 defm defmf) (braid≅ [] r₁ .(suc _ ∷ _ ∷ suc _ ∷ r₁) .m3 refl defmf₁) = {!   !}
---
+diamond .(_ ∷ _ ∷ r₁) m2 m3 (cancel≅ (x₁ ∷ x₂ ∷ l) r .(_ ∷ _ ∷ r₁) .m2 defm defmf) (swap≅ x [] r₁ .(_ ∷ _ ∷ r₁) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ rewrite (cut-h2 defm) rewrite ≡-sym (cut-t1 defm) rewrite ≡-sym (cut-t2 defm) =
+  _ , (swap x [] _ , cancel _ r)
+diamond .(suc _ ∷ _ ∷ suc _ ∷ r₁) m2 m3 (cancel≅ (x ∷ x₁ ∷ x₂ ∷ l) r .(suc _ ∷ _ ∷ suc _ ∷ r₁) .m2 defm defmf) (braid≅ [] r₁ .(suc _ ∷ _ ∷ suc _ ∷ r₁) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ rewrite (cut-h3 defm) rewrite ≡-sym (cut-t1 defm) rewrite ≡-sym (cut-t2 defm) rewrite ≡-sym (cut-t3 defm) =
+  _ , ((braid [] (l ++ r) _ _) , (cancel _ r))
+diamond .(suc _ ∷ _ ∷ suc _ ∷ r₁) m2 m3 (swap≅ x (x₁ ∷ x₂ ∷ x₃ ∷ l) r .(suc _ ∷ _ ∷ suc _ ∷ r₁) .m2 defm defmf) (braid≅ [] r₁ .(suc _ ∷ _ ∷ suc _ ∷ r₁) .m3 refl defmf₁)
+  rewrite defmf rewrite defmf₁ rewrite (cut-h3 defm) rewrite ≡-sym (cut-t1 defm) rewrite ≡-sym (cut-t2 defm) rewrite ≡-sym (cut-t3 defm) =
+  _ , ((braid [] (l ++ _ ∷ _ ∷ r) _ _) , (swap x (_ ∷ suc _ ∷ _ ∷ l) r))
+
 -- diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (bs≅ (x ∷ x₁ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 -- diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (bs≅ (x₁ ∷ x₂ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 -- diamond m1 m2 m3 (braid≅ [] r .m1 .m2 defm defmf) (bs≅ (x ∷ x₁ ∷ x₂ ∷ l) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
