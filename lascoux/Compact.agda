@@ -33,6 +33,7 @@ data _≅_ : List ℕ -> List ℕ -> Set where
     cancel≅ : (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ n ∷ r) -> (defmf : mf ≡ l ++ r) -> (m ≅ mf)
     swap≅ : {k : ℕ} -> (suc k < n) ->  (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ k ∷ r) -> (defmf : mf ≡ l ++ k ∷ n ∷ r) -> (m ≅ mf)
     braid≅ :  (l r m mf : List ℕ) -> (defm : m ≡ l ++ (suc n) ∷ n ∷ (suc n) ∷ r) -> (defmf : mf ≡ l ++ n ∷ (suc n) ∷ n ∷ r) -> (m ≅ mf)
+    bs≅ : (l r m mf : List ℕ) -> (defm : m ≡ l ++ (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ r) -> (defmf : mf ≡ l ++ (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ r) -> (m ≅ mf)
 
 data _≅*_ : List ℕ -> List ℕ -> Set where
     refl : {m : List ℕ} -> m ≅* m
@@ -59,6 +60,9 @@ swap {k} pk l r = {!!}
 
 braid : (l r m mf : List ℕ) -> (l ++ (suc n) ∷ n ∷ (suc n) ∷ r) ≅* (l ++ n ∷ (suc n) ∷ n ∷ r)
 braid = {!!}
+
+bs : (l r m mf : List ℕ) -> (defm : m ≡ l ++ (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ r) -> (defmf : mf ≡ l ++ (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ r) -> (m ≅* mf)
+bs = {!!}
 
 trans : {m1 m2 m3 : List ℕ} -> (m1 ≅* m2) -> (m2 ≅* m3) -> m1 ≅* m3
 trans refl p  = p
@@ -116,6 +120,9 @@ refl≡ refl = refl
 ≅-abs-l (braid≅ [] r .(_ ∷ []) .[] () defmf)
 ≅-abs-l (braid≅ (x ∷ []) r .(_ ∷ []) .[] () defmf)
 ≅-abs-l (braid≅ (x ∷ x₁ ∷ l) r .(_ ∷ []) .[] () defmf)
+≅-abs-l (bs≅ [] r .(_ ∷ []) .[] () defmf)
+≅-abs-l (bs≅ (x ∷ []) r .(_ ∷ []) .[] () defmf)
+≅-abs-l (bs≅ (x ∷ x₁ ∷ l) r .(_ ∷ []) .[] () defmf)
 
 ≅-abs-r : {x : ℕ} -> [] ≅ (x ∷ []) -> ⊥
 ≅-abs-r (cancel≅ [] r .[] .(_ ∷ []) () defmf)
@@ -124,6 +131,8 @@ refl≡ refl = refl
 ≅-abs-r (swap≅ x (x₁ ∷ l) r .[] .(_ ∷ []) () defmf)
 ≅-abs-r (braid≅ [] r .[] .(_ ∷ []) () defmf)
 ≅-abs-r (braid≅ (x ∷ l) r .[] .(_ ∷ []) () defmf)
+≅-abs-r (bs≅ [] r .[] .(_ ∷ []) () defmf)
+≅-abs-r (bs≅ (x ∷ l) r .[] .(_ ∷ []) () defmf)
 
 empty-reduction : {m : List ℕ} -> ([] ≅ m) -> ⊥
 empty-reduction (cancel≅ [] r .[] _ () defmf)
@@ -132,6 +141,8 @@ empty-reduction (swap≅ x [] r .[] _ () defmf)
 empty-reduction (swap≅ x (x₁ ∷ l) r .[] _ () defmf)
 empty-reduction (braid≅ [] r .[] _ () defmf)
 empty-reduction (braid≅ (x ∷ l) r .[] _ () defmf)
+empty-reduction (bs≅ [] r .[] mf () defmf)
+empty-reduction (bs≅ (x ∷ l) r .[] mf () defmf)
 
 mod2 : ℕ -> Bool
 mod2 0 = true
