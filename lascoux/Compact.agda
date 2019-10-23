@@ -58,10 +58,10 @@ cancel = {!!}
 swap : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅* (l ++ k ∷ n ∷ r)
 swap {k} pk l r = {!!}
 
-braid : (l r m mf : List ℕ) -> (l ++ (suc n) ∷ n ∷ (suc n) ∷ r) ≅* (l ++ n ∷ (suc n) ∷ n ∷ r)
+braid : (l r : List ℕ) -> (l ++ (suc n) ∷ n ∷ (suc n) ∷ r) ≅* (l ++ n ∷ (suc n) ∷ n ∷ r)
 braid = {!!}
 
-bs : (l r m mf : List ℕ) -> (defm : m ≡ l ++ (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ r) -> (defmf : mf ≡ l ++ (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ r) -> (m ≅* mf)
+bs : (l r : List ℕ) -> (l ++ (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ r) ≅* (l ++ (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ r)
 bs = {!!}
 
 trans : {m1 m2 m3 : List ℕ} -> (m1 ≅* m2) -> (m2 ≅* m3) -> m1 ≅* m3
