@@ -37,27 +37,26 @@ abs-refl p = ⊥-elim (1+n≰n p)
 
 -- suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r ≡ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ suc (suc n1) ∷ r1) ->
 
-long-lemma : {n n1 k k1 t t1 : ℕ} -> {p : k ≤ n} -> {p1 : k1 ≤ n1} -> {r r1 : List ℕ} -> suc n ∷ n ∷ (n ↓ k , p) ++ (t + n) ∷ r ≡ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ (t1 + n1) ∷ r1 -> (n ≡ n1) × (k ≡ k1) × (r ≡ r1) × (t ≡ t1)
-long-lemma {n} {n1} {.0} {.0} {t} {t1} {z≤n} {z≤n} {r} {r1} q = (cut-t2 q) , refl , (cut-h3 q) , ≡-down-r-+ (subst (λ e -> t + e ≡ t1 + n1) (cut-t2 q) (cut-t3 q))
-long-lemma {suc n} {suc n1} {suc k} {suc k1} {t} {t1} {s≤s p} {s≤s p1} {r} {r1} q rewrite (cut-t3 q) =
-  let qq =
-        begin
-          suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ (t + 1) + n ∷ r
-        ≡⟨ cong (λ e -> suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ e ∷ r) (+-assoc t 1 n) ⟩ --
-          _
-        ≡⟨ q ⟩
-          suc (suc n1) ∷ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ t1 + suc n1 ∷ r1
-        ≡⟨ cong (λ e -> suc (suc n1) ∷ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ e ∷ r1) (≡-sym (+-assoc t1 1 n1)) ⟩
-          suc (suc n1) ∷ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ (t1 + 1) + n1 ∷ r1
-        ∎
-      en , ek , er , et = long-lemma {p = p} {p1 = p1} {r = r} {r1 = r1} (cut-head qq)
-  in  refl , (cong suc ek) , er , ≡-down-r-+ et
-long-lemma {n} {suc n1} {zero} {suc k1} {suc t} {t1} {z≤n} {s≤s p1} {r} {r1} q =
+long-lemma : (n n1 k k1 t t1 : ℕ) -> (suc n ≤ t) -> (suc n1 ≤ t1) -> (r r1 : List ℕ) -> ((2 + n) ↓ (2 + k)) ++ t ∷ r ≡ ((2 + n1) ↓ (2 + k1)) ++ t1 ∷ r1
+             -> (n ≡ n1) × (((2 + n) ↓ (2 + k)) ≡ ((2 + n1) ↓ (2 + k1))) × (r ≡ r1)
+long-lemma n n1 zero zero t t1 pt pt1 r r1 p rewrite (cut-t2 p) rewrite (cut-h3 p) = refl , (refl , refl)
+long-lemma .0 zero zero (suc k1) t t1 pt pt1 r .r refl = refl , (refl , refl)
+long-lemma zero .0 (suc k) zero t t1 pt pt1 r .r refl = refl , (refl , refl)
+long-lemma zero zero (suc k) (suc k1) t t1 pt pt1 r .r refl = refl , (refl , refl)
+long-lemma (suc n) (suc n1) (suc k) (suc k1) t t1 pt pt1 r r1 p =
+  let recn , recl , recr = long-lemma n n1 k k1 t t1  (≤-down pt) (≤-down pt1) r r1 (cut-head p)
+      recll = head+tail (cong (λ e -> 2 + e) recn) recl
+  in  (cong suc recn) ,(recll , recr)
+long-lemma n (suc n1) zero (suc k1) t t1 pt pt1 r r1 q =
   let e1 = cut-t2 q
       e2 = cut-t3 q
-      aa = ≤-trans {!   !} (≤-trans (≤-reflexive (cong suc e2)) (≤-reflexive (≡-sym e1)))
-  in  {!  !}
-long-lemma {suc n} {n1} {suc k} {zero} {t} {suc t1} {s≤s p} {z≤n} {r} {r1} q = {!   !}
+      eq = ≤-trans (s≤s pt) (≤-trans (s≤s (≤-reflexive e2)) (≤-reflexive (≡-sym e1)))
+  in  abs-suc eq
+long-lemma (suc n) (suc n1) (suc k) zero t t1 pt pt1 r r1 q =
+  let e1 = cut-t2 q
+      e2 = cut-t3 q
+      eq = ≤-trans (s≤s pt1) (≤-trans (s≤s (≤-reflexive (≡-sym e2))) (≤-reflexive e1))
+  in  abs-suc eq
 
 -- and this should do something like: if ir1 = (ir p1) and ir2 = (ir p2) are non-overlapping, use force-non-crit-pair
 -- otherwise, take the ir1 ∪ ir2 , force it into one of the critical pairs and then reduce critical pair
@@ -145,7 +144,7 @@ diamond : (m1 m2 m3 : List ℕ) -> (m1 ≅ m2) -> (m1 ≅ m3) -> ∃ (λ m -> (m
 --   in  abs-refl (≤-trans x (≤-trans (≤-reflexive nn) (≤-reflexive (≡-sym (cong suc kk)))))
 
 -- TODO
-diamond m1 m2 m3 (long≅ {n} k1 p [] r m mf defm defmf) (long≅ k2 p₁ [] r₁ m₁ mf₁ defm₁ defmf₁)
+diamond m1 m2 m3 (long≅ {n} k1 [] r m mf defm defmf) (long≅ k2 [] r₁ m₁ mf₁ defm₁ defmf₁)
   rewrite defmf rewrite defmf₁ =
   let eq = ≡-trans (≡-sym defm) defm₁
   in  {!   !} , (refl , {! refl  !})
