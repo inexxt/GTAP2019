@@ -57,6 +57,8 @@ swap-c {k} pk l r = {!!}
 long-c : (k : ℕ) -> (l r : List ℕ) -> (l ++ ((2 + n) ↓ (2 + k)) ++ (1 + n) ∷ r) ≅ (l ++ n ∷ ((2 + n) ↓ (2 + k)) ++ r)
 long-c k l r = long≅ k l r _ _ refl refl
 
+-- refl-c : {l l' : List ℕ} -> (l ≡ l1) -> (l ≅ l)
+
 ext : {l l' : List ℕ} -> l ≅ l' -> l ≅* l'
 ext p = trans≅ p refl
 
@@ -230,3 +232,6 @@ cut-h4 {l1 = l1} {l2 = .l1} refl = refl
 
 head+tail : {h1 h2 : ℕ} -> {t1 t2 : List ℕ} -> (h1 ≡ h2) -> (t1 ≡ t2) -> (h1 ∷ t1) ≡ (h2 ∷ t2)
 head+tail p1 p2 = {!!}
+
+start+end : {h1 h2 : List ℕ} -> {t1 t2 : List ℕ} -> (h1 ≡ h2) -> (t1 ≡ t2) -> (h1 ++ t1) ≡ (h2 ++ t2)
+start+end p1 p2 = {!!}
