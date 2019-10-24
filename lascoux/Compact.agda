@@ -29,11 +29,14 @@ variable
 data nonempty : List ℕ -> Set where
   nonempty-l : (x : ℕ) -> (l : List ℕ) -> nonempty (x ∷ l)
 
+↓ : (n : ℕ) -> List ℕ
+↓ zero = []
+↓ (suc n) = n ∷ (↓ n)
+
 data _≅_ : List ℕ -> List ℕ -> Set where
     cancel≅ : (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ n ∷ r) -> (defmf : mf ≡ l ++ r) -> (m ≅ mf)
     swap≅ : {k : ℕ} -> (suc k < n) ->  (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ k ∷ r) -> (defmf : mf ≡ l ++ k ∷ n ∷ r) -> (m ≅ mf)
-    braid≅ :  (l r m mf : List ℕ) -> (defm : m ≡ l ++ (suc n) ∷ n ∷ (suc n) ∷ r) -> (defmf : mf ≡ l ++ n ∷ (suc n) ∷ n ∷ r) -> (m ≅ mf)
-    bs≅ : (l r m mf : List ℕ) -> (defm : m ≡ l ++ (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ r) -> (defmf : mf ≡ l ++ (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ r) -> (m ≅ mf)
+    long≅ : (l r m mf : List ℕ) -> (defm : m ≡ l ++ ↓ (2 + n) ++ (1 + n) ∷ r) -> (defmf : mf ≡ l ++ n ∷ ↓ (2 + n) ++ r) -> (m ≅ mf)
 
 data _≅*_ : List ℕ -> List ℕ -> Set where
     refl : {m : List ℕ} -> m ≅* m
@@ -45,10 +48,6 @@ cancel-c = {!!}
 swap-c : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅ (l ++ k ∷ n ∷ r)
 swap-c {k} pk l r = {!!}
 
-braid-c : (l r : List ℕ) -> (l ++ (suc n) ∷ n ∷ (suc n) ∷ r) ≅ (l ++ n ∷ (suc n) ∷ n ∷ r)
-braid-c = {!!}
-
-
 ext : {l l' : List ℕ} -> l ≅ l' -> l ≅* l'
 ext p = trans≅ p refl
 
@@ -58,11 +57,8 @@ cancel = {!!}
 swap : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅* (l ++ k ∷ n ∷ r)
 swap {k} pk l r = {!!}
 
-braid : (l r : List ℕ) -> (l ++ (suc n) ∷ n ∷ (suc n) ∷ r) ≅* (l ++ n ∷ (suc n) ∷ n ∷ r)
-braid = {!!}
-
-bs : (l r : List ℕ) -> (l ++ (2 + n) ∷ (1 + n) ∷ n ∷ (2 + n) ∷ r) ≅* (l ++ (1 + n) ∷ (2 + n) ∷ (1 + n) ∷ n ∷ r)
-bs = {!!}
+long : (l r : List ℕ) -> (l ++ ↓ (2 + n) ++ (1 + n) ∷ r) ≅ (l ++ n ∷ ↓ (2 + n) ++ r)
+long = {!!}
 
 trans : {m1 m2 m3 : List ℕ} -> (m1 ≅* m2) -> (m2 ≅* m3) -> m1 ≅* m3
 trans refl p  = p
@@ -117,32 +113,22 @@ refl≡ refl = refl
 ≅-abs-l (swap≅ x [] r .(_ ∷ []) .[] () defmf)
 ≅-abs-l (swap≅ x (x₁ ∷ []) r .(_ ∷ []) .[] () defmf)
 ≅-abs-l (swap≅ x (x₁ ∷ x₂ ∷ l) r .(_ ∷ []) .[] () defmf)
-≅-abs-l (braid≅ [] r .(_ ∷ []) .[] () defmf)
-≅-abs-l (braid≅ (x ∷ []) r .(_ ∷ []) .[] () defmf)
-≅-abs-l (braid≅ (x ∷ x₁ ∷ l) r .(_ ∷ []) .[] () defmf)
-≅-abs-l (bs≅ [] r .(_ ∷ []) .[] () defmf)
-≅-abs-l (bs≅ (x ∷ []) r .(_ ∷ []) .[] () defmf)
-≅-abs-l (bs≅ (x ∷ x₁ ∷ l) r .(_ ∷ []) .[] () defmf)
+≅-abs-l (long≅ [] r .(_ ∷ []) .[] () defmf)
+≅-abs-l (long≅ (x ∷ l) r .(_ ∷ []) .[] defm ())
 
 ≅-abs-r : {x : ℕ} -> [] ≅ (x ∷ []) -> ⊥
 ≅-abs-r (cancel≅ [] r .[] .(_ ∷ []) () defmf)
 ≅-abs-r (cancel≅ (x ∷ l) r .[] .(_ ∷ []) () defmf)
 ≅-abs-r (swap≅ x [] r .[] .(_ ∷ []) () defmf)
 ≅-abs-r (swap≅ x (x₁ ∷ l) r .[] .(_ ∷ []) () defmf)
-≅-abs-r (braid≅ [] r .[] .(_ ∷ []) () defmf)
-≅-abs-r (braid≅ (x ∷ l) r .[] .(_ ∷ []) () defmf)
-≅-abs-r (bs≅ [] r .[] .(_ ∷ []) () defmf)
-≅-abs-r (bs≅ (x ∷ l) r .[] .(_ ∷ []) () defmf)
+≅-abs-r (long≅ [] r .[] .(_ ∷ []) () defmf)
 
 empty-reduction : {m : List ℕ} -> ([] ≅ m) -> ⊥
 empty-reduction (cancel≅ [] r .[] _ () defmf)
 empty-reduction (cancel≅ (x ∷ l) r .[] _ () defmf)
 empty-reduction (swap≅ x [] r .[] _ () defmf)
 empty-reduction (swap≅ x (x₁ ∷ l) r .[] _ () defmf)
-empty-reduction (braid≅ [] r .[] _ () defmf)
-empty-reduction (braid≅ (x ∷ l) r .[] _ () defmf)
-empty-reduction (bs≅ [] r .[] mf () defmf)
-empty-reduction (bs≅ (x ∷ l) r .[] mf () defmf)
+empty-reduction (long≅ [] r .[] mf () defmf)
 
 mod2 : ℕ -> Bool
 mod2 0 = true
