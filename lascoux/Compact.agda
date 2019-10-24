@@ -71,7 +71,35 @@ braid {n} l r = long {n} 0 z≤n l r
 trans : {m1 m2 m3 : List ℕ} -> (m1 ≅* m2) -> (m2 ≅* m3) -> m1 ≅* m3
 trans refl p  = p
 trans (trans≅ x q) p = trans≅ x (trans q p)
---
+
+l++≅ : (m1 m2 l : List ℕ) -> (m1 ≅ m2) -> ((l ++ m1) ≅ (l ++ m2))
+l++≅ m1 m2 l (cancel≅ l₁ r .m1 .m2 defm defmf) = {!   !}
+l++≅ m1 m2 l (swap≅ x l₁ r .m1 .m2 defm defmf) = {!   !}
+l++≅ m1 m2 l (long≅ k p l₁ r .m1 .m2 defm defmf) = {!   !}
+
+l++ : (l : List ℕ) -> {m1 m2 : List ℕ} -> (m1 ≅* m2) -> ((l ++ m1) ≅* (l ++ m2))
+l++ l p = {!   !}
+
+++r≅ : (m1 m2 r : List ℕ) -> (m1 ≅ m2) -> ((m1 ++ r) ≅ (m2 ++ r))
+++r≅ m1 m2 l (cancel≅ l₁ r .m1 .m2 defm defmf) = {!   !}
+++r≅ m1 m2 l (swap≅ x l₁ r .m1 .m2 defm defmf) = {!   !}
+++r≅ m1 m2 l (long≅ k p l₁ r .m1 .m2 defm defmf) = {!   !}
+
+++r : {m1 m2 : List ℕ} -> (r : List ℕ) -> (m1 ≅* m2) -> ((m1 ++ r) ≅* (m2 ++ r))
+++r r p = {!   !}
+
+long-swap : {n1 n2 : ℕ} -> (n1 < n2) -> {k : ℕ} -> (p : k ≤ n1) -> (n2 ∷ (n1 ↓ k , p)) ≅* ((n1 ↓ k , p) ++ [ n2 ])
+long-swap {n1} {n2} pn {.0} z≤n = refl
+long-swap {(suc n1)} {n2} pn {(suc k)} (s≤s pk) =
+  let rec = long-swap (≤-down pn) pk
+  in  trans (swap pn [] _ ) (l++ [ n1 ] rec)
+
+long-swap-lr : {n1 n2 : ℕ} -> (l r : List ℕ) -> (n1 < n2) -> {k : ℕ} -> (p : k ≤ n1) -> (l ++ (n2 ∷ (n1 ↓ k , p)) ++ r) ≅* (l ++ (n1 ↓ k , p) ++ n2 ∷ r)
+long-swap-lr l r pn pk =
+  let lemma = l++ l (++r r (long-swap pn pk))
+      assoc = ++-assoc l {!   !} r
+  in  subst {!   !} assoc lemma
+
 -- ---
 --
 abs-suc : {A : Set} -> suc n < n -> A
