@@ -41,7 +41,7 @@ n ↓ 0 , z≤n = []
 data _≅_ : List ℕ -> List ℕ -> Set where
     cancel≅ : (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ n ∷ r) -> (defmf : mf ≡ l ++ r) -> (m ≅ mf)
     swap≅ : {k : ℕ} -> (suc k < n) ->  (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ k ∷ r) -> (defmf : mf ≡ l ++ k ∷ n ∷ r) -> (m ≅ mf)
-    long≅ : (k : ℕ) -> (p : k ≤ (2 + n)) -> (l r m mf : List ℕ) -> (defm : m ≡ l ++ ((2 + n) ↓ k , p) ++ (1 + n) ∷ r) -> (defmf : mf ≡ l ++ n ∷ ((2 + n) ↓ k , p) ++ r) -> (m ≅ mf)
+    long≅ : (k : ℕ) -> (p : k ≤ n) -> (l r m mf : List ℕ) -> (defm : m ≡ l ++ ((2 + n) ↓ (2 + k) , s≤s (s≤s p)) ++ (1 + n) ∷ r) -> (defmf : mf ≡ l ++ n ∷ ((2 + n) ↓ (2 + k) , s≤s (s≤s p)) ++ r) -> (m ≅ mf)
 
 data _≅*_ : List ℕ -> List ℕ -> Set where
     refl : {m : List ℕ} -> m ≅* m
@@ -62,11 +62,11 @@ cancel = {!!}
 swap : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅* (l ++ k ∷ n ∷ r)
 swap {k} pk l r = {!!}
 
-long : (k : ℕ) -> (p : k ≤ (2 + n)) -> (l r : List ℕ) -> (l ++ ((2 + n) ↓ k , p) ++ (1 + n) ∷ r) ≅* (l ++ n ∷ ((2 + n) ↓ k , p) ++ r)
+long : (k : ℕ) -> (p : k ≤ n) -> (l r : List ℕ) -> (l ++ ((2 + n) ↓ (2 + k) , s≤s (s≤s p)) ++ (1 + n) ∷ r) ≅* (l ++ n ∷ ((2 + n) ↓ (2 + k) , s≤s (s≤s p)) ++ r)
 long k p l r = ext (long≅ k p l r _ _ refl refl)
 
 braid : (l r : List ℕ) -> (l ++ suc n ∷ n ∷ suc n ∷ r) ≅* (l ++ n ∷ suc n ∷ n ∷ r)
-braid {n} l r = long {n} 2 (s≤s (s≤s z≤n)) l r
+braid {n} l r = long {n} 0 z≤n l r
 
 trans : {m1 m2 m3 : List ℕ} -> (m1 ≅* m2) -> (m2 ≅* m3) -> m1 ≅* m3
 trans refl p  = p
@@ -137,8 +137,8 @@ empty-reduction (cancel≅ [] r .[] _ () defmf)
 empty-reduction (cancel≅ (x ∷ l) r .[] _ () defmf)
 empty-reduction (swap≅ x [] r .[] _ () defmf)
 empty-reduction (swap≅ x (x₁ ∷ l) r .[] _ () defmf)
-empty-reduction (long≅ zero z≤n [] r .[] .(_ ∷ r) () refl)
-empty-reduction (long≅ (suc k) (s≤s p) [] r .[] mf () defmf)
+empty-reduction (long≅ k p [] r .[] mf () defmf)
+empty-reduction (long≅ k p (x ∷ l) r .[] mf () defmf)
 
 mod2 : ℕ -> Bool
 mod2 0 = true

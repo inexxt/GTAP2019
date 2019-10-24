@@ -50,7 +50,10 @@ diamond (c ∷ b ∷ a ∷ m1) m2 m3 (swap≅ b<c [] .(a ∷ m1) .(c ∷ b ∷ a
 diamond (x₂ ∷ x₃ ∷ .x₃ ∷ m1) m2 m3 (cancel≅ (.x₂ ∷ []) .m1 .(x₂ ∷ x₃ ∷ x₃ ∷ m1) .m2 refl defmf) (swap≅ x [] .(x₃ ∷ m1) .(x₂ ∷ x₃ ∷ x₃ ∷ m1) .m3 refl defmf₁)
   rewrite defmf rewrite defmf₁ = _ , (refl , trans (swap x [ x₃ ] _) (cancel [] _)) -- cs
 
--- - disjoint
+diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (long≅ k p (x ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
+diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (long≅ k p (x₁ ∷ []) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
+
+-- -- - disjoint
 diamond .(_ ∷ _ ∷ r) m2 m3 (cancel≅ [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (cancel≅ {n = n} (x ∷ x₁ ∷ l) r₁ .(_ ∷ _ ∷ r) .m3 d defmf₁)
     rewrite (≡-trans defmf (cut-h2 d)) rewrite defmf₁ rewrite (≡-sym (cut-t1 d)) rewrite (≡-sym (cut-t2 d)) =
     (l ++ r₁) ,  cancel l r₁ , (cancel [] (l ++ r₁)) --((cancel l r₁) ,  -- cc-dis
@@ -64,15 +67,16 @@ diamond .(_ ∷ _ ∷ r₁) m2 m3 (cancel≅ (x₁ ∷ x₂ ∷ l) r .(_ ∷ _ �
   rewrite defmf rewrite defmf₁ rewrite (cut-h2 defm) rewrite ≡-sym (cut-t1 defm) rewrite ≡-sym (cut-t2 defm) =
   _ , (swap x [] _ , cancel _ r)
 
+diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (long≅ k p (x ∷ x₁ ∷ l₁) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
+diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (long≅ k p (x₁ ∷ x₂ ∷ l₁) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 
--- --- identity
+-- -- --- identity
 diamond .(_ ∷ _ ∷ r) m2 m3 (cancel≅ [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (cancel≅ [] r₁ .(_ ∷ _ ∷ r) .m3 defm₁ defmf₁)
   rewrite defmf rewrite defmf₁ rewrite (cut-h2 defm₁)  = r₁ , (refl , refl)
 diamond .(_ ∷ _ ∷ r) m2 m3 (swap≅ x [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (swap≅ x₁ [] r₁ .(_ ∷ _ ∷ r) .m3 defm₁ defmf₁)
   rewrite defmf rewrite defmf₁ rewrite (cut-h2 defm₁) rewrite (cut-t1 defm₁) rewrite (cut-t2 defm₁)  = _ , (refl , refl)
-diamond m1 m2 m3 (long≅ k p [] r .m1 .m2 defm defmf) (long≅ k₁ p₁ [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 
--- --- rec
+-- -- --- rec
 diamond m1 m2 m3 (swap≅ x l r .m1 .m2 defm defmf) (cancel≅ l₁ r₁ .m1 .m3 defm₁ defmf₁) = {!!}
 diamond m1 m2 m3 (long≅ k p l r .m1 .m2 defm defmf) (cancel≅ l₁ r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 diamond m1 m2 m3 (long≅ k p l r .m1 .m2 defm defmf) (swap≅ x l₁ r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
@@ -94,11 +98,12 @@ diamond .(_ ∷ _ ∷ r) m2 m3 (cancel≅ [] r .(_ ∷ _ ∷ r) .m2 refl defmf) 
 diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (long≅ k p [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (long≅ k p [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 
-diamond m1 m2 m3 (cancel≅ [] r .m1 .m2 defm defmf) (long≅ k p (x ∷ l₁) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
+-- TODO
+diamond m1 m2 m3 (long≅ k1 p [] r .m1 .m2 defm defmf) (long≅ k2 p₁ [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- with k1 ≟ k2
 diamond m1 m2 m3 (cancel≅ (x ∷ l) r .m1 .m2 defm defmf) (long≅ k p [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
-diamond m1 m2 m3 (swap≅ x [] r .m1 .m2 defm defmf) (long≅ k p (x₁ ∷ l₁) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 diamond m1 m2 m3 (swap≅ x (x₁ ∷ l) r .m1 .m2 defm defmf) (long≅ k p [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 diamond m1 m2 m3 (long≅ k p [] r .m1 .m2 defm defmf) (long≅ k₁ p₁ (x ∷ l₁) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
+
 
 -- diamond-full : {m1 m2 m3 : List ℕ} -> (m1 ≅* m2) -> (m1 ≅* m3) -> ∃ (λ m -> (m2 ≅* m) × (m3 ≅* m))
 -- diamond-full p q = {!!}
