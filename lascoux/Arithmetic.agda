@@ -50,6 +50,8 @@ postulate
     ≤-up-r-+ : {p q r : ℕ} -> (p ≤ q) -> (p ≤ q + r)
     ≤-up-+ : {p q r : ℕ} -> (p ≤ q) -> (p ≤ r + q)
     ≤-down-+ : {p q r : ℕ} -> (p + r ≤ q) -> (p ≤ q)
+    ≡-down-+ : {p q r : ℕ} -> (r + p ≡ r + q) -> (p ≡ q)
+    ≡-down-r-+ : {p q r : ℕ} -> (p + r ≡ q + r) -> (p ≡ q)
     ∸-anti-≤ : {p q r : ℕ} -> (q ≤ p) -> (p ≤ r) -> (r ∸ p) ≤ (r ∸ q)
 
 ∸-∸-+ : {p q r : ℕ} -> (r ≤ q) -> (q ≤ p + r) -> p ∸ (q ∸ r) ≡ (p + r) ∸ q

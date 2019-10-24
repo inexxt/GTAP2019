@@ -28,9 +28,36 @@ variable
     l : List ℕ
 
 open ≅*-Reasoning
+open Relation.Binary.PropositionalEquality.≡-Reasoning
+
 
 abs-refl : {A : Set} -> n < n -> A
 abs-refl p = ⊥-elim (1+n≰n p)
+
+
+-- suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r ≡ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ suc (suc n1) ∷ r1) ->
+
+long-lemma : {n n1 k k1 t t1 : ℕ} -> {p : k ≤ n} -> {p1 : k1 ≤ n1} -> {r r1 : List ℕ} -> suc n ∷ n ∷ (n ↓ k , p) ++ (t + n) ∷ r ≡ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ (t1 + n1) ∷ r1 -> (n ≡ n1) × (k ≡ k1) × (r ≡ r1) × (t ≡ t1)
+long-lemma {n} {n1} {.0} {.0} {t} {t1} {z≤n} {z≤n} {r} {r1} q = (cut-t2 q) , refl , (cut-h3 q) , ≡-down-r-+ (subst (λ e -> t + e ≡ t1 + n1) (cut-t2 q) (cut-t3 q))
+long-lemma {suc n} {suc n1} {suc k} {suc k1} {t} {t1} {s≤s p} {s≤s p1} {r} {r1} q rewrite (cut-t3 q) =
+  let qq =
+        begin
+          suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ (t + 1) + n ∷ r
+        ≡⟨ cong (λ e -> suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ e ∷ r) (+-assoc t 1 n) ⟩ --
+          _
+        ≡⟨ q ⟩
+          suc (suc n1) ∷ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ t1 + suc n1 ∷ r1
+        ≡⟨ cong (λ e -> suc (suc n1) ∷ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ e ∷ r1) (≡-sym (+-assoc t1 1 n1)) ⟩
+          suc (suc n1) ∷ suc n1 ∷ n1 ∷ (n1 ↓ k1 , p1) ++ (t1 + 1) + n1 ∷ r1
+        ∎
+      en , ek , er , et = long-lemma {p = p} {p1 = p1} {r = r} {r1 = r1} (cut-head qq)
+  in  refl , (cong suc ek) , er , ≡-down-r-+ et
+long-lemma {n} {suc n1} {zero} {suc k1} {suc t} {t1} {z≤n} {s≤s p1} {r} {r1} q =
+  let e1 = cut-t2 q
+      e2 = cut-t3 q
+      aa = ≤-trans {!   !} (≤-trans (≤-reflexive (cong suc e2)) (≤-reflexive (≡-sym e1)))
+  in  {!  !}
+long-lemma {suc n} {n1} {suc k} {zero} {t} {suc t1} {s≤s p} {z≤n} {r} {r1} q = {!   !}
 
 -- and this should do something like: if ir1 = (ir p1) and ir2 = (ir p2) are non-overlapping, use force-non-crit-pair
 -- otherwise, take the ir1 ∪ ir2 , force it into one of the critical pairs and then reduce critical pair
@@ -49,23 +76,23 @@ diamond : (m1 m2 m3 : List ℕ) -> (m1 ≅ m2) -> (m1 ≅ m3) -> ∃ (λ m -> (m
 --    in a ∷ b ∷ c ∷ m1 , left , right -- ss
 -- diamond (x₂ ∷ x₃ ∷ .x₃ ∷ m1) m2 m3 (cancel≅ (.x₂ ∷ []) .m1 .(x₂ ∷ x₃ ∷ x₃ ∷ m1) .m2 refl defmf) (swap≅ x [] .(x₃ ∷ m1) .(x₂ ∷ x₃ ∷ x₃ ∷ m1) .m3 refl defmf₁)
 --   rewrite defmf rewrite defmf₁ = _ , (refl , trans (swap x [ x₃ ] _) (cancel [] _)) -- cs
-
-diamond .(1 ∷ 1 ∷ 0 ∷ 1 ∷ r₁) m2 m3 (cancel≅ [] .(0 ∷ 1 ∷ r₁) .(1 ∷ 1 ∷ 0 ∷ 1 ∷ r₁) .m2 refl defmf) (long≅ {zero} zero z≤n (.1 ∷ []) r₁ .(1 ∷ 1 ∷ 0 ∷ 1 ∷ r₁) .m3 refl defmf₁)
-  rewrite defmf rewrite defmf₁ =
-  0 ∷ 1 ∷ r₁ , refl , trans (braid [] (0 ∷ r₁)) (cancel (0 ∷ 1 ∷ []) r₁)
-diamond .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ suc (suc n) ∷ r₁) m2 m3 (cancel≅ [] .(suc n ∷ suc (suc n) ∷ r₁) .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ suc (suc n) ∷ r₁) .m2 refl defmf) (long≅ {suc n} zero z≤n (.(suc (suc n)) ∷ []) r₁ .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ suc (suc n) ∷ r₁) .m3 refl defmf₁)
-  rewrite defmf rewrite defmf₁ =
-  (1 + n) ∷ (2 + n) ∷ r₁ , refl , trans (braid [] ((1 + n) ∷ r₁)) (cancel ((1 + n) ∷ (2 + n) ∷ []) r₁)
-diamond .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r₁) m2 m3 (cancel≅ [] .(suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r₁) .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r₁) .m2 refl defmf) (long≅ {suc n} (suc k) (s≤s p) (.(suc (suc n)) ∷ []) r₁ .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r₁) .m3 refl defmf₁)
-  rewrite defmf rewrite defmf₁ =
-  _ , (refl , (trans (braid [] _) (trans (cancel ((1 + n) ∷ 2 + n ∷ []) _) (long-swap-lr [ suc n ] r₁ (s≤s (≤-reflexive refl)) (s≤s p)))))
-diamond .(x₁ ∷ suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) m2 m3 (swap≅ x [] .(_ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) .(x₁ ∷ suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) .m2 refl defmf) (long≅ {n} k p (x₁ ∷ []) r₁ .(x₁ ∷ suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) .m3 refl defmf₁)
-  rewrite defmf rewrite defmf₁ =
-  let left = trans (long-swap-lr {n1 = suc n} [ suc n ] (suc n ∷ r₁) (≤-down x) {k = suc k} (s≤s p)) (trans (swap x (suc n ∷ n ∷ (n ↓ k , p)) r₁) (long k p [] (x₁ ∷ r₁)))
-      right = trans (swap (≤-down x) [] _) (long-swap-lr [ n ] r₁ x (s≤s (s≤s p)))
-  in  _ , (left , right)
-
--- -- - disjoint
+--
+-- diamond .(1 ∷ 1 ∷ 0 ∷ 1 ∷ r₁) m2 m3 (cancel≅ [] .(0 ∷ 1 ∷ r₁) .(1 ∷ 1 ∷ 0 ∷ 1 ∷ r₁) .m2 refl defmf) (long≅ {zero} zero z≤n (.1 ∷ []) r₁ .(1 ∷ 1 ∷ 0 ∷ 1 ∷ r₁) .m3 refl defmf₁)
+--   rewrite defmf rewrite defmf₁ =
+--   0 ∷ 1 ∷ r₁ , refl , trans (braid [] (0 ∷ r₁)) (cancel (0 ∷ 1 ∷ []) r₁)
+-- diamond .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ suc (suc n) ∷ r₁) m2 m3 (cancel≅ [] .(suc n ∷ suc (suc n) ∷ r₁) .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ suc (suc n) ∷ r₁) .m2 refl defmf) (long≅ {suc n} zero z≤n (.(suc (suc n)) ∷ []) r₁ .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ suc (suc n) ∷ r₁) .m3 refl defmf₁)
+--   rewrite defmf rewrite defmf₁ =
+--   (1 + n) ∷ (2 + n) ∷ r₁ , refl , trans (braid [] ((1 + n) ∷ r₁)) (cancel ((1 + n) ∷ (2 + n) ∷ []) r₁)
+-- diamond .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r₁) m2 m3 (cancel≅ [] .(suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r₁) .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r₁) .m2 refl defmf) (long≅ {suc n} (suc k) (s≤s p) (.(suc (suc n)) ∷ []) r₁ .(suc (suc n) ∷ suc (suc n) ∷ suc n ∷ n ∷ (n ↓ k , p) ++ suc (suc n) ∷ r₁) .m3 refl defmf₁)
+--   rewrite defmf rewrite defmf₁ =
+--   _ , (refl , (trans (braid [] _) (trans (cancel ((1 + n) ∷ 2 + n ∷ []) _) (long-swap-lr [ suc n ] r₁ (s≤s (≤-reflexive refl)) (s≤s p)))))
+-- diamond .(x₁ ∷ suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) m2 m3 (swap≅ x [] .(_ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) .(x₁ ∷ suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) .m2 refl defmf) (long≅ {n} k p (x₁ ∷ []) r₁ .(x₁ ∷ suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) .m3 refl defmf₁)
+--   rewrite defmf rewrite defmf₁ =
+--   let left = trans (long-swap-lr {n1 = suc n} [ suc n ] (suc n ∷ r₁) (≤-down x) {k = suc k} (s≤s p)) (trans (swap x (suc n ∷ n ∷ (n ↓ k , p)) r₁) (long k p [] (x₁ ∷ r₁)))
+--       right = trans (swap (≤-down x) [] _) (long-swap-lr [ n ] r₁ x (s≤s (s≤s p)))
+--   in  _ , (left , right)
+--
+-- -- -- - disjoint
 -- diamond .(_ ∷ _ ∷ r) m2 m3 (cancel≅ [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (cancel≅ {n = n} (x ∷ x₁ ∷ l) r₁ .(_ ∷ _ ∷ r) .m3 d defmf₁)
 --     rewrite (≡-trans defmf (cut-h2 d)) rewrite defmf₁ rewrite (≡-sym (cut-t1 d)) rewrite (≡-sym (cut-t2 d)) =
 --     (l ++ r₁) ,  cancel l r₁ , (cancel [] (l ++ r₁)) --((cancel l r₁) ,  -- cc-dis
@@ -78,20 +105,20 @@ diamond .(x₁ ∷ suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) m2 m3 (swap�
 -- diamond .(_ ∷ _ ∷ r₁) m2 m3 (cancel≅ (x₁ ∷ x₂ ∷ l) r .(_ ∷ _ ∷ r₁) .m2 defm defmf) (swap≅ x [] r₁ .(_ ∷ _ ∷ r₁) .m3 refl defmf₁)
 --   rewrite defmf rewrite defmf₁ rewrite (cut-h2 defm) rewrite ≡-sym (cut-t1 defm) rewrite ≡-sym (cut-t2 defm) =
 --   _ , (swap x [] _ , cancel _ r)
-
+--
 -- diamond .(_ ∷ _ ∷ r) m2 m3 (cancel≅ [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (long≅ k p (x ∷ x₁ ∷ l₁) r₁ .(_ ∷ _ ∷ r) .m3 d defmf₁)
 --   rewrite defmf rewrite defmf₁ rewrite (cut-h2 d) rewrite ≡-sym (cut-t1 d) rewrite ≡-sym (cut-t2 d) =
 --   _ , ((long k p l₁ r₁) , (cancel [] _))
 -- diamond .(_ ∷ _ ∷ r) m2 m3 (swap≅ x [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (long≅ k p (x₁ ∷ x₂ ∷ l₁) r₁ .(_ ∷ _ ∷ r) .m3 d defmf₁)
 --   rewrite defmf rewrite defmf₁ rewrite (cut-h2 d) rewrite ≡-sym (cut-t1 d) rewrite ≡-sym (cut-t2 d) =
 --   _ , ((long k p (_ ∷ _ ∷ l₁) r₁) , (swap x [] _))
-
+--
 -- -- --- identity
 -- diamond .(_ ∷ _ ∷ r) m2 m3 (cancel≅ [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (cancel≅ [] r₁ .(_ ∷ _ ∷ r) .m3 defm₁ defmf₁)
 --   rewrite defmf rewrite defmf₁ rewrite (cut-h2 defm₁)  = r₁ , (refl , refl)
 -- diamond .(_ ∷ _ ∷ r) m2 m3 (swap≅ x [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (swap≅ x₁ [] r₁ .(_ ∷ _ ∷ r) .m3 defm₁ defmf₁)
 --   rewrite defmf rewrite defmf₁ rewrite (cut-h2 defm₁) rewrite (cut-t1 defm₁) rewrite (cut-t2 defm₁)  = _ , (refl , refl)
-
+--
 -- -- --- rec
 -- diamond m1 m2 m3 (swap≅ x l r .m1 .m2 defm defmf) (cancel≅ l₁ r₁ .m1 .m3 defm₁ defmf₁) = {!!}
 -- diamond m1 m2 m3 (long≅ k p l r .m1 .m2 defm defmf) (cancel≅ l₁ r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
@@ -112,10 +139,17 @@ diamond .(x₁ ∷ suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) m2 m3 (swap�
 -- -- - abs
 -- diamond .(_ ∷ _ ∷ r) m2 m3 (cancel≅ [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (swap≅ x [] .r .(_ ∷ _ ∷ r) .m3 refl defmf₁) = abs-suc x
 -- diamond .(_ ∷ _ ∷ r) m2 m3 (cancel≅ [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (long≅ k p [] r₁ .(_ ∷ _ ∷ r) .m3 () defmf₁)
--- diamond .(suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) m2 m3 (swap≅ x [] .((_ ↓ k , p) ++ suc _ ∷ r₁) .(suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) .m2 refl defmf) (long≅ k p [] r₁ .(suc _ ∷ _ ∷ (_ ↓ k , p) ++ suc _ ∷ r₁) .m3 refl defmf₁) = abs-refl x
+-- diamond .(_ ∷ _ ∷ r) m2 m3 (swap≅ x [] r .(_ ∷ _ ∷ r) .m2 refl defmf) (long≅ k p [] r₁ .(_ ∷ _ ∷ r) .m3 defm₁ defmf₁) =
+--   let nn = (cut-t1 defm₁)
+--       kk = (cut-t2 defm₁)
+--   in  abs-refl (≤-trans x (≤-trans (≤-reflexive nn) (≤-reflexive (≡-sym (cong suc kk)))))
 
--- -- TODO
--- diamond m1 m2 m3 (long≅ k1 p [] r .m1 .m2 defm defmf) (long≅ k2 p₁ [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !} -- with k1 ≟ k2
+-- TODO
+diamond m1 m2 m3 (long≅ {n} k1 p [] r m mf defm defmf) (long≅ k2 p₁ [] r₁ m₁ mf₁ defm₁ defmf₁)
+  rewrite defmf rewrite defmf₁ =
+  let eq = ≡-trans (≡-sym defm) defm₁
+  in  {!   !} , (refl , {! refl  !})
+
 -- diamond m1 m2 m3 (cancel≅ (x ∷ l) r .m1 .m2 defm defmf) (long≅ k p [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 -- diamond m1 m2 m3 (swap≅ x (x₁ ∷ l) r .m1 .m2 defm defmf) (long≅ k p [] r₁ .m1 .m3 defm₁ defmf₁) = {!   !}
 -- diamond m1 m2 m3 (long≅ k p [] r .m1 .m2 defm defmf) (long≅ k₁ p₁ (x ∷ l₁) r₁ .m1 .m3 defm₁ defmf₁) = {!   !}

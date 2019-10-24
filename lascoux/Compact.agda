@@ -53,6 +53,9 @@ cancel-c = {!!}
 swap-c : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅ (l ++ k ∷ n ∷ r)
 swap-c {k} pk l r = {!!}
 
+long-c : (k : ℕ) -> (p : k ≤ n) -> (l r : List ℕ) -> (l ++ ((2 + n) ↓ (2 + k) , s≤s (s≤s p)) ++ (1 + n) ∷ r) ≅ (l ++ n ∷ ((2 + n) ↓ (2 + k) , s≤s (s≤s p)) ++ r)
+long-c k p l r = long≅ k p l r _ _ refl refl
+
 ext : {l l' : List ℕ} -> l ≅ l' -> l ≅* l'
 ext p = trans≅ p refl
 
