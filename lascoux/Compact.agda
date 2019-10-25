@@ -31,8 +31,7 @@ data nonempty : List ℕ -> Set where
 
 _↓_ : (n : ℕ) -> (k : ℕ) -> List ℕ
 n ↓ 0 = []
-zero ↓ k = []
-(suc n) ↓ (suc k) = n ∷ (n ↓ k)
+n ↓ (suc k) = (k + n) ∷ (n ↓ k)
 
 -- ↓-rec : {n k : ℕ} -> (k < n) -> (n ↓ suc k) ≡ (n ↓ k) ++ [ n ∸ (k + 1) ]
 -- ↓-rec {suc zero} {zero} (s≤s z≤n) = refl
@@ -42,7 +41,7 @@ zero ↓ k = []
 data _≅_ : List ℕ -> List ℕ -> Set where
     cancel≅ : (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ n ∷ r) -> (defmf : mf ≡ l ++ r) -> (m ≅ mf)
     swap≅ : {k : ℕ} -> (suc k < n) ->  (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ k ∷ r) -> (defmf : mf ≡ l ++ k ∷ n ∷ r) -> (m ≅ mf)
-    long≅ : (k : ℕ) -> (l r m mf : List ℕ) -> (defm : m ≡ l ++ ((2 + n) ↓ (2 + k)) ++ (1 + n) ∷ r) -> (defmf : mf ≡ l ++ n ∷ ((2 + n) ↓ (2 + k)) ++ r) -> (m ≅ mf)
+    long≅ : (k : ℕ) -> (l r m mf : List ℕ) -> (defm : m ≡ l ++ (n ↓ (2 + k)) ++ (1 + k + n) ∷ r) -> (defmf : mf ≡ l ++ (k + n) ∷ (n ↓ (2 + k)) ++ r) -> (m ≅ mf)
 
 data _≅*_ : List ℕ -> List ℕ -> Set where
     refl : {m : List ℕ} -> m ≅* m
@@ -54,7 +53,7 @@ cancel-c = {!!}
 swap-c : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅ (l ++ k ∷ n ∷ r)
 swap-c {k} pk l r = {!!}
 
-long-c : (k : ℕ) -> (l r : List ℕ) -> (l ++ ((2 + n) ↓ (2 + k)) ++ (1 + n) ∷ r) ≅ (l ++ n ∷ ((2 + n) ↓ (2 + k)) ++ r)
+long-c : (k : ℕ) -> (l r : List ℕ) -> (l ++ (n ↓ (2 + k)) ++ (1 + k + n) ∷ r) ≅ (l ++ (k + n) ∷ (n ↓ (2 + k)) ++ r)
 long-c k l r = long≅ k l r _ _ refl refl
 
 -- refl-c : {l l' : List ℕ} -> (l ≡ l1) -> (l ≅ l)
@@ -68,7 +67,7 @@ cancel = {!!}
 swap : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅* (l ++ k ∷ n ∷ r)
 swap {k} pk l r = {!!}
 
-long : (k : ℕ) -> (l r : List ℕ) -> (l ++ ((2 + n) ↓ (2 + k)) ++ (1 + n) ∷ r) ≅* (l ++ n ∷ ((2 + n) ↓ (2 + k)) ++ r)
+long : (k : ℕ) -> (l r : List ℕ) -> (l ++ (n ↓ (2 + k)) ++ (1 + k + n) ∷ r) ≅* (l ++ (k + n) ∷ (n ↓ (2 + k)) ++ r)
 long k l r = ext (long≅ k l r _ _ refl refl)
 
 braid : (l r : List ℕ) -> (l ++ suc n ∷ n ∷ suc n ∷ r) ≅* (l ++ n ∷ suc n ∷ n ∷ r)
@@ -98,21 +97,18 @@ refl≡ : {l l' : List ℕ} -> (l ≡ l') -> l ≅* l'
 refl≡ refl = refl
 
 
-long-swap : {n1 n2 : ℕ} -> (n1 < n2) -> {k : ℕ} -> (n2 ∷ (n1 ↓ k)) ≅* ((n1 ↓ k) ++ [ n2 ])
-long-swap {n1} {n2} pn {0} = refl
-long-swap {zero} {n2} pn {suc k} = refl
-long-swap {(suc n1)} {n2} pn {(suc k)} =
-  let rec = long-swap (≤-down pn)
-  in  trans (swap pn [] _ ) (l++ [ n1 ] rec)
+long-swap : (n1 n2 : ℕ) -> (k : ℕ) -> (k + n1 < n2) -> (n2 ∷ (n1 ↓ k)) ≅* ((n1 ↓ k) ++ [ n2 ])
+long-swap n1 n2 zero p = refl
+long-swap n1 n2 (suc k) p =
+  let rec = long-swap n1 n2 k (≤-down p)
+  in  trans (swap p [] _) (l++ [ k + n1 ] rec)
 
-
-long-swap-lr : {n1 n2 : ℕ} -> (l r : List ℕ) -> (n1 < n2) -> {k : ℕ} -> (l ++ (n2 ∷ (n1 ↓ k)) ++ r) ≅* (l ++ (n1 ↓ k) ++ n2 ∷ r)
-long-swap-lr l r pn {k} =
-  let lemma = (++r r (long-swap pn {k}))
+long-swap-lr : (n1 n2 k : ℕ) -> (l r : List ℕ) -> (k + n1 < n2) -> (l ++ (n2 ∷ (n1 ↓ k)) ++ r) ≅* (l ++ (n1 ↓ k) ++ n2 ∷ r)
+long-swap-lr n1 n2 k l r p =
+  let lemma = (++r r (long-swap n1 n2 k p))
   in  l++ l (trans lemma (refl≡ (++-assoc _ [ _ ] r)))
 
 
---
 abs-suc : {A : Set} -> suc n < n -> A
 abs-suc {n} p = ⊥-elim (1+n≰n (≤-down p))
 
