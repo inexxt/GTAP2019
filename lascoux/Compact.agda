@@ -10,8 +10,8 @@ open import Data.Product using (∃; _×_; _,_)
 open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
-open import Data.Bool hiding (_<_; _≤_)
-open import Data.Bool.Properties hiding (≤-reflexive)
+open import Data.Bool hiding (_<_; _≤_; ≤-trans)
+open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 open import Function
 
 open import Arithmetic hiding (n)
@@ -115,6 +115,17 @@ long-swap<-lr : (n1 n2 k : ℕ) -> (l r : List ℕ) -> (suc n1 < n2) -> (l ++ (n
 long-swap<-lr n1 n2 k l r p =
   let lemma = (++r r (long-swap< n1 n2 k p))
   in  l++ l (trans (refl≡ (≡-sym (++-assoc (n2 ↓ k) (n1 ∷ []) r))) lemma)
+
+short-swap : {n k t tl tr : ℕ} -> (tr + n ≡ t) -> ((tl + suc t) ≡ suc (k + n)) -> (n ↓ (2 + k) ++ [ suc t ]) ≅* (t ∷ (n ↓ (2 + k)))
+short-swap {n} {k} {.n} {tl} {zero} refl ptkn = {!   !}
+short-swap {n} {k} {.(suc (tr + n))} {tl} {suc tr} refl ptkn = {!   !}
+
+-- short-swap {zero} {zero} {zero} pnt (s≤s ptkn) = braid [] []
+-- short-swap {suc n} {zero} {zero} (s≤s ()) (s≤s ptkn)
+-- short-swap {zero} {suc k} {zero} pnt (s≤s ptkn) rewrite (+-unit {k}) = {!   !}
+-- short-swap {suc n} {suc k} {zero} pnt (s≤s ptkn) = {!   !}
+-- short-swap {n} {zero} {suc t} (s≤s pnt) (s≤s ptkn) rewrite (≤-≡ ptkn pnt) = braid [] []
+-- short-swap {n} {suc k} {suc t} pnt (s≤s ptkn) = ?
 
 abs-suc : {A : Set} -> suc n < n -> A
 abs-suc {n} p = ⊥-elim (1+n≰n (≤-down p))

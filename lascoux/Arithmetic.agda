@@ -53,6 +53,8 @@ postulate
     ≡-down-+ : {p q r : ℕ} -> (r + p ≡ r + q) -> (p ≡ q)
     ≡-down-r-+ : {p q r : ℕ} -> (p + r ≡ q + r) -> (p ≡ q)
     ∸-anti-≤ : {p q r : ℕ} -> (q ≤ p) -> (p ≤ r) -> (r ∸ p) ≤ (r ∸ q)
+    +-unit : {n : ℕ} -> n + zero ≡ n
+    ≤-≡ : {n k : ℕ} -> (n ≤ k) -> (k ≤ n) -> (n ≡ k)
 
 ∸-∸-+ : {p q r : ℕ} -> (r ≤ q) -> (q ≤ p + r) -> p ∸ (q ∸ r) ≡ (p + r) ∸ q
 ∸-∸-+ {p} {zero} {zero} rq qpr = +-comm zero p
