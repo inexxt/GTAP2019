@@ -60,32 +60,29 @@ _↑_ : (n : ℕ) -> (k : ℕ) -> List ℕ
 n ↑ 0 = []
 n ↑ (suc k) = n ∷ (suc n ↑ k)
 
+++-↓ : (n k : ℕ) -> ((suc n) ↓ k) ++ [ n ] ≡ n ↓ (suc k)
+++-↓ n zero = refl
+++-↓ n (suc k) rewrite ++-↓ n k = head+tail (+-three-assoc {k} {1} {n}) refl
+
+++-↑ : (n k : ℕ) -> (n ↑ k) ++ [ n + k ] ≡ n ↑ (suc k)
+++-↑ n zero rewrite (+-identityʳ n) = refl
+++-↑ n (suc k) = {!!}
+
 rev : List ℕ -> List ℕ
 rev [] = []
 rev (x ∷ l) = (rev l) ++ [ x ]
 
 rev-d : (k p : ℕ) -> rev (k ↓ p) ≡ k ↑ p
-rev-d zero zero = refl
-rev-d zero (suc p) =
-  let rec = rev-d zero p
-  in  {!   !}
-rev-d (suc k) zero = refl
-rev-d (suc k) (suc p) = {!   !}
+rev-d k p = {!!}
 
 rev-u : (k p : ℕ) -> rev (k ↑ p) ≡ k ↓ p
-rev-u zero zero = refl
-rev-u zero (suc p) =
-  let rec = rev-u zero p
-  in  {!   !}
-rev-u (suc k) zero = refl
-rev-u (suc k) (suc p) = {!   !}
+rev-u k p = {!!}
 
 rev-++ : (l r : List ℕ) -> rev (l ++ r) ≡ (rev r) ++ (rev l)
-rev-++ l r = {!!}
-
-cons-↓ : (n k : ℕ) -> ((suc n) ↓ k) ++ [ n ] ≡ n ↓ (suc k)
-cons-↓ n zero = refl
-cons-↓ n (suc k) rewrite cons-↓ n k = head+tail (+-three-assoc {k} {1} {n}) refl
+rev-++ [] r = ≡-sym ++-unit
+rev-++ (x ∷ l) r =
+  let rec = start+end (rev-++ l r) refl
+  in  ≡-trans rec (++-assoc (rev r) (rev l) (x ∷ []))
 
 repeat-long-lemma : (n k n1 : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
 repeat-long-lemma n zero n1 [] r ()
@@ -95,7 +92,11 @@ repeat-long-lemma n (suc (suc k)) n1 [] r p =
 repeat-long-lemma n (suc k) n1 (x ∷ l) r p = repeat-long-lemma n k n1 l r (cut-head p)
 
 repeat-long-lemma-rev : (n k n1 : ℕ) -> (l r : List ℕ) -> (n ↑ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
-repeat-long-lemma-rev n k n1 l r p = {!!}
+repeat-long-lemma-rev n zero n1 [] r ()
+repeat-long-lemma-rev n zero n1 (x ∷ l) r ()
+repeat-long-lemma-rev n (suc zero) n1 [] r ()
+repeat-long-lemma-rev n (suc (suc k)) n1 [] r ()
+repeat-long-lemma-rev n (suc k) n1 (x ∷ l) r p = repeat-long-lemma-rev (suc n) k n1 l r (cut-head p)
 
 cancel-long-lemma-rev : (n k n1 : ℕ) -> (r l1 r1 : List ℕ) -> ((r ++ (1 + k + n) ∷ (n ↑ (2 + k))) ≡ (r1 ++ n1 ∷ n1 ∷ l1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (rev r1))) ≅* mf))
 cancel-long-lemma-rev n k n1 [] l1 [] p =
@@ -125,9 +126,9 @@ cancel-long-lemma-rev n k .(suc (k + n)) (.(suc (k + n)) ∷ []) .(n ∷ suc n �
           (rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []
         ≡⟨ start+end (start+end (rev-u (2 + n) k) refl) refl ⟩
           ((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []
-        ≡⟨ start+end (cons-↓ (1 + n) k) refl ⟩
+        ≡⟨ start+end (++-↓ (1 + n) k) refl ⟩
           k + suc n ∷ (suc n ↓ k) ++ n ∷ []
-        ≡⟨ cons-↓ n (1 + k) ⟩
+        ≡⟨ ++-↓ n (1 + k) ⟩
           suc (k + n) ∷ k + n ∷ (n ↓ k)
         ∎
   in  _ , ( left , refl≡ right)
@@ -152,9 +153,9 @@ cancel-long-lemma-rev n k n1 (.n1 ∷ .n1 ∷ r) .(r ++ suc (k + n) ∷ n ∷ su
           (((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
         ≡⟨ start+end (start+end (start+end (start+end (rev-u (2 + n) k) refl) refl) refl) refl ⟩
           ((((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
-        ≡⟨ start+end (start+end (start+end (cons-↓ (1 + n) k) refl) refl) refl ⟩
+        ≡⟨ start+end (start+end (start+end (++-↓ (1 + n) k) refl) refl) refl ⟩
           k + suc n ∷ (((suc n ↓ k) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
-        ≡⟨ start+end (start+end (cons-↓ n (1 + k)) refl) refl ⟩
+        ≡⟨ start+end (start+end (++-↓ n (1 + k)) refl) refl ⟩
           suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ suc (k + n) ∷ []) ++ rev r
         ∎
       right* =
@@ -175,7 +176,19 @@ cancel-long-lemma-rev n k n1 (x ∷ r) l1 (x₁ ∷ r1) p rewrite (≡-sym (cut-
   in  _ , (ll , rr)
 
 
-
+cancel-long-lemma : (n k n1 : ℕ) -> (r l1 r1 : List ℕ) -> (((n ↑ (2 + k)) ++ (1 + k + n) ∷ r) ≡ (l1 ++ n1 ∷ n1 ∷ r1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (rev r1))) ≅* mf))
+cancel-long-lemma n k n1 r l1 r1 p =
+  let pp =
+        begin
+          r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)
+        ≡⟨ {!!} ⟩
+          (rev ((suc (suc n) ↑ k) ++ suc (k + n) ∷ r) ++ suc n ∷ []) ++ n ∷ []
+        ≡⟨ cong rev p ⟩
+          rev (l1 ++ n1 ∷ n1 ∷ r1)
+        ≡⟨ {!!} ⟩
+          r1 ++ n1 ∷ n1 ∷ l1
+        ∎
+  in  cancel-long-lemma-rev n k n1 r l1 r1 pp
 
 -- swap-long-lemma : (n k t n1 k1 : ℕ) -> (x : suc k1 < n1) -> (pt : suc n ≤ t) -> (l r l1 r1 : List ℕ) -> (((n ↓ k) ++ t ∷ r) ≡ (l1 ++ n1 ∷ k1 ∷ r1)) -> ∃ (λ mf -> (((n ↓ k) ++ t ∷ r) ≅* mf) × ((l1 ++ k1 ∷ n1 ∷ r1)) ≅* mf)
 -- swap-long-lemma zero zero t .t k1 x pt l .(k1 ∷ r1) [] r1 refl = _ , (swap x [] _ , refl)
