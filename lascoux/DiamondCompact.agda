@@ -10,8 +10,8 @@ open import Data.Product using (∃; _×_; _,_)
 open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
-open import Data.Bool hiding (_<_; _≤_; _≟_)
-open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans; _≟_)
+open import Data.Bool hiding (_<_; _≤_; _≟_; _<?_)
+open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans; _≟_; _<?_)
 open import Function
 
 open import Arithmetic hiding (n)
@@ -84,130 +84,243 @@ rev-++ (x ∷ l) r =
   let rec = start+end (rev-++ l r) refl
   in  ≡-trans rec (++-assoc (rev r) (rev l) (x ∷ []))
 
-repeat-long-lemma : (n k n1 : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
-repeat-long-lemma n zero n1 [] r ()
-repeat-long-lemma n zero n1 (x ∷ l) r ()
-repeat-long-lemma n (suc (suc k)) n1 [] r p =
-  abs-refl (≤-trans (≤-reflexive (cut-t1 p)) (≤-reflexive (≡-sym (cut-t2 p))))
-repeat-long-lemma n (suc k) n1 (x ∷ l) r p = repeat-long-lemma n k n1 l r (cut-head p)
+-- repeat-long-lemma : (n k n1 : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
+-- repeat-long-lemma n zero n1 [] r ()
+-- repeat-long-lemma n zero n1 (x ∷ l) r ()
+-- repeat-long-lemma n (suc (suc k)) n1 [] r p =
+--   abs-refl (≤-trans (≤-reflexive (cut-t1 p)) (≤-reflexive (≡-sym (cut-t2 p))))
+-- repeat-long-lemma n (suc k) n1 (x ∷ l) r p = repeat-long-lemma n k n1 l r (cut-head p)
+--
+-- repeat-long-lemma-rev : (n k n1 : ℕ) -> (l r : List ℕ) -> (n ↑ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
+-- repeat-long-lemma-rev n zero n1 [] r ()
+-- repeat-long-lemma-rev n zero n1 (x ∷ l) r ()
+-- repeat-long-lemma-rev n (suc zero) n1 [] r ()
+-- repeat-long-lemma-rev n (suc (suc k)) n1 [] r ()
+-- repeat-long-lemma-rev n (suc k) n1 (x ∷ l) r p = repeat-long-lemma-rev (suc n) k n1 l r (cut-head p)
+--
+-- cancel-long-lemma-rev : (n k n1 : ℕ) -> (r l1 r1 : List ℕ) -> ((r ++ (1 + k + n) ∷ (n ↑ (2 + k))) ≡ (r1 ++ n1 ∷ n1 ∷ l1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (rev r1))) ≅* mf))
+-- cancel-long-lemma-rev n k n1 [] l1 [] p =
+--   let fst = cut-t1 p
+--       snd = cut-t2 p
+--   in  abs-refl (≤-trans (≤-reflexive fst) (≤-trans (≤-reflexive (≡-sym snd)) (≤-up-+ (≤-reflexive refl))))
+-- cancel-long-lemma-rev n zero n1 [] l1 (x ∷ x₁ ∷ []) ()
+-- cancel-long-lemma-rev n (suc k) n1 [] l1 (x ∷ x₁ ∷ []) ()
+-- cancel-long-lemma-rev n k n1 [] l1 (x ∷ x₁ ∷ x₂ ∷ r1) p =
+--   let cut = cut-h3 p
+--   in  ⊥-elim (repeat-long-lemma-rev (suc (suc n)) k n1 r1 l1 (cut-h3 p))
+-- cancel-long-lemma-rev n k .(suc (k + n)) (.(suc (k + n)) ∷ []) .(n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl =
+--   let left =
+--         ≅*begin
+--           k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ suc (k + n) ∷ []
+--         ≅*⟨ long k [ k + n ] [] ⟩
+--           k + n ∷ k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ []
+--         ≅*⟨ cancel [] _ ⟩
+--           suc (k + n) ∷ k + n ∷ (n ↓ k) ++ []
+--         ≅*⟨ refl≡ (++-unit) ⟩
+--           (n ↓ (2 + k))
+--         ≅*∎
+--       right =
+--         begin
+--           ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ []
+--         ≡⟨ ++-unit ⟩
+--           (rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []
+--         ≡⟨ start+end (start+end (rev-u (2 + n) k) refl) refl ⟩
+--           ((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []
+--         ≡⟨ start+end (++-↓ (1 + n) k) refl ⟩
+--           k + suc n ∷ (suc n ↓ k) ++ n ∷ []
+--         ≡⟨ ++-↓ n (1 + k) ⟩
+--           suc (k + n) ∷ k + n ∷ (n ↓ k)
+--         ∎
+--   in  _ , ( left , refl≡ right)
+--
+-- cancel-long-lemma-rev n k n1 (.n1 ∷ .n1 ∷ r) .(r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl =
+--   let left =
+--         ≅*begin
+--           (rev r ++ n1 ∷ []) ++ n1 ∷ []
+--         ≅*⟨ refl≡ (++-assoc (rev r) [ n1 ] (n1 ∷ [])) ⟩
+--           rev r ++ n1 ∷ n1 ∷ []
+--         ≅*⟨ (cancel (rev r) []) ⟩
+--           rev r ++ []
+--         ≅*⟨ (refl≡ ++-unit) ⟩
+--           rev r
+--         ≅*∎
+--       right =
+--         begin
+--           rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ++ []
+--         ≡⟨ ++-unit ⟩
+--           rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k))
+--         ≡⟨ rev-++ r (suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ⟩
+--           (((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
+--         ≡⟨ start+end (start+end (start+end (start+end (rev-u (2 + n) k) refl) refl) refl) refl ⟩
+--           ((((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
+--         ≡⟨ start+end (start+end (start+end (++-↓ (1 + n) k) refl) refl) refl ⟩
+--           k + suc n ∷ (((suc n ↓ k) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
+--         ≡⟨ start+end (start+end (++-↓ n (1 + k)) refl) refl ⟩
+--           suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ suc (k + n) ∷ []) ++ rev r
+--         ∎
+--       right* =
+--         ≅*begin
+--           rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ++ []
+--         ≅*⟨ refl≡ right ⟩
+--           suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ suc (k + n) ∷ []) ++ rev r
+--         ≅*⟨ ++r (rev r) (long k [] []) ⟩
+--           k + n ∷ suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ []) ++ rev r
+--         ≅*⟨ ++r (rev r) (l++ (k + n ∷ suc (k + n) ∷ k + n ∷ []) (refl≡ ++-unit)) ⟩
+--           k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ rev r
+--         ≅*∎
+--   in  _ , ( l++ (k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)) left , right* )
+-- cancel-long-lemma-rev n k n1 (x ∷ r) l1 (x₁ ∷ r1) p rewrite (≡-sym (cut-tail p)) =
+--   let rec-m , rec-l , rec-r = cancel-long-lemma-rev n k n1 r l1 r1 (cut-head p)
+--       ll = trans (refl≡ (≡-sym (++-assoc (k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)) (rev r) [ x ]))) (++r [ x ] rec-l)
+--       rr = trans (refl≡ (≡-sym (++-assoc (rev l1) (rev r1) [ x ]))) (++r [ x ] rec-r)
+--   in  _ , (ll , rr)
+--
+-- cancel-long-lemma : (n k n1 : ℕ) -> (r l1 r1 : List ℕ) -> (((n ↑ (2 + k)) ++ (1 + k + n) ∷ r) ≡ (l1 ++ n1 ∷ n1 ∷ r1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (rev r1))) ≅* mf))
+-- cancel-long-lemma n k n1 r l1 r1 p =
+--   let pp =
+--         begin
+--           r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)
+--         ≡⟨ {!!} ⟩
+--           (rev ((suc (suc n) ↑ k) ++ suc (k + n) ∷ r) ++ suc n ∷ []) ++ n ∷ []
+--         ≡⟨ cong rev p ⟩
+--           rev (l1 ++ n1 ∷ n1 ∷ r1)
+--         ≡⟨ {!!} ⟩
+--           r1 ++ n1 ∷ n1 ∷ l1
+--         ∎
+--   in  cancel-long-lemma-rev n k n1 r l1 r1 pp
 
-repeat-long-lemma-rev : (n k n1 : ℕ) -> (l r : List ℕ) -> (n ↑ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
-repeat-long-lemma-rev n zero n1 [] r ()
-repeat-long-lemma-rev n zero n1 (x ∷ l) r ()
-repeat-long-lemma-rev n (suc zero) n1 [] r ()
-repeat-long-lemma-rev n (suc (suc k)) n1 [] r ()
-repeat-long-lemma-rev n (suc k) n1 (x ∷ l) r p = repeat-long-lemma-rev (suc n) k n1 l r (cut-head p)
+-- incr-long-lemma : (n k n1 k1 : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
+-- incr-long-lemma
 
-cancel-long-lemma-rev : (n k n1 : ℕ) -> (r l1 r1 : List ℕ) -> ((r ++ (1 + k + n) ∷ (n ↑ (2 + k))) ≡ (r1 ++ n1 ∷ n1 ∷ l1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (rev r1))) ≅* mf))
-cancel-long-lemma-rev n k n1 [] l1 [] p =
+incr-long-lemma-rev : (n k n1 k1 : ℕ) -> (suc k1 < n1) -> (l r : List ℕ) -> (n ↑ k) ≡ (l ++ k1 ∷ n1 ∷ r) -> ⊥
+incr-long-lemma-rev n k n1 k1 pkn l r p = {!   !}
+
+swap-long-lemma-rev : (n k n1 k1 : ℕ) -> (pkn : suc k1 < n1)-> (r l1 r1 : List ℕ) -> ((r ++ (1 + k + n) ∷ (n ↑ (2 + k))) ≡ (r1 ++ k1 ∷ n1 ∷ l1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (k1 ∷ n1 ∷ rev r1))) ≅* mf))
+swap-long-lemma-rev n k n1 k1 pkn [] l1 [] p =
   let fst = cut-t1 p
       snd = cut-t2 p
-  in  abs-refl (≤-trans (≤-reflexive fst) (≤-trans (≤-reflexive (≡-sym snd)) (≤-up-+ (≤-reflexive refl))))
-cancel-long-lemma-rev n zero n1 [] l1 (x ∷ x₁ ∷ []) ()
-cancel-long-lemma-rev n (suc k) n1 [] l1 (x ∷ x₁ ∷ []) ()
-cancel-long-lemma-rev n k n1 [] l1 (x ∷ x₁ ∷ x₂ ∷ r1) p =
-  let cut = cut-h3 p
-  in  ⊥-elim (repeat-long-lemma-rev (suc (suc n)) k n1 r1 l1 (cut-h3 p))
-cancel-long-lemma-rev n k .(suc (k + n)) (.(suc (k + n)) ∷ []) .(n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl =
+  in  abs-refl (≤-trans (≤-trans (≤-trans (s≤s (≤-up (≤-up (≤-up-+ (≤-reflexive refl))))) (≤-reflexive (cong (λ e -> 2 + e ) fst))) pkn) (≤-reflexive (≡-sym snd)))
+
+swap-long-lemma-rev n k .(suc n) .n pkn [] .(suc (suc n) ↑ k) (.(suc (k + n)) ∷ []) refl = abs-refl pkn
+swap-long-lemma-rev n (suc k) .(suc (suc n)) .(suc n) pkn [] .(suc (suc (suc n)) ↑ k) (.(suc (suc (k + n))) ∷ .n ∷ []) refl = abs-refl pkn
+swap-long-lemma-rev n k n1 k1 pkn [] l1 (x ∷ x₁ ∷ x₂ ∷ r1) p = ⊥-elim (incr-long-lemma-rev (suc (suc n)) k n1 k1 pkn r1 l1 (cut-h3 p))
+swap-long-lemma-rev n k .(suc (k + n)) k1 pkn (.k1 ∷ []) .(n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl with suc k1 <? n
+... | yes p =
   let left =
         ≅*begin
-          k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ suc (k + n) ∷ []
-        ≅*⟨ long k [ k + n ] [] ⟩
-          k + n ∷ k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ []
-        ≅*⟨ cancel [] _ ⟩
-          suc (k + n) ∷ k + n ∷ (n ↓ k) ++ []
+          k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ k1 ∷ []
+        ≅*⟨ long-swap<-lr k1 n (2 + k) [ k + n ] [] p ⟩
+          k + n ∷ k1 ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ []
         ≅*⟨ refl≡ (++-unit) ⟩
-          (n ↓ (2 + k))
+          k + n ∷ k1 ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)
+        ≅*⟨ swap (≤-trans p (≤-up-+ (≤-reflexive refl))) [] _ ⟩
+          k1 ∷ k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)
         ≅*∎
       right =
         begin
-          ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ []
-        ≡⟨ ++-unit ⟩
-          (rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []
-        ≡⟨ start+end (start+end (rev-u (2 + n) k) refl) refl ⟩
-          ((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []
-        ≡⟨ start+end (++-↓ (1 + n) k) refl ⟩
-          k + suc n ∷ (suc n ↓ k) ++ n ∷ []
-        ≡⟨ ++-↓ n (1 + k) ⟩
-          suc (k + n) ∷ k + n ∷ (n ↓ k)
+          ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ k1 ∷ suc (k + n) ∷ []
+        ≡⟨ start+end (start+end (start+end (rev-u (2 + n) k) refl) refl) refl ⟩
+          (((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []) ++ k1 ∷ suc (k + n) ∷ []
+        ≡⟨ start+end (start+end (++-↓ (1 + n) k) refl) refl ⟩
+          (((suc n) ↓ (1 + k)) ++ n ∷ []) ++ k1 ∷ suc (k + n) ∷ []
+        ≡⟨ start+end (++-↓ n (1 + k)) refl ⟩
+          (n ↓ (2 + k)) ++ k1 ∷ suc (k + n) ∷ []
+        ≡⟨ {!!} ⟩
+          {!!}
+        ≡⟨ {!!} ⟩
+          {!!}
         ∎
   in  _ , ( left , refl≡ right)
-
-cancel-long-lemma-rev n k n1 (.n1 ∷ .n1 ∷ r) .(r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl =
-  let left =
-        ≅*begin
-          (rev r ++ n1 ∷ []) ++ n1 ∷ []
-        ≅*⟨ refl≡ (++-assoc (rev r) [ n1 ] (n1 ∷ [])) ⟩
-          rev r ++ n1 ∷ n1 ∷ []
-        ≅*⟨ (cancel (rev r) []) ⟩
-          rev r ++ []
-        ≅*⟨ (refl≡ ++-unit) ⟩
-          rev r
-        ≅*∎
-      right =
-        begin
-          rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ++ []
-        ≡⟨ ++-unit ⟩
-          rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k))
-        ≡⟨ rev-++ r (suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ⟩
-          (((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
-        ≡⟨ start+end (start+end (start+end (start+end (rev-u (2 + n) k) refl) refl) refl) refl ⟩
-          ((((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
-        ≡⟨ start+end (start+end (start+end (++-↓ (1 + n) k) refl) refl) refl ⟩
-          k + suc n ∷ (((suc n ↓ k) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
-        ≡⟨ start+end (start+end (++-↓ n (1 + k)) refl) refl ⟩
-          suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ suc (k + n) ∷ []) ++ rev r
-        ∎
-      right* =
-        ≅*begin
-          rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ++ []
-        ≅*⟨ refl≡ right ⟩
-          suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ suc (k + n) ∷ []) ++ rev r
-        ≅*⟨ ++r (rev r) (long k [] []) ⟩
-          k + n ∷ suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ []) ++ rev r
-        ≅*⟨ ++r (rev r) (l++ (k + n ∷ suc (k + n) ∷ k + n ∷ []) (refl≡ ++-unit)) ⟩
-          k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ rev r
-        ≅*∎
-  in  _ , ( l++ (k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)) left , right* )
-cancel-long-lemma-rev n k n1 (x ∷ r) l1 (x₁ ∷ r1) p rewrite (≡-sym (cut-tail p)) =
-  let rec-m , rec-l , rec-r = cancel-long-lemma-rev n k n1 r l1 r1 (cut-head p)
+... | no q = {!!}
+swap-long-lemma-rev n k n1 k1 pkn (.k1 ∷ .n1 ∷ r) .(r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl = {!   !}
+swap-long-lemma-rev n k n1 k1 pkn (x ∷ r) l1 (x₁ ∷ r1) p rewrite (≡-sym (cut-tail p)) =
+  let rec-m , rec-l , rec-r = swap-long-lemma-rev n k n1 k1 pkn r l1 r1 (cut-head p)
       ll = trans (refl≡ (≡-sym (++-assoc (k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)) (rev r) [ x ]))) (++r [ x ] rec-l)
-      rr = trans (refl≡ (≡-sym (++-assoc (rev l1) (rev r1) [ x ]))) (++r [ x ] rec-r)
+      rr = trans (refl≡ (≡-sym (++-assoc (rev l1) ( _ ∷ _ ∷ rev r1) [ x ]))) (++r [ x ] rec-r)
   in  _ , (ll , rr)
 
 
-cancel-long-lemma : (n k n1 : ℕ) -> (r l1 r1 : List ℕ) -> (((n ↑ (2 + k)) ++ (1 + k + n) ∷ r) ≡ (l1 ++ n1 ∷ n1 ∷ r1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (rev r1))) ≅* mf))
-cancel-long-lemma n k n1 r l1 r1 p =
+-- swap-long-lemma-rev n k .(suc (k + n)) (.(suc (k + n)) ∷ []) .(n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl =
+--   let left =
+--         ≅*begin
+--           k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ suc (k + n) ∷ []
+--         ≅*⟨ long k [ k + n ] [] ⟩
+--           k + n ∷ k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ []
+--         ≅*⟨ swap [] _ ⟩
+--           suc (k + n) ∷ k + n ∷ (n ↓ k) ++ []
+--         ≅*⟨ refl≡ (++-unit) ⟩
+--           (n ↓ (2 + k))
+--         ≅*∎
+--       right =
+--         begin
+--           ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ []
+--         ≡⟨ ++-unit ⟩
+--           (rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []
+--         ≡⟨ start+end (start+end (rev-u (2 + n) k) refl) refl ⟩
+--           ((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []
+--         ≡⟨ start+end (++-↓ (1 + n) k) refl ⟩
+--           k + suc n ∷ (suc n ↓ k) ++ n ∷ []
+--         ≡⟨ ++-↓ n (1 + k) ⟩
+--           suc (k + n) ∷ k + n ∷ (n ↓ k)
+--         ∎
+--   in  _ , ( left , refl≡ right)
+--
+-- swap-long-lemma-rev n k n1 (.n1 ∷ .n1 ∷ r) .(r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl =
+--   let left =
+--         ≅*begin
+--           (rev r ++ n1 ∷ []) ++ n1 ∷ []
+--         ≅*⟨ refl≡ (++-assoc (rev r) [ n1 ] (n1 ∷ [])) ⟩
+--           rev r ++ n1 ∷ n1 ∷ []
+--         ≅*⟨ (swap (rev r) []) ⟩
+--           rev r ++ []
+--         ≅*⟨ (refl≡ ++-unit) ⟩
+--           rev r
+--         ≅*∎
+--       right =
+--         begin
+--           rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ++ []
+--         ≡⟨ ++-unit ⟩
+--           rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k))
+--         ≡⟨ rev-++ r (suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ⟩
+--           (((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
+--         ≡⟨ start+end (start+end (start+end (start+end (rev-u (2 + n) k) refl) refl) refl) refl ⟩
+--           ((((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
+--         ≡⟨ start+end (start+end (start+end (++-↓ (1 + n) k) refl) refl) refl ⟩
+--           k + suc n ∷ (((suc n ↓ k) ++ n ∷ []) ++ suc (k + n) ∷ []) ++ rev r
+--         ≡⟨ start+end (start+end (++-↓ n (1 + k)) refl) refl ⟩
+--           suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ suc (k + n) ∷ []) ++ rev r
+--         ∎
+--       right* =
+--         ≅*begin
+--           rev (r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) ++ []
+--         ≅*⟨ refl≡ right ⟩
+--           suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ suc (k + n) ∷ []) ++ rev r
+--         ≅*⟨ ++r (rev r) (long k [] []) ⟩
+--           k + n ∷ suc (k + n) ∷ k + n ∷ ((n ↓ k) ++ []) ++ rev r
+--         ≅*⟨ ++r (rev r) (l++ (k + n ∷ suc (k + n) ∷ k + n ∷ []) (refl≡ ++-unit)) ⟩
+--           k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ rev r
+--         ≅*∎
+--   in  _ , ( l++ (k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)) left , right* )
+-- swap-long-lemma-rev n k n1 (x ∷ r) l1 (x₁ ∷ r1) p rewrite (≡-sym (cut-tail p)) =
+--   let rec-m , rec-l , rec-r = swap-long-lemma-rev n k n1 r l1 r1 (cut-head p)
+--       ll = trans (refl≡ (≡-sym (++-assoc (k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)) (rev r) [ x ]))) (++r [ x ] rec-l)
+--       rr = trans (refl≡ (≡-sym (++-assoc (rev l1) (rev r1) [ x ]))) (++r [ x ] rec-r)
+--   in  _ , (ll , rr)
+
+swap-long-lemma : (n k n1 k1 : ℕ) -> (pkn : suc k1 < n1) -> (r l1 r1 : List ℕ) -> (((n ↑ (2 + k)) ++ (1 + k + n) ∷ r) ≡ (l1 ++ n1 ∷ k1 ∷ r1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (k1 ∷ n1 ∷ rev r1))) ≅* mf))
+swap-long-lemma n k n1 k1 pkn r l1 r1 p =
   let pp =
         begin
           r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)
         ≡⟨ {!!} ⟩
           (rev ((suc (suc n) ↑ k) ++ suc (k + n) ∷ r) ++ suc n ∷ []) ++ n ∷ []
         ≡⟨ cong rev p ⟩
-          rev (l1 ++ n1 ∷ n1 ∷ r1)
+          rev (l1 ++ n1 ∷ k1 ∷ r1)
         ≡⟨ {!!} ⟩
-          r1 ++ n1 ∷ n1 ∷ l1
+          r1 ++ k1 ∷ n1 ∷ l1
         ∎
-  in  cancel-long-lemma-rev n k n1 r l1 r1 pp
+  in  swap-long-lemma-rev n k n1 k1 pkn r l1 r1 pp
 
--- swap-long-lemma : (n k t n1 k1 : ℕ) -> (x : suc k1 < n1) -> (pt : suc n ≤ t) -> (l r l1 r1 : List ℕ) -> (((n ↓ k) ++ t ∷ r) ≡ (l1 ++ n1 ∷ k1 ∷ r1)) -> ∃ (λ mf -> (((n ↓ k) ++ t ∷ r) ≅* mf) × ((l1 ++ k1 ∷ n1 ∷ r1)) ≅* mf)
--- swap-long-lemma zero zero t .t k1 x pt l .(k1 ∷ r1) [] r1 refl = _ , (swap x [] _ , refl)
--- swap-long-lemma zero zero t n1 k1 x pt l .(l1 ++ n1 ∷ k1 ∷ r1) (.t ∷ l1) r1 refl = _ , (swap x (t ∷ l1) r1 , refl)
--- swap-long-lemma zero (suc k) t .t k1 x pt l .(k1 ∷ r1) [] r1 refl = _ , (swap x [] _ , refl)
--- swap-long-lemma zero (suc k) t n1 k1 x pt l .(l1 ++ n1 ∷ k1 ∷ r1) (.t ∷ l1) r1 refl = _ , (swap x (t ∷ l1) r1 , refl)
--- swap-long-lemma (suc n) zero t .t k1 x pt l .(k1 ∷ r1) [] r1 refl = _ , (swap x [] _ , refl)
--- swap-long-lemma (suc n) zero t n1 k1 x pt l .(l1 ++ n1 ∷ k1 ∷ r1) (.t ∷ l1) r1 refl = _ , (swap x (t ∷ l1) r1 , refl)
--- swap-long-lemma (suc zero) (suc zero) t .0 .t () pt l r [] .r refl
--- swap-long-lemma (suc zero) (suc (suc k)) t .0 .t () pt l r [] .r refl
--- swap-long-lemma (suc (suc n)) (suc zero) t .(suc n) .t x pt l r [] .r refl =
---   let lemma = ≤-trans (s≤s (s≤s x)) pt
---   in  abs-suc (≤-down (≤-down lemma))
--- swap-long-lemma (suc (suc n)) (suc (suc k)) t .(suc n) .n x pt l r [] .((n ↓ k) ++ t ∷ r) refl = abs-refl x
--- swap-long-lemma (suc n) (suc k) t n1 k1 x pt l r (y ∷ l1) r1 p =
---   let rec-m , rec-l , rec-r = swap-long-lemma n k t n1 k1 x (≤-down pt) l r l1 r1 (cut-head p)
---       ll = l++ [ y ] rec-l
---       rr = l++ [ y ] rec-r
---   in  y ∷ rec-m , (trans (refl≡ (cong (λ e -> e ∷ _) (cut-tail p))) ll , rr)
 --
 -- long-long-lemma : (n k t n1 k1 t1 : ℕ) -> (suc n ≤ t) -> (suc n1 ≤ t1) -> (l r l1 r1 : List ℕ) -> (((n ↓ k) ++ t ∷ r) ≡ ((n1 ↓ k1) ++ t1 ∷ r1)) -> ∃ (λ mf -> (((n ↓ k) ++ t ∷ r) ≅* mf) × ((n1 ↓ k1) ++ t1 ∷ r1) ≅* mf)
 -- long-long-lemma zero zero t zero zero .t pt pt1 l r l1 .r refl = _ , (refl , refl)

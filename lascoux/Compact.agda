@@ -56,8 +56,6 @@ swap-c {k} pk l r = {!!}
 long-c : (k : ℕ) -> (l r : List ℕ) -> (l ++ (n ↓ (2 + k)) ++ (1 + k + n) ∷ r) ≅ (l ++ (k + n) ∷ (n ↓ (2 + k)) ++ r)
 long-c k l r = long≅ k l r _ _ refl refl
 
--- refl-c : {l l' : List ℕ} -> (l ≡ l1) -> (l ≅ l)
-
 ext : {l l' : List ℕ} -> l ≅ l' -> l ≅* l'
 ext p = trans≅ p refl
 
@@ -96,18 +94,27 @@ l++ l p = {!   !}
 refl≡ : {l l' : List ℕ} -> (l ≡ l') -> l ≅* l'
 refl≡ refl = refl
 
-
 long-swap : (n1 n2 : ℕ) -> (k : ℕ) -> (k + n1 < n2) -> (n2 ∷ (n1 ↓ k)) ≅* ((n1 ↓ k) ++ [ n2 ])
 long-swap n1 n2 zero p = refl
 long-swap n1 n2 (suc k) p =
   let rec = long-swap n1 n2 k (≤-down p)
   in  trans (swap p [] _) (l++ [ k + n1 ] rec)
 
+long-swap< : (n1 n2 : ℕ) -> (k : ℕ) -> (suc n1 < n2) -> ((n2 ↓ k) ++ [ n1 ]) ≅* (n1 ∷ (n2 ↓ k))
+long-swap< n1 n2 zero p = refl
+long-swap< n1 n2 (suc k) p =
+  let rec = long-swap< n1 n2 k p
+  in  trans (l++ (k + n2 ∷ []) rec) (swap (≤-up-+ p) [] _)
+
 long-swap-lr : (n1 n2 k : ℕ) -> (l r : List ℕ) -> (k + n1 < n2) -> (l ++ (n2 ∷ (n1 ↓ k)) ++ r) ≅* (l ++ (n1 ↓ k) ++ n2 ∷ r)
 long-swap-lr n1 n2 k l r p =
   let lemma = (++r r (long-swap n1 n2 k p))
   in  l++ l (trans lemma (refl≡ (++-assoc _ [ _ ] r)))
 
+long-swap<-lr : (n1 n2 k : ℕ) -> (l r : List ℕ) -> (suc n1 < n2) -> (l ++ (n2 ↓ k) ++ n1 ∷ r) ≅* (l ++ n1 ∷ (n2 ↓ k) ++ r)
+long-swap<-lr n1 n2 k l r p =
+  let lemma = (++r r (long-swap< n1 n2 k p))
+  in  l++ l (trans (refl≡ (≡-sym (++-assoc (n2 ↓ k) (n1 ∷ []) r))) lemma)
 
 abs-suc : {A : Set} -> suc n < n -> A
 abs-suc {n} p = ⊥-elim (1+n≰n (≤-down p))
