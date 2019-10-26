@@ -15,28 +15,16 @@ open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 open import Function
 
 open import Arithmetic hiding (n)
+open import Lists
 open ≤-Reasoning renaming (begin_ to ≤-begin_; _∎ to ≤∎) hiding (_≡⟨_⟩_; _≡⟨⟩_)
-
 
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 
 
 variable
-    n : ℕ
-    l : List ℕ
-
-data nonempty : List ℕ -> Set where
-  nonempty-l : (x : ℕ) -> (l : List ℕ) -> nonempty (x ∷ l)
-
-_↓_ : (n : ℕ) -> (k : ℕ) -> List ℕ
-n ↓ 0 = []
-n ↓ (suc k) = (k + n) ∷ (n ↓ k)
-
--- ↓-rec : {n k : ℕ} -> (k < n) -> (n ↓ suc k) ≡ (n ↓ k) ++ [ n ∸ (k + 1) ]
--- ↓-rec {suc zero} {zero} (s≤s z≤n) = refl
--- ↓-rec {suc (suc n)} {zero} (s≤s z≤n) = refl
--- ↓-rec {suc (suc n)} {suc k} (s≤s p) = cong (λ l -> suc n ∷ l) (↓-rec p)
+  n : ℕ
+  l : List ℕ
 
 data _≅_ : List ℕ -> List ℕ -> Set where
     cancel≅ : (l r m mf : List ℕ) -> (defm : m ≡ l ++ n ∷ n ∷ r) -> (defmf : mf ≡ l ++ r) -> (m ≅ mf)
@@ -48,10 +36,10 @@ data _≅*_ : List ℕ -> List ℕ -> Set where
     trans≅ : {m1 m2 m3 : List ℕ} -> (m1 ≅ m2) -> (m2 ≅* m3) -> m1 ≅* m3
 
 cancel-c : (l r : List ℕ) -> (l ++ n ∷ n ∷ r) ≅ (l ++ r)
-cancel-c = {!!}
+cancel-c {n} = λ l r → cancel≅ l r (l ++ n ∷ n ∷ r) (l ++ r) refl refl
 
 swap-c : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅ (l ++ k ∷ n ∷ r)
-swap-c {k} pk l r = {!!}
+swap-c {k} pk l r = swap≅ pk l r (l ++ k ∷ _ ∷ r) (l ++ _ ∷ k ∷ r) refl refl
 
 long-c : (k : ℕ) -> (l r : List ℕ) -> (l ++ (n ↓ (2 + k)) ++ (1 + k + n) ∷ r) ≅ (l ++ (k + n) ∷ (n ↓ (2 + k)) ++ r)
 long-c k l r = long≅ k l r _ _ refl refl
@@ -60,10 +48,12 @@ ext : {l l' : List ℕ} -> l ≅ l' -> l ≅* l'
 ext p = trans≅ p refl
 
 cancel : (l r : List ℕ) -> (l ++ n ∷ n ∷ r) ≅* (l ++ r)
-cancel = {!!}
+cancel {n} = λ l r →
+             trans≅ (cancel≅ l r (l ++ n ∷ n ∷ r) (l ++ r) refl refl) refl
 
 swap : {k : ℕ} -> (pk : suc k < n) ->  (l r : List ℕ) -> (l ++ n ∷ k ∷ r) ≅* (l ++ k ∷ n ∷ r)
-swap {k} pk l r = {!!}
+swap {k} pk l r = trans≅ (swap≅ pk l r (l ++ k ∷ _ ∷ r) (l ++ _ ∷ k ∷ r) refl refl)
+                    refl
 
 long : (k : ℕ) -> (l r : List ℕ) -> (l ++ (n ↓ (2 + k)) ++ (1 + k + n) ∷ r) ≅* (l ++ (k + n) ∷ (n ↓ (2 + k)) ++ r)
 long k l r = ext (long≅ k l r _ _ refl refl)
@@ -93,39 +83,6 @@ l++ l p = {!   !}
 
 refl≡ : {l l' : List ℕ} -> (l ≡ l') -> l ≅* l'
 refl≡ refl = refl
-
-long-swap : (n1 n2 : ℕ) -> (k : ℕ) -> (k + n1 < n2) -> (n2 ∷ (n1 ↓ k)) ≅* ((n1 ↓ k) ++ [ n2 ])
-long-swap n1 n2 zero p = refl
-long-swap n1 n2 (suc k) p =
-  let rec = long-swap n1 n2 k (≤-down p)
-  in  trans (swap p [] _) (l++ [ k + n1 ] rec)
-
-long-swap< : (n1 n2 : ℕ) -> (k : ℕ) -> (suc n1 < n2) -> ((n2 ↓ k) ++ [ n1 ]) ≅* (n1 ∷ (n2 ↓ k))
-long-swap< n1 n2 zero p = refl
-long-swap< n1 n2 (suc k) p =
-  let rec = long-swap< n1 n2 k p
-  in  trans (l++ (k + n2 ∷ []) rec) (swap (≤-up-+ p) [] _)
-
-long-swap-lr : (n1 n2 k : ℕ) -> (l r : List ℕ) -> (k + n1 < n2) -> (l ++ (n2 ∷ (n1 ↓ k)) ++ r) ≅* (l ++ (n1 ↓ k) ++ n2 ∷ r)
-long-swap-lr n1 n2 k l r p =
-  let lemma = (++r r (long-swap n1 n2 k p))
-  in  l++ l (trans lemma (refl≡ (++-assoc _ [ _ ] r)))
-
-long-swap<-lr : (n1 n2 k : ℕ) -> (l r : List ℕ) -> (suc n1 < n2) -> (l ++ (n2 ↓ k) ++ n1 ∷ r) ≅* (l ++ n1 ∷ (n2 ↓ k) ++ r)
-long-swap<-lr n1 n2 k l r p =
-  let lemma = (++r r (long-swap< n1 n2 k p))
-  in  l++ l (trans (refl≡ (≡-sym (++-assoc (n2 ↓ k) (n1 ∷ []) r))) lemma)
-
-short-swap : {n k t tl tr : ℕ} -> (tr + n ≡ t) -> ((tl + suc t) ≡ suc (k + n)) -> (n ↓ (2 + k) ++ [ suc t ]) ≅* (t ∷ (n ↓ (2 + k)))
-short-swap {n} {k} {.n} {tl} {zero} refl ptkn = {!   !}
-short-swap {n} {k} {.(suc (tr + n))} {tl} {suc tr} refl ptkn = {!   !}
-
--- short-swap {zero} {zero} {zero} pnt (s≤s ptkn) = braid [] []
--- short-swap {suc n} {zero} {zero} (s≤s ()) (s≤s ptkn)
--- short-swap {zero} {suc k} {zero} pnt (s≤s ptkn) rewrite (+-unit {k}) = {!   !}
--- short-swap {suc n} {suc k} {zero} pnt (s≤s ptkn) = {!   !}
--- short-swap {n} {zero} {suc t} (s≤s pnt) (s≤s ptkn) rewrite (≤-≡ ptkn pnt) = braid [] []
--- short-swap {n} {suc k} {suc t} pnt (s≤s ptkn) = ?
 
 abs-suc : {A : Set} -> suc n < n -> A
 abs-suc {n} p = ⊥-elim (1+n≰n (≤-down p))
@@ -160,9 +117,6 @@ module ≅*-Reasoning where
     x ≅*∎  =  refl
 
 open ≅*-Reasoning
-
-postulate
-    ++-unit : l ++ [] ≡ l
 
 ≅-abs-l : {x : ℕ} -> (x ∷ []) ≅ [] -> ⊥
 ≅-abs-l (cancel≅ [] r .(_ ∷ []) .[] () defmf)
@@ -217,35 +171,52 @@ postulate
   len-nonincreasing : (m1 m2 : List ℕ) -> (m1 ≅* m2) -> (length m2 ≤ length m1)
 
 
-cut-head : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (l1 ≡ l2)
-cut-head {a1} {.a1} {l1} {.l1} refl = refl
+long-swap : (n1 n2 : ℕ) -> (k : ℕ) -> (k + n1 < n2) -> (n2 ∷ (n1 ↓ k)) ≅* ((n1 ↓ k) ++ [ n2 ])
+long-swap n1 n2 zero p = refl
+long-swap n1 n2 (suc k) p =
+  let rec = long-swap n1 n2 k (≤-down p)
+  in  trans (swap p [] _) (l++ [ k + n1 ] rec)
 
-cut-tail : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (a1 ≡ a2)
-cut-tail {a1} {.a1} {l1} {.l1} refl = refl
+long-swap< : (n1 n2 : ℕ) -> (k : ℕ) -> (suc n1 < n2) -> ((n2 ↓ k) ++ [ n1 ]) ≅* (n1 ∷ (n2 ↓ k))
+long-swap< n1 n2 zero p = refl
+long-swap< n1 n2 (suc k) p =
+  let rec = long-swap< n1 n2 k p
+  in  trans (l++ (k + n2 ∷ []) rec) (swap (≤-up-+ p) [] _)
 
-cut-t1 : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (a1 ≡ a2)
-cut-t1 {a1} {.a1} {l1} {.l1} refl = refl
+long-swap-lr : (n1 n2 k : ℕ) -> (l r : List ℕ) -> (k + n1 < n2) -> (l ++ (n2 ∷ (n1 ↓ k)) ++ r) ≅* (l ++ (n1 ↓ k) ++ n2 ∷ r)
+long-swap-lr n1 n2 k l r p =
+  let lemma = (++r r (long-swap n1 n2 k p))
+  in  l++ l (trans lemma (refl≡ (++-assoc _ [ _ ] r)))
 
-cut-t2 : {a1 a2 b1 b2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ b1 ∷ l1 ≡ a2 ∷ b2 ∷ l2) -> (b1 ≡ b2)
-cut-t2 {l1 = l1} {l2 = .l1} refl = refl
+long-swap<-lr : (n1 n2 k : ℕ) -> (l r : List ℕ) -> (suc n1 < n2) -> (l ++ (n2 ↓ k) ++ n1 ∷ r) ≅* (l ++ n1 ∷ (n2 ↓ k) ++ r)
+long-swap<-lr n1 n2 k l r p =
+  let lemma = (++r r (long-swap< n1 n2 k p))
+  in  l++ l (trans (refl≡ (≡-sym (++-assoc (n2 ↓ k) (n1 ∷ []) r))) lemma)
 
-cut-t3 : {a1 a2 b1 b2 c1 c2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ b1 ∷ c1 ∷ l1 ≡ a2 ∷ b2 ∷ c2 ∷ l2) -> (c1 ≡ c2)
-cut-t3 {l1 = l1} {l2 = .l1} refl = refl
+short-swap : {n k t tl tr : ℕ} -> (tr + n ≡ t) -> ((tl + suc t) ≡ suc (k + n)) -> (n ↓ (2 + k) ++ [ suc t ]) ≅* (t ∷ (n ↓ (2 + k)))
+short-swap {n} {k} {t} {tl} {tr} ptn ptkn rewrite (≡-sym ptn) =
+  let k=tl+tr : 2 + k ≡ tl + (2 + tr)
+      k=tl+tr = {!!}
 
-cut-t4 : {a1 a2 b1 b2 c1 c2 d1 d2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ b1 ∷ c1 ∷ d1 ∷ l1 ≡ a2 ∷ b2 ∷ c2 ∷ d2 ∷ l2) -> (d1 ≡ d2)
-cut-t4 {l1 = l1} {l2 = .l1} refl = refl
+      lemma : n ↓ (2 + k) ≡ (n + (2 + tr)) ↓ tl ++ (n ↓ (2 + tr))
+      lemma = ≡-trans (cong (λ e -> n ↓ e) k=tl+tr) (↓-+ n tl (2 + tr))
 
-cut-h2 : {a1 a2 b1 b2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ b1 ∷ l1 ≡ a2 ∷ b2 ∷ l2) -> (l1 ≡ l2)
-cut-h2 {l1 = l1} {l2 = .l1} refl = refl
-
-cut-h3 : {a1 a2 b1 b2 c1 c2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ b1 ∷ c1 ∷ l1 ≡ a2 ∷ b2 ∷ c2 ∷ l2) -> (l1 ≡ l2)
-cut-h3 {l1 = l1} {l2 = .l1} refl = refl
-
-cut-h4 : {a1 a2 b1 b2 c1 c2 d1 d2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ b1 ∷ c1 ∷ d1 ∷ l1 ≡ a2 ∷ b2 ∷ c2 ∷ d2 ∷ l2) -> (l1 ≡ l2)
-cut-h4 {l1 = l1} {l2 = .l1} refl = refl
-
-head+tail : {h1 h2 : ℕ} -> {t1 t2 : List ℕ} -> (h1 ≡ h2) -> (t1 ≡ t2) -> (h1 ∷ t1) ≡ (h2 ∷ t2)
-head+tail p1 p2 = {!!}
-
-start+end : {h1 h2 : List ℕ} -> {t1 t2 : List ℕ} -> (h1 ≡ h2) -> (t1 ≡ t2) -> (h1 ++ t1) ≡ (h2 ++ t2)
-start+end p1 p2 = {!!}
+      red =
+        ≅*begin
+          suc (k + n) ∷ k + n ∷ (n ↓ k) ++ suc (tr + n) ∷ []
+        ≅*⟨ refl≡ (start+end lemma refl) ⟩
+          (((n + (2 + tr)) ↓ tl) ++ (n ↓ (2 + tr))) ++ suc (tr + n) ∷ []
+        ≅*⟨ refl≡ (++-assoc ((n + suc (suc tr)) ↓ tl) _ (suc (tr + n) ∷ []) ) ⟩
+          ((n + (2 + tr)) ↓ tl) ++ (n ↓ (2 + tr)) ++ suc (tr + n) ∷ []
+        ≅*⟨ long _ (((n + (2 + tr)) ↓ tl)) [] ⟩
+          ((n + (2 + tr)) ↓ tl) ++ (tr + n) ∷ (n ↓ (2 + tr)) ++ []
+        ≅*⟨ long-swap<-lr (tr + n) (n + (2 + tr)) tl [] (suc (tr + n) ∷ tr + n ∷ (n ↓ tr) ++ []) (≤-reflexive (≡-trans (≡-sym (+-assoc 2 tr n)) (+-comm (suc (suc tr)) n))) ⟩
+          (tr + n) ∷ ((n + (2 + tr)) ↓ tl) ++ (n ↓ (2 + tr)) ++ []
+        ≅*⟨ refl≡ (start+end (refl {x = (tr + n) ∷ ((n + (2 + tr)) ↓ tl)}) (++-unit {(n ↓ (2 + tr))})) ⟩
+          (tr + n) ∷ ((n + (2 + tr)) ↓ tl) ++ (n ↓ (2 + tr))
+        ≅*⟨ refl≡ (head+tail refl (≡-sym (↓-+ n tl (2 + tr)))) ⟩
+          tr + n ∷ (n ↓ (tl + suc (suc tr)))
+        ≅*⟨ refl≡ (head+tail refl (cong (λ e -> n ↓ e) (≡-sym k=tl+tr))) ⟩
+          tr + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)
+        ≅*∎
+  in  red
