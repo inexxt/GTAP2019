@@ -220,3 +220,10 @@ short-swap {n} {k} {t} {tl} {tr} ptn ptkn rewrite (≡-sym ptn) =
           tr + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)
         ≅*∎
   in  red
+
+short-swap-l : {n k t : ℕ} -> (l : List ℕ) -> (n ≤ t) -> (suc t ≤ suc (k + n)) -> (l ++ n ↓ (2 + k) ++ [ suc t ]) ≅* (l ++ t ∷ (n ↓ (2 + k)))
+short-swap-l {n} {k} {t} l pnt ptkn =
+  let tr , tr-p = ≤-∃ n t pnt
+      tl , tl-p = ≤-∃ (suc t) (suc k + n) ptkn
+      lemma = (short-swap {n} {k} {t} {tl} {tr} tr-p tl-p)
+  in  l++ l lemma

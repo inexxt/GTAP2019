@@ -14,6 +14,8 @@ open import Data.Bool hiding (_<_; _≤_; ≤-trans)
 open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 open import Function
 
+open import Arithmetic hiding (n)
+
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 
@@ -66,3 +68,34 @@ start+end p1 p2 = {!!}
 ↓-+ : (n k1 k2 : ℕ) -> n ↓ (k1 + k2) ≡ ((n + k2) ↓ k1) ++ (n ↓ k2)
 ↓-+ n zero k2 = refl
 ↓-+ n (suc k1) k2 rewrite (↓-+ n k1 k2) rewrite (+-comm n k2) = head+tail (+-assoc k1 k2 n) refl
+
+_↑_ : (n : ℕ) -> (k : ℕ) -> List ℕ
+n ↑ 0 = []
+n ↑ (suc k) = n ∷ (suc n ↑ k)
+
+++-↓ : (n k : ℕ) -> ((suc n) ↓ k) ++ [ n ] ≡ n ↓ (suc k)
+++-↓ n zero = refl
+++-↓ n (suc k) rewrite ++-↓ n k = head+tail (+-three-assoc {k} {1} {n}) refl
+
+++-↑ : (n k : ℕ) -> (n ↑ k) ++ [ k + n ] ≡ n ↑ (suc k)
+++-↑ n zero = refl
+++-↑ n (suc k) rewrite ≡-sym (++-↑ (suc n) k) rewrite (+-three-assoc {k} {1} {n}) = refl
+
+rev : List ℕ -> List ℕ
+rev [] = []
+rev (x ∷ l) = (rev l) ++ [ x ]
+
+rev-d : (k p : ℕ) -> rev (k ↓ p) ≡ k ↑ p
+rev-d k p = {!!}
+
+rev-u : (k p : ℕ) -> rev (k ↑ p) ≡ k ↓ p
+rev-u k p = {!!}
+
+rev-++ : (l r : List ℕ) -> rev (l ++ r) ≡ (rev r) ++ (rev l)
+rev-++ [] r = ≡-sym ++-unit
+rev-++ (x ∷ l) r =
+  let rec = start+end (rev-++ l r) refl
+  in  ≡-trans rec (++-assoc (rev r) (rev l) (x ∷ []))
+
+rev-rev : {l : List ℕ} -> l ≡ rev (rev l)
+rev-rev {l} = {!!}

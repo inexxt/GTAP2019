@@ -6,6 +6,7 @@ open import Data.Nat
 open import Data.Nat.Properties
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
+open import Data.Product using (∃; _,_)
 
 open import Relation.Nullary
 open import Data.Empty
@@ -29,6 +30,9 @@ variable
 
 ≤-abs : {A : Set} -> {n : ℕ} -> (suc n ≤ 0) -> A
 ≤-abs ()
+
+abs-refl : {A : Set} -> n < n -> A
+abs-refl p = ⊥-elim (1+n≰n p)
 
 postulate
     ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
@@ -84,3 +88,9 @@ nowhere {suc n} {suc k} p1 p2 p3 p4 = nowhere (λ x → p1 (s≤s x)) (λ x → 
 ≤-≠-≤ {suc zero} {zero} p q = ⊥-elim (q refl)
 ≤-≠-≤ {suc (suc n)} {zero} (s≤s ()) q
 ≤-≠-≤ {suc n} {suc m} (s≤s p) q = s≤s (≤-≠-≤ p λ x → q (cong suc x))
+
+≤-∃ : (n m : ℕ) -> (n ≤ m) -> ∃ (λ t -> t + n ≡ m)
+≤-∃ .0 m z≤n = m , +-unit
+≤-∃ (suc n) (suc m) (s≤s p) =
+  let rec-t , rec-p = ≤-∃ n m p
+  in  rec-t , ≡-trans (+-three-assoc {rec-t} {1} {n}) (cong suc rec-p)
