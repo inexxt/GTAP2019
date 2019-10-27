@@ -263,23 +263,24 @@ swap-long-lemma-rev n k .(suc (k + n)) k1 pkn (.k1 ∷ []) .(n ∷ (suc n ↑ su
 ... | no q2 =
   let qq = ≰⇒> q
       qq2 = ≰⇒> q2
-
-  in  {!   !}
+  in  swap-long-lemma-base n k k1 pkn (≤-down2 qq2) (≤-down2 qq) refl
 ... | yes q2 =
-  let sk1 , sk1p = ≤-∃ {!   !} {!   !} {!   !}
+  let sk1 , sk1p = ≤-∃ 1 k1 (≤-down-+ q2)
       qq : n < 2 + k1
       qq = ≰⇒> q
+
+      k1=1+sk1 : k1 ≡ suc sk1
+      k1=1+sk1 = ≡-trans (≡-sym sk1p) (+-comm _ 1)
+
       left =
         ≅*begin
-          {!   !}
-        ≅*⟨ {!   !} ⟩
-          k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k) ++ (suc sk1) ∷ []
-        ≅*⟨ short-swap-l [ k + n ] {!   !} {!   !} ⟩
-          k + n ∷ sk1 ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)
-        ≅*⟨ {!!} ⟩
-          {!!}
-        ≅*⟨ {!!} ⟩
-          {!!}
+          k + n ∷ (n ↓ (2 + k)) ++ k1 ∷ []
+        ≅*⟨ refl≡ (cong (λ e -> (k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)) ++ [ e ]) k1=1+sk1) ⟩
+          k + n ∷ (n ↓ (2 + k)) ++ (suc sk1) ∷ []
+        ≅*⟨ short-swap-l [ k + n ] (≤-down2 (≤-trans q2 (≤-reflexive k1=1+sk1))) (≤-trans (s≤s (≤-up (≤-down (≤-reflexive (≡-sym k1=1+sk1))))) pkn) ⟩
+          k + n ∷ sk1 ∷ (n ↓ (2 + k))
+        ≅*⟨ swap (≤-down2 (≤-trans (s≤s (s≤s (≤-reflexive (≡-sym k1=1+sk1)))) pkn)) [] _ ⟩
+          sk1 ∷ k + n ∷ (n ↓ (2 + k))
         ≅*∎
       right = telescope-rev n k ((suc sk1) ∷ suc (k + n) ∷ [])
       right* =
