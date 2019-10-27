@@ -19,6 +19,8 @@ open import Arithmetic hiding (n)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 
+open Relation.Binary.PropositionalEquality.≡-Reasoning
+
 
 data nonempty : List ℕ -> Set where
   nonempty-l : (x : ℕ) -> (l : List ℕ) -> nonempty (x ∷ l)
@@ -99,3 +101,15 @@ rev-++ (x ∷ l) r =
 
 rev-rev : {l : List ℕ} -> l ≡ rev (rev l)
 rev-rev {l} = {!!}
+
+telescope-rev : (n k : ℕ) -> (r : List ℕ) -> ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ r ≡ (n ↓ (2 + k)) ++ r
+telescope-rev n k r =
+  begin
+    ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ r
+  ≡⟨ start+end (start+end (start+end (rev-u (2 + n) k) refl) refl) refl ⟩
+    (((suc (suc n) ↓ k) ++ suc n ∷ []) ++ n ∷ []) ++ r
+  ≡⟨ start+end (start+end (++-↓ (1 + n) k) refl) refl ⟩
+    (((suc n) ↓ (1 + k)) ++ n ∷ []) ++ r
+  ≡⟨ start+end (++-↓ n (1 + k)) refl ⟩
+    (n ↓ (2 + k)) ++ r
+  ∎
