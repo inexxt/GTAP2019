@@ -366,14 +366,8 @@ long-lemma n n1 (suc k) (suc k1) t t1 pnt pnt1 r r1 p =
 --   in  call-m , ll , rr
 
 
--- -- long-long-lemma-rev : (n k n1 k1 : ℕ) -> (pkn : suc k1 < n1)-> (r l1 r1 : List ℕ) -> ((r ++ (1 + k + n) ∷ (n ↑ (2 + k))) ≡ (r1 ++ k1 ∷ n1 ∷ l1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (k1 ∷ n1 ∷ rev r1))) ≅* mf))
--- -- long-long-lemma-rev
-
 ar-lemma : (k1 k2 : ℕ) -> {n1 n2 : ℕ} -> (n1 ≡ n2) -> suc (k1 + n1) ≡ suc (k2 + n2) -> k1 ≡ k2
 ar-lemma k1 k2 pn p rewrite pn = ≡-down-r-+ (≡-down2 p)
-
--- impossible-long-long : (x k n k1 n1 : ℕ) -> (r l1 : List ℕ) -> (x ∷ r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k) ≡ suc (k1 + n1) ∷ n1 ∷ suc n1 ∷ (suc (suc n1) ↑ k1) ++ l1) ->
--- impossible-long-long x k n k1 n1 r l1 r1 = {!!}
 
 long-long-lemma-rev : (n k n1 k1 : ℕ) -> (r l1 r1 : List ℕ) -> ((r ++ (1 + k + n) ∷ (n ↑ (2 + k))) ≡ (r1 ++ (1 + k1 + n1) ∷ (n1 ↑ (2 + k1)) ++ l1))
                       -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × ((rev l1) ++ (k1 + n1) ∷ (n1 ↓ (2 + k1)) ++ (rev r1)) ≅* mf))
@@ -389,8 +383,11 @@ long-long-lemma-rev n k n1 k1 [] (x ∷ l) [] p =
     (head+tail (cut-t3 p)
     (≡-trans (cong (λ e -> (2 + e) ↑ k) nn1) (cong (λ e -> (2 + n1) ↑ e) kk1))))))))
 
-long-long-lemma-rev n k n1 k1 [] l1 (x ∷ r1) p = {!   !}
-long-long-lemma-rev n k n1 k1 (x ∷ r) l1 [] p = {!  r !}
+long-long-lemma-rev n zero n1 k1 [] l1 (x ∷ x₁ ∷ x₂ ∷ []) ()
+long-long-lemma-rev n zero n1 k1 [] l1 (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ r1) ()
+long-long-lemma-rev n (suc k) n1 k1 [] l1 (x ∷ r1) p = {!!} , ({!!} , {!!})
+long-long-lemma-rev n k n1 zero (x ∷ r) l1 [] p = {!!}
+long-long-lemma-rev n k n1 (suc k1) (x ∷ r) l1 [] p = {!!}
 long-long-lemma-rev n k n1 k1 (x₁ ∷ r) l1 (x ∷ r1) p rewrite cut-tail p =
   let rec-m , rec-l , rec-r = long-long-lemma-rev n k n1 k1 r l1 r1 (cut-head p)
   in  rec-m ++ [ x ] , (trans (refl≡ (≡-sym (++-assoc _ (rev r) [ x ]))) (++r [ x ] rec-l) ,
