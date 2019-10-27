@@ -272,12 +272,16 @@ swap-long-lemma-rev n k .(suc (k + n)) k1 pkn (.k1 ∷ []) .(n ∷ (suc n ↑ su
       k1=1+sk1 : k1 ≡ suc sk1
       k1=1+sk1 = ≡-trans (≡-sym sk1p) (+-comm _ 1)
 
+      n≤sk1 : n ≤ sk1
+      n≤sk1 = (≤-down2 (≤-trans q2 (≤-reflexive k1=1+sk1)))
+      sk1≤k+n : suc sk1 ≤ suc (k + n)
+      sk1≤k+n = (≤-trans (s≤s (≤-up (≤-down (≤-reflexive (≡-sym k1=1+sk1))))) pkn)
       left =
         ≅*begin
           k + n ∷ (n ↓ (2 + k)) ++ k1 ∷ []
         ≅*⟨ refl≡ (cong (λ e -> (k + n ∷ suc (k + n) ∷ k + n ∷ (n ↓ k)) ++ [ e ]) k1=1+sk1) ⟩
           k + n ∷ (n ↓ (2 + k)) ++ (suc sk1) ∷ []
-        ≅*⟨ short-swap-l [ k + n ] (≤-down2 (≤-trans q2 (≤-reflexive k1=1+sk1))) (≤-trans (s≤s (≤-up (≤-down (≤-reflexive (≡-sym k1=1+sk1))))) pkn) ⟩
+        ≅*⟨ short-swap-l [ k + n ] n≤sk1 sk1≤k+n ⟩
           k + n ∷ sk1 ∷ (n ↓ (2 + k))
         ≅*⟨ swap (≤-down2 (≤-trans (s≤s (s≤s (≤-reflexive (≡-sym k1=1+sk1)))) pkn)) [] _ ⟩
           sk1 ∷ k + n ∷ (n ↓ (2 + k))
@@ -285,17 +289,17 @@ swap-long-lemma-rev n k .(suc (k + n)) k1 pkn (.k1 ∷ []) .(n ∷ (suc n ↑ su
       right = telescope-rev n k ((suc sk1) ∷ suc (k + n) ∷ [])
       right* =
         ≅*begin
-          {!   !}
-        ≅*⟨ {!   !} ⟩
+          _
+        ≅*⟨ refl≡ (cong (λ e -> ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ e ∷ suc (k + n) ∷ [] ) k1=1+sk1) ⟩
           ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ (suc sk1) ∷ suc (k + n) ∷ []
         ≅*⟨ refl≡ right ⟩
-          suc (k + n) ∷ k + n ∷ (n ↓ k) ++ (suc sk1) ∷ suc (k + n) ∷ []
-        ≅*⟨ {!!} ⟩
-          {!!}
-        ≅*⟨ {!!} ⟩
-          {!!}
-        ≅*⟨ {!!} ⟩
-          {!!}
+           (n ↓ (2 + k)) ++ (suc sk1) ∷ suc (k + n) ∷ []
+        ≅*⟨ refl≡ (≡-sym (++-assoc (n ↓ (2 + k)) [ suc sk1 ] [ suc (k + n) ])) ⟩
+          ((n ↓ (2 + k)) ++ [ suc sk1 ]) ++ suc (k + n) ∷ []
+        ≅*⟨ ++r [ suc (k + n) ] (short-swap-l [] n≤sk1 sk1≤k+n) ⟩
+          sk1 ∷ (n ↓ (2 + k)) ++ suc (k + n) ∷ []
+        ≅*⟨ short-swap-l [ sk1 ] (≤-up-+ (≤-reflexive refl)) (≤-reflexive refl) ⟩
+          _
         ≅*∎
   in  _ , (left , right*)
 swap-long-lemma-rev n k n1 k1 pkn (.k1 ∷ .n1 ∷ r) .(r ++ suc (k + n) ∷ n ∷ suc n ∷ (suc (suc n) ↑ k)) [] refl =
