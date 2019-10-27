@@ -113,3 +113,10 @@ telescope-rev n k r =
   ≡⟨ start+end (++-↓ n (1 + k)) refl ⟩
     (n ↓ (2 + k)) ++ r
   ∎
+
+++-empty : (l r : List ℕ) -> (l ++ r) ≡ l -> (r ≡ [])
+++-empty [] r p = p
+++-empty (x ∷ l) r p = ++-empty l r (cut-head p)
+
+[]-abs : {x : ℕ} -> {l : List ℕ} -> (x ∷ l) ≡ [] -> ⊥
+[]-abs ()
