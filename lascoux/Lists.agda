@@ -114,6 +114,26 @@ telescope-rev n k r =
     (n ↓ (2 + k)) ++ r
   ∎
 
+-- highly specific lemma...
+telescope-l-rev-+1 : (n k : ℕ) -> (l r : List ℕ) -> ((((l ++ rev ((3 + n) ↑ k)) ++ (2 + n) ∷ []) ++ (1 + n) ∷ []) ++ n ∷ []) ++ r ≡ l ++ (n ↓ (3 + k)) ++ r
+telescope-l-rev-+1 n k l r =
+  begin
+    ((((l ++ (rev ((suc (suc (suc n)) ↑ k)))) ++ suc (suc n) ∷ []) ++ suc n ∷ []) ++ n ∷ []) ++ r
+  ≡⟨ ++-assoc (((l ++ rev (suc (suc (suc n)) ↑ k)) ++ suc (suc n) ∷ []) ++ suc n ∷ []) (n ∷ []) r ⟩
+    _
+  ≡⟨ ++-assoc ((l ++ rev (suc (suc (suc n)) ↑ k)) ++ suc (suc n) ∷ []) (suc n ∷ []) (n ∷ r) ⟩
+    _
+  ≡⟨ ++-assoc (l ++ rev (suc (suc (suc n)) ↑ k)) (suc (suc n) ∷ []) (suc n ∷ n ∷ r) ⟩
+    _
+  ≡⟨ ++-assoc (l) (rev (suc (suc (suc n)) ↑ k)) (suc (suc n) ∷ suc n ∷ n ∷ r) ⟩
+    _
+  ≡⟨ {!start+end (refl {x = rev l}) (telescope-rev (suc n) k ?)!} ⟩
+    {!!}
+  ≡⟨ {!!} ⟩
+    {!!}
+  ∎
+
+
 ++-empty : (l r : List ℕ) -> (l ++ r) ≡ l -> (r ≡ [])
 ++-empty [] r p = p
 ++-empty (x ∷ l) r p = ++-empty l r (cut-head p)
