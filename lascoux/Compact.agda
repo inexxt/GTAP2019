@@ -242,7 +242,7 @@ long->-long n (suc k) n1 (suc k1) pp pk =
   let rec = long->-long n k n1 k1 (≡-down2 pp) (≤-down2 pk)
   in  {!!}
 
-long-≤-long : (n k n1 k1 : ℕ) -> (k + n ≡ k1 + n1) -> (k ≤ k1) -> (((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))) ≅* (((1 + n1) ↓ (1 + k1)) ++ ((2 + n) ↓ (1 + k)))
+long-≤-long : (n k n1 k1 : ℕ) -> (k + n ≡ k1 + n1) -> (k ≤ k1) -> ((n ↓ (2 + k)) ++ (n1 ↓ (2 + k1))) ≅* ((n1 ↓ (1 + k1)) ++ ((1 + n) ↓ (1 + k)))
 long-≤-long n zero n1 k1 pp pk rewrite pp rewrite (+-three-assoc {k1} {1} {n1}) =
   ≅*begin
     _
@@ -252,26 +252,26 @@ long-≤-long n zero n1 k1 pp pk rewrite pp rewrite (+-three-assoc {k1} {1} {n1}
     _
   ≅*⟨ refl≡ (≡-sym (++-unit)) ⟩
     _
-  ≅*⟨ long-swap-lr (suc n1) (2 + k1 + n1) k1 [ _ ] [] (≤-reflexive (+-three-assoc {1 + k1} {1} {n1})) ⟩
+  ≅*⟨ long-swap-lr n1 (1 + k1 + n1) k1 [ _ ] [] (≤-reflexive refl) ⟩
     _
   ≅*∎
 long-≤-long n (suc k) n1 zero pp ()
-long-≤-long n (suc k) n1 (suc k1) pp pk rewrite (≡-trans (+-three-assoc {2 + k1} {1} {n1}) (≡-trans (cong (λ e -> 2 + e) (≡-sym pp)) (≡-sym (+-three-assoc {2 + k} {1} {n})))) =
+long-≤-long n (suc k) n1 (suc k1) pp pk =
   let rec = long-≤-long n k n1 k1 (≡-down2 pp) (≤-down2 pk)
       lemma = (≡-sym (cong (λ e -> 2 + e) (≡-trans (+-three-assoc {k} {1} {n}) (≡-trans pp (≡-sym (+-three-assoc {k1} {1} {n1}))))))
   in
     ≅*begin
-    (2 + k + suc n) ∷ ((1 + n) ↓ (2 + k)) ++ 2 + k + suc n ∷ ((1 + n1) ↓ (2 + k1))
-    ≅*⟨ short-swap-lr {n = 1 + n} {k = 1 + k} [] ((1 + n1) ↓ (2 + k1)) (s≤s (≤-up-+ (≤-up (≤-reflexive refl)))) (≤-reflexive refl) ⟩
-       1 + k + suc n ∷ (2 + k + suc n) ∷ ((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))
-    ≅*⟨ refl≡ (++-assoc (1 + k + suc n ∷ (2 + k + suc n) ∷ []) (((1 + n) ↓ (2 + k))) _) ⟩
-      1 + k + suc n ∷ (2 + k + suc n) ∷ (((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1)))
-    ≅*⟨ l++ (1 + k + suc n ∷ (2 + k + suc n) ∷ []) rec ⟩
-      1 + k + suc n ∷ (2 + k + suc n) ∷ (((1 + n1) ↓ (1 + k1)) ++ ((2 + n) ↓ (1 + k)))
-    ≅*⟨ refl≡ (≡-sym (++-assoc (_ ∷ _ ∷ []) (((1 + n1) ↓ (1 + k1))) _)) ⟩
-      1 + k + suc n ∷ (2 + k + suc n) ∷ ((1 + n1) ↓ (1 + k1)) ++ ((2 + n) ↓ (1 + k))
-    ≅*⟨ long-swap-lr (suc n1) (2 + (k + suc n)) (suc k1) [ _ ] (((2 + n) ↓ (1 + k))) (≤-reflexive lemma) ⟩
-      1 + k + suc n ∷ ((1 + n1) ↓ (1 + k1)) ++ (2 + k + suc n) ∷ ((2 + n) ↓ (1 + k))
-    ≅*⟨ refl≡ (start+end (head+tail (≡-down2 (≡-sym lemma)) (refl {x = ((1 + n1) ↓ (1 + k1))})) (head+tail (≡-sym (+-three-assoc {1 + k} {1} {1 + n})) refl)) ⟩
-      (((1 + n1) ↓ (2 + k1)) ++ ((2 + n) ↓ (2 + k)))
+      (n ↓ (3 + k)) ++ 2 + k1 + n1 ∷ (n1 ↓ (2 + k1))
+    ≅*⟨ short-swap-lr {n = n} [] ((n1 ↓ (2 + k1))) (≤-trans (≤-up (≤-up-+ (≤-reflexive refl))) (≤-reflexive pp)) (s≤s (≤-reflexive (≡-sym pp))) ⟩
+       1 + k1 + n1 ∷ (2 + k + n) ∷ (n ↓ (2 + k)) ++ (n1 ↓ (2 + k1))
+    ≅*⟨ refl≡ (++-assoc (_ ∷ _ ∷ []) ((n ↓ (2 + k))) _) ⟩
+      1 + k1 + n1 ∷ (2 + k + n) ∷ [] ++ (((n ↓ (2 + k)) ++ (n1 ↓ (2 + k1))))
+    ≅*⟨ l++ (_ ∷ _ ∷ []) rec ⟩
+      1 + k1 + n1 ∷ (2 + k + n) ∷ [] ++ (((n1 ↓ (1 + k1)) ++ ((1 + n) ↓ (1 + k))))
+    ≅*⟨ refl≡ (≡-sym (++-assoc (_ ∷ _ ∷ []) (n1 ↓ (1 + k1)) _)) ⟩
+      _
+    ≅*⟨ long-swap-lr n1 (suc (suc (k + n))) (suc k1) [ _ ] ((1 + n) ↓ (1 + k)) (≤-reflexive (cong suc (≡-sym pp))) ⟩
+      1 + k1 + n1 ∷ (n1 ↓ (1 + k1)) ++ (2 + k + n) ∷ ((1 + n) ↓ (1 + k))
+    ≅*⟨ refl≡ (start+end (refl {x = 1 + k1 + n1 ∷ (n1 ↓ (1 + k1))})  (head+tail (≡-sym (+-three-assoc {1 + k} {1} {n})) refl)) ⟩
+      _
     ≅*∎
