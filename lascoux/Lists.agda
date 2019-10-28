@@ -133,7 +133,6 @@ telescope-l-rev-+1 n k l r =
     {!!}
   ∎
 
-
 ++-empty : (l r : List ℕ) -> (l ++ r) ≡ l -> (r ≡ [])
 ++-empty [] r p = p
 ++-empty (x ∷ l) r p = ++-empty l r (cut-head p)

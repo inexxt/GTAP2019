@@ -378,10 +378,6 @@ dec-long-lemma-disjoint-rev : (n k n1 k1 x : ℕ) -> (n < x) -> (l r : List ℕ)
                                   Σ (List ℕ) (λ m -> (l ≡ (n1 ↑ (1 + k1)) ++ m) × (r ≡ m ++ x ∷ (n ↑ (1 + k)))))
 dec-long-lemma-disjoint-rev n k n1 k1 pnx l r p = {!!}
 
-long-≤-long : (n k n1 k1 : ℕ) -> (k + n ≡ (1 + n1 + k1)) -> (k ≤ k1) -> ((n ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))) ≅* ((n1 ↓ (2 + k1)) ++ (n ↓ (2 + k)))
-long-≤-long n zero n1 k1 p pk = ?
-long-≤-long n (suc k) n1 k1 p pk = ?
-
 long-long-not-disjoint : (n k n1 k1 : ℕ) -> (k + n ≡ suc (n1 + k1))
                          -> ∃ (λ mf -> ((k + n ∷ (n ↓ (2 + k)) ++ (n1 ↓ (2 + k1)) ++ (2 + (k1 + n1)) ∷ []) ≅* mf) ×
                                         (((n ↓ (2 + k)) ++ (suc (k1 + n1) ∷ (n1 ↓ (3 + k1)))) ≅* mf))
@@ -389,26 +385,26 @@ long-long-not-disjoint n zero n1 k1 p rewrite p rewrite (cong suc (+-comm n1 k1)
  let left = trans (cancel (_ ∷ _ ∷ []) _) (trans (long-swap-lr n1 (2 + (k1 + n1))(1 + k1) [ suc (k1 + n1) ] [ 2 + k1 + n1 ] (≤-reflexive refl)) (trans (cancel _ []) (refl≡ ++-unit)))
      right = trans (cancel [ _ ] _) (cancel [] _)
  in  _ , (left , right)
-long-long-not-disjoint n (suc k) n1 k1 p with k ≤? k1
-... | yes q =
-  let left =
-        ≅*begin
-          suc (k + n) ∷ (2 + k + n) ∷ (n ↓ (2 + k)) ++ (n1 ↓ (2 + k1)) ++ suc (suc (k1 + n1)) ∷ []
-        ≅*⟨ {!!} ⟩
-          {!!}
-        ≅*⟨ {!!} ⟩
-          {!!}
-        ≅*∎
-      right =
-        ≅*begin
-          (n ↓ (3 + k)) ++ suc (k1 + n1) ∷ (n1 ↓ (3 + k1))
-        ≅*⟨ short-swap-lr {n} {1 + k} [] (n1 ↓ (3 + k1)) (≤-down-+ {r = k} (≤-reflexive (≡-trans (+-comm n k) (≡-trans (≡-down2 p) (+-comm n1 k1))))) (≤-up (≤-reflexive (≡-trans (cong suc (+-comm k1 n1)) (≡-sym p)))) ⟩
-          (k1 + n1) ∷ (n ↓ (3 + k)) ++ (n1 ↓ (3 + k1))
-        ≅*⟨ {!!} ⟩
-          {!!}
-        ≅*∎
-  in  {!!} , left , right
-... | no q = {!!}
+long-long-not-disjoint n (suc k) n1 k1 p with k ≤? k1 with k ≟ k1
+... | yes q | yes qq rewrite qq = {!!}
+  -- let left =
+  --       ≅*begin
+  --         suc (k + n) ∷ (2 + k + n) ∷ (n ↓ (2 + k)) ++ (n1 ↓ (2 + k1)) ++ suc (suc (k1 + n1)) ∷ []
+  --       ≅*⟨ {!!} ⟩
+  --         {!!}
+  --       ≅*⟨ {!!} ⟩
+  --         {!!}
+  --       ≅*∎
+  --     right =
+  --       ≅*begin
+  --         (n ↓ (3 + k)) ++ suc (k1 + n1) ∷ (n1 ↓ (3 + k1))
+  --       ≅*⟨ short-swap-lr {n} {1 + k} [] (n1 ↓ (3 + k1)) (≤-down-+ {r = k} (≤-reflexive (≡-trans (+-comm n k) (≡-trans (≡-down2 p) (+-comm n1 k1))))) (≤-up (≤-reflexive (≡-trans (cong suc (+-comm k1 n1)) (≡-sym p)))) ⟩
+  --         (k1 + n1) ∷ (n ↓ (3 + k)) ++ (n1 ↓ (3 + k1))
+  --       ≅*∎
+  -- in  {!!} , left , right
+... | no q | yes qq = ⊥-elim (q (≤-reflexive qq))
+... | no q | no qq = {!!}
+... | yes q | no qq = {!!}
 
 -- long-long-lemma-rev : (n k n1 k1 : ℕ) -> (r l1 r1 : List ℕ) -> ((r ++ (1 + k + n) ∷ (n ↑ (2 + k))) ≡ (r1 ++ (1 + k1 + n1) ∷ (n1 ↑ (2 + k1)) ++ l1))
 --                       -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × ((rev l1) ++ (k1 + n1) ∷ (n1 ↓ (2 + k1)) ++ (rev r1)) ≅* mf))

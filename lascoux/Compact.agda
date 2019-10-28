@@ -234,3 +234,66 @@ short-swap-lr {n} {k} {t} l r pnt ptkn =
       tl , tl-p = ≤-∃ (suc t) (suc k + n) ptkn
       lemma = (short-swap {n} {k} {t} {tl} {tr} tr-p tl-p)
   in  {!!}
+
+
+-- long-≡-long : (n k n1 : ℕ) -> (((1 + n) ↓ (2 + k)) ++ ((1 + n) ↓ (2 + k))) ≅* (((1 + n) ↓ (1 + k)) ++ ((2 + n) ↓ (1 + k)))
+-- long-≡-long n zero n1 = trans (braid [] _) (cancel _ [] )
+-- long-≡-long n (suc k) n1 =
+--   let rec = long-≡-long n k n1
+--   in
+--     ≅*begin
+--       ((1 + n) ↓ (3 + k)) ++ (2 + k + (1 + n)) ∷ ((1 + n) ↓ (2 + k))
+--     ≅*⟨ short-swap-lr {n = suc n} {k = suc k} [] (((1 + n) ↓ (2 + k))) (s≤s (≤-up-+ (≤-up (≤-reflexive refl)))) (≤-reflexive refl) ⟩
+--       (1 + k + (1 + n)) ∷ (2 + k + (1 + n)) ∷ ((1 + n) ↓ (2 + k)) ++ ((1 + n) ↓ (2 + k))
+--     ≅*⟨ refl≡ (++-assoc (suc (k + suc n) ∷ suc (suc (k + suc n)) ∷ []) (((1 + n) ↓ (2 + k))) (((1 + n) ↓ (2 + k)))) ⟩
+--       (1 + k + (1 + n)) ∷ [ 2 + k + (1 + n) ] ++ (((1 + n) ↓ (2 + k)) ++ ((1 + n) ↓ (2 + k)))
+--     ≅*⟨ l++ ((1 + k + (1 + n)) ∷ [ 2 + k + (1 + n) ]) rec ⟩
+--       (1 + k + (1 + n)) ∷ [ 2 + k + (1 + n) ] ++ (((1 + n) ↓ (1 + k)) ++ ((2 + n) ↓ (1 + k)))
+--     ≅*⟨ refl≡ (≡-sym (++-assoc ((1 + k + (1 + n)) ∷ [ 2 + k + (1 + n) ]) (((1 + n) ↓ (1 + k))) _)) ⟩
+--       (1 + k + (1 + n)) ∷ (2 + k + (1 + n)) ∷ ((1 + n) ↓ (1 + k)) ++ ((2 + n) ↓ (1 + k))
+--     ≅*⟨ long-swap-lr ((1 + n)) ((2 + k + (1 + n))) (1 + k) [ (1 + k + (1 + n)) ] ((2 + n) ↓ (1 + k)) (≤-reflexive refl) ⟩
+--       (suc n ↓ (2 + k)) ++ suc (suc (k + suc n)) ∷ k + suc (suc n) ∷ (suc (suc n) ↓ k)
+--     ≅*⟨ l++ (suc n ↓ (2 + k)) (refl≡ (head+tail (≡-sym (+-three-assoc {1 + k} {1} {1 + n})) refl)) ⟩
+--       (((1 + n) ↓ (2 + k)) ++ ((2 + n) ↓ (2 + k)))
+--     ≅*∎
+
+long->-long : (n k n1 k1 : ℕ) -> (k + n ≡ k1 + n1) -> (k1 < k) -> (((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))) ≅* ((n1 ↓ (2 + k1)) ++ ((2 + n) ↓ (2 + k)))
+long->-long n zero n1 k1 pp ()
+long->-long n (suc k) n1 zero pp pk = {!!}
+long->-long n (suc k) n1 (suc k1) pp pk =
+  let rec = long->-long n k n1 k1 (≡-down2 pp) (≤-down2 pk)
+  in  {!!}
+
+long-≤-long : (n k n1 k1 : ℕ) -> (k + n ≡ k1 + n1) -> (k ≤ k1) -> (((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))) ≅* (((1 + n1) ↓ (1 + k1)) ++ ((2 + n) ↓ (1 + k)))
+long-≤-long n zero n1 k1 pp pk rewrite pp rewrite (+-three-assoc {k1} {1} {n1}) =
+  ≅*begin
+    _
+  ≅*⟨ braid [] _ ⟩
+    _
+  ≅*⟨ cancel (_ ∷ _ ∷ [])  _ ⟩
+    _
+  ≅*⟨ refl≡ (≡-sym (++-unit)) ⟩
+    _
+  ≅*⟨ long-swap-lr (suc n1) (2 + k1 + n1) k1 [ _ ] [] (≤-reflexive (+-three-assoc {1 + k1} {1} {n1})) ⟩
+    _
+  ≅*∎
+long-≤-long n (suc k) n1 zero pp ()
+long-≤-long n (suc k) n1 (suc k1) pp pk rewrite (≡-trans (+-three-assoc {2 + k1} {1} {n1}) (≡-trans (cong (λ e -> 2 + e) (≡-sym pp)) (≡-sym (+-three-assoc {2 + k} {1} {n})))) =
+  let rec = long-≤-long n k n1 k1 (≡-down2 pp) (≤-down2 pk)
+      lemma = (≡-sym (cong (λ e -> 2 + e) (≡-trans (+-three-assoc {k} {1} {n}) (≡-trans pp (≡-sym (+-three-assoc {k1} {1} {n1}))))))
+  in
+    ≅*begin
+    (2 + k + suc n) ∷ ((1 + n) ↓ (2 + k)) ++ 2 + k + suc n ∷ ((1 + n1) ↓ (2 + k1))
+    ≅*⟨ short-swap-lr {n = 1 + n} {k = 1 + k} [] ((1 + n1) ↓ (2 + k1)) (s≤s (≤-up-+ (≤-up (≤-reflexive refl)))) (≤-reflexive refl) ⟩
+       1 + k + suc n ∷ (2 + k + suc n) ∷ ((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))
+    ≅*⟨ refl≡ (++-assoc (1 + k + suc n ∷ (2 + k + suc n) ∷ []) (((1 + n) ↓ (2 + k))) _) ⟩
+      1 + k + suc n ∷ (2 + k + suc n) ∷ (((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1)))
+    ≅*⟨ l++ (1 + k + suc n ∷ (2 + k + suc n) ∷ []) rec ⟩
+      1 + k + suc n ∷ (2 + k + suc n) ∷ (((1 + n1) ↓ (1 + k1)) ++ ((2 + n) ↓ (1 + k)))
+    ≅*⟨ refl≡ (≡-sym (++-assoc (_ ∷ _ ∷ []) (((1 + n1) ↓ (1 + k1))) _)) ⟩
+      1 + k + suc n ∷ (2 + k + suc n) ∷ ((1 + n1) ↓ (1 + k1)) ++ ((2 + n) ↓ (1 + k))
+    ≅*⟨ long-swap-lr (suc n1) (2 + (k + suc n)) (suc k1) [ _ ] (((2 + n) ↓ (1 + k))) (≤-reflexive lemma) ⟩
+      1 + k + suc n ∷ ((1 + n1) ↓ (1 + k1)) ++ (2 + k + suc n) ∷ ((2 + n) ↓ (1 + k))
+    ≅*⟨ refl≡ (start+end (head+tail (≡-down2 (≡-sym lemma)) (refl {x = ((1 + n1) ↓ (1 + k1))})) (head+tail (≡-sym (+-three-assoc {1 + k} {1} {1 + n})) refl)) ⟩
+      (((1 + n1) ↓ (2 + k1)) ++ ((2 + n) ↓ (2 + k)))
+    ≅*∎
