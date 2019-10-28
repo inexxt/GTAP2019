@@ -235,28 +235,6 @@ short-swap-lr {n} {k} {t} l r pnt ptkn =
       lemma = (short-swap {n} {k} {t} {tl} {tr} tr-p tl-p)
   in  {!!}
 
-
--- long-≡-long : (n k n1 : ℕ) -> (((1 + n) ↓ (2 + k)) ++ ((1 + n) ↓ (2 + k))) ≅* (((1 + n) ↓ (1 + k)) ++ ((2 + n) ↓ (1 + k)))
--- long-≡-long n zero n1 = trans (braid [] _) (cancel _ [] )
--- long-≡-long n (suc k) n1 =
---   let rec = long-≡-long n k n1
---   in
---     ≅*begin
---       ((1 + n) ↓ (3 + k)) ++ (2 + k + (1 + n)) ∷ ((1 + n) ↓ (2 + k))
---     ≅*⟨ short-swap-lr {n = suc n} {k = suc k} [] (((1 + n) ↓ (2 + k))) (s≤s (≤-up-+ (≤-up (≤-reflexive refl)))) (≤-reflexive refl) ⟩
---       (1 + k + (1 + n)) ∷ (2 + k + (1 + n)) ∷ ((1 + n) ↓ (2 + k)) ++ ((1 + n) ↓ (2 + k))
---     ≅*⟨ refl≡ (++-assoc (suc (k + suc n) ∷ suc (suc (k + suc n)) ∷ []) (((1 + n) ↓ (2 + k))) (((1 + n) ↓ (2 + k)))) ⟩
---       (1 + k + (1 + n)) ∷ [ 2 + k + (1 + n) ] ++ (((1 + n) ↓ (2 + k)) ++ ((1 + n) ↓ (2 + k)))
---     ≅*⟨ l++ ((1 + k + (1 + n)) ∷ [ 2 + k + (1 + n) ]) rec ⟩
---       (1 + k + (1 + n)) ∷ [ 2 + k + (1 + n) ] ++ (((1 + n) ↓ (1 + k)) ++ ((2 + n) ↓ (1 + k)))
---     ≅*⟨ refl≡ (≡-sym (++-assoc ((1 + k + (1 + n)) ∷ [ 2 + k + (1 + n) ]) (((1 + n) ↓ (1 + k))) _)) ⟩
---       (1 + k + (1 + n)) ∷ (2 + k + (1 + n)) ∷ ((1 + n) ↓ (1 + k)) ++ ((2 + n) ↓ (1 + k))
---     ≅*⟨ long-swap-lr ((1 + n)) ((2 + k + (1 + n))) (1 + k) [ (1 + k + (1 + n)) ] ((2 + n) ↓ (1 + k)) (≤-reflexive refl) ⟩
---       (suc n ↓ (2 + k)) ++ suc (suc (k + suc n)) ∷ k + suc (suc n) ∷ (suc (suc n) ↓ k)
---     ≅*⟨ l++ (suc n ↓ (2 + k)) (refl≡ (head+tail (≡-sym (+-three-assoc {1 + k} {1} {1 + n})) refl)) ⟩
---       (((1 + n) ↓ (2 + k)) ++ ((2 + n) ↓ (2 + k)))
---     ≅*∎
-
 long->-long : (n k n1 k1 : ℕ) -> (k + n ≡ k1 + n1) -> (k1 < k) -> (((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))) ≅* ((n1 ↓ (2 + k1)) ++ ((2 + n) ↓ (2 + k)))
 long->-long n zero n1 k1 pp ()
 long->-long n (suc k) n1 zero pp pk = {!!}
