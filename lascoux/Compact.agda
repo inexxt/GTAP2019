@@ -227,3 +227,10 @@ short-swap-l {n} {k} {t} l pnt ptkn =
       tl , tl-p = ≤-∃ (suc t) (suc k + n) ptkn
       lemma = (short-swap {n} {k} {t} {tl} {tr} tr-p tl-p)
   in  l++ l lemma
+
+short-swap-lr : {n k t : ℕ} -> (l r : List ℕ) -> (n ≤ t) -> (suc t ≤ suc (k + n)) -> ((l ++ n ↓ (2 + k)) ++ suc t ∷ r) ≅* ((l ++ t ∷ (n ↓ (2 + k))) ++ r)
+short-swap-lr {n} {k} {t} l r pnt ptkn =
+  let tr , tr-p = ≤-∃ n t pnt
+      tl , tl-p = ≤-∃ (suc t) (suc k + n) ptkn
+      lemma = (short-swap {n} {k} {t} {tl} {tr} tr-p tl-p)
+  in  {!!}
