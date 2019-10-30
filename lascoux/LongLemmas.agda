@@ -382,7 +382,7 @@ long-long-not-disjoint : (n k n1 k1 : ℕ) -> (k + n ≡ suc (n1 + k1))
                          -> ∃ (λ mf -> ((k + n ∷ (n ↓ (2 + k)) ++ (n1 ↓ (2 + k1)) ++ (2 + (k1 + n1)) ∷ []) ≅* mf) ×
                                         (((n ↓ (2 + k)) ++ (suc (k1 + n1) ∷ (n1 ↓ (3 + k1)))) ≅* mf))
 long-long-not-disjoint n zero n1 k1 p rewrite p rewrite (cong suc (+-comm n1 k1)) =
- let left = trans (cancel (_ ∷ _ ∷ []) _) (trans (long-swap-lr n1 (2 + (k1 + n1))(1 + k1) [ suc (k1 + n1) ] [ 2 + k1 + n1 ] (≤-reflexive refl)) (trans (cancel _ []) (refl≡ ++-unit)))
+ let left = trans (cancel (_ ∷ _ ∷ []) _) (trans (long-swap-lr n1 (2 + (k1 + n1)) (1 + k1) [ suc (k1 + n1) ] [ 2 + k1 + n1 ] (≤-reflexive refl)) (trans (cancel _ []) (refl≡ ++-unit)))
      right = trans (cancel [ _ ] _) (cancel [] _)
  in  _ , (left , right)
 long-long-not-disjoint n (suc k) n1 k1 p with k ≤? k1

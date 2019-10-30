@@ -235,12 +235,33 @@ short-swap-lr {n} {k} {t} l r pnt ptkn =
       lemma = (short-swap {n} {k} {t} {tl} {tr} tr-p tl-p)
   in  {!!}
 
-long->-long : (n k n1 k1 : ℕ) -> (k + n ≡ k1 + n1) -> (k1 < k) -> (((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))) ≅* ((n1 ↓ (2 + k1)) ++ ((2 + n) ↓ (2 + k)))
+long->-long : (n k n1 k1 : ℕ) -> (k + n ≡ k1 + n1) -> (k1 < k) -> (((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))) ≅* ((n1 ↓ (2 + k1)) ++ ((1 + n) ↓ (2 + k)))
 long->-long n zero n1 k1 pp ()
-long->-long n (suc k) n1 zero pp pk = {!!}
+long->-long n (suc k) n1 zero pp pk rewrite (≡-sym pp) rewrite (≡-sym (+-three-assoc {k} {1} {n}))=
+  ≅*begin
+    ((1 + n) ↓ (3 + k)) ++ (2 + (k + (1 + n))) ∷ (1 + (k + (1 + n))) ∷ []
+  ≅*⟨ long (1 + k) [] [ _ ] ⟩
+    (1 + (k + (1 + n))) ∷ ((1 + n) ↓ (3 + k)) ++ (1 + (k + (1 + n))) ∷ []
+  ≅*⟨ short-swap-lr {n = (1 + n)} {k = (1 + k)} [ _ ] [] (≤-up-+ (≤-reflexive refl)) (≤-up (≤-reflexive refl)) ⟩
+    _
+  ≅*⟨ refl≡ ++-unit ⟩
+    _
+  ≅*∎
 long->-long n (suc k) n1 (suc k1) pp pk =
-  let rec = long->-long n k n1 k1 (≡-down2 pp) (≤-down2 pk)
-  in  {!!}
+  let p = ≡-trans (+-three-assoc {1 + k1} {1} {n1}) (≡-trans (cong suc (≡-sym pp)) (≡-sym (+-three-assoc {1 + k} {1} {n})))
+      rec = long->-long n k n1 k1 (≡-down2 pp) (≤-down2 pk)
+  in
+    ≅*begin
+      ((1 + n) ↓ (3 + k)) ++ ((1 + n1) ↓ (3 + k1))
+    ≅*⟨ short-swap-lr {n = (1 + n)} {k = (1 + k)} [] (((1 + n1) ↓ (2 + k1))) (≤-trans (s≤s (≤-up-+ (≤-up (≤-reflexive refl)))) (≤-reflexive (≡-sym p))) (≤-reflexive (cong suc p)) ⟩
+      _ ∷ _ ∷ ((1 + n) ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))
+    ≅*⟨ l++ (_ ∷ _ ∷ []) rec ⟩
+      _ ∷ _ ∷ (n1 ↓ (2 + k1)) ++ ((1 + n) ↓ (2 + k))
+    ≅*⟨ long-swap-lr n1 (suc (suc (k + suc n))) (suc (suc k1)) [ _ ] (((1 + n) ↓ (2 + k))) (≤-reflexive (≡-trans (≡-sym (+-three-assoc {2 + k1} {1} {n1})) (cong suc p))) ⟩
+      _ ∷ (n1 ↓ (2 + k1)) ++ _ ∷ ((1 + n) ↓ (2 + k))
+    ≅*⟨ refl≡ (head+tail (+-three-assoc {1 + k1} {1} {n1}) refl) ⟩
+      (n1 ↓ (3 + k1)) ++ ((1 + n) ↓ (3 + k))
+    ≅*∎
 
 long-≤-long : (n k n1 k1 : ℕ) -> (k + n ≡ k1 + n1) -> (k ≤ k1) -> ((n ↓ (2 + k)) ++ (n1 ↓ (2 + k1))) ≅* ((n1 ↓ (1 + k1)) ++ ((1 + n) ↓ (1 + k)))
 long-≤-long n zero n1 k1 pp pk rewrite pp rewrite (+-three-assoc {k1} {1} {n1}) =
