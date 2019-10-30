@@ -18,7 +18,7 @@ open import Arithmetic hiding (n)
 open import Lists
 open import Compact hiding (n; l)
 open ≤-Reasoning renaming (begin_ to ≤-begin_; _∎ to ≤∎) hiding (_≡⟨_⟩_; _≡⟨⟩_)
-
+open _⊎_
 
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
@@ -374,9 +374,17 @@ dec-long-lemma-rev n (suc (suc k)) .(suc n) .n pkn [] .(suc (suc n) ↑ k) refl 
 dec-long-lemma-rev n (suc k) n1 k1 pkn (x ∷ l) r p = dec-long-lemma-rev (suc n) k n1 k1 pkn l r (cut-head p)
 
 dec-long-lemma-disjoint-rev : (n k n1 k1 x : ℕ) -> (n < x) -> (l r : List ℕ) -> l ++ x ∷ (n ↑ (1 + k)) ≡ (n1 ↑ (1 + k1)) ++ r
-                              -> (Σ (List ℕ × List ℕ) (λ (l1 , r1) -> (l ≡ (n1 ↑ k1)) × (x ≡ n1 + k1) × (r ≡ (n ↑ (1 + k)))) ⊎
-                                  Σ (List ℕ) (λ m -> (l ≡ (n1 ↑ (1 + k1)) ++ m) × (r ≡ m ++ x ∷ (n ↑ (1 + k)))))
-dec-long-lemma-disjoint-rev n k n1 k1 pnx l r p = {!!}
+                              -> ((l ≡ (n1 ↑ k1)) × (x ≡ n1 + k1) × (r ≡ (n ↑ (1 + k)))) ⊎
+                                  Σ (List ℕ) (λ m -> (l ≡ (n1 ↑ (1 + k1)) ++ m) × (r ≡ m ++ x ∷ (n ↑ (1 + k))))
+dec-long-lemma-disjoint-rev n k n1 zero .n1 pnx [] .(n ∷ (suc n ↑ k)) refl = inj₁ (refl , ((≡-sym (+-unit {n1})) , refl))
+dec-long-lemma-disjoint-rev n k n1 (suc k1) x pnx [] r p =
+  let h1 = cut-t1 p
+      h2 = cut-t2 p
+  in  abs-refl (≤-trans (≤-reflexive (cong suc (≡-sym h2))) (≤-trans pnx (≤-trans (≤-reflexive h1) (≤-up rrr))))
+dec-long-lemma-disjoint-rev n k n1 zero x pnx (.n1 ∷ l) .(l ++ x ∷ n ∷ (suc n ↑ k)) refl = inj₂ (l , (refl , refl))
+dec-long-lemma-disjoint-rev n k n1 (suc k1) x pnx (x₁ ∷ l) r p with (dec-long-lemma-disjoint-rev n k (suc n1) k1 x pnx l r (cut-head p))
+... | inj₁ (pl , px , pr) rewrite (cut-tail p) = inj₁ (((head+tail refl pl) , ((≡-trans px (≡-sym (+-three-assoc {n1} {1}))) , pr)))
+... | inj₂ (m , pl , pr) rewrite (cut-tail p) = inj₂ (m , (head+tail refl pl , pr))
 
 long-long-not-disjoint : (n k n1 k1 : ℕ) -> (k + n ≡ suc (k1 + n1))
                          -> ∃ (λ mf -> ((k + n ∷ (n ↓ (2 + k)) ++ (n1 ↓ (2 + k1)) ++ (2 + (k1 + n1)) ∷ []) ≅* mf) ×
