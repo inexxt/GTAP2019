@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas --without-K #-}
+{-# OPTIONS --without-K #-}
 module Compact where
 
 open import Data.List
@@ -10,7 +10,7 @@ open import Data.Product using (∃; _×_; _,_)
 open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
-open import Data.Bool hiding (_<_; _≤_; ≤-trans)
+open import Data.Bool hiding (_<_; _≤_)
 open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 open import Function
 
@@ -157,22 +157,22 @@ mod2 (suc n) with mod2 n
 abs-bool : (true ≡ false) -> ⊥
 abs-bool ()
 
-postulate
-  -- these are proved for the previous representation, it's possible to transport them to here
-  mod2-+ : (n1 n2 : ℕ) -> mod2 (n1 + n2) ≡ not ((mod2 n1) xor (mod2 n2))
-  len-mod2≅ : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (mod2 (length m1) ≡ mod2 (length m2))
-  len-nonincreasing≅ : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (length m2 ≤ length m1)
-  diamond-separate : {l r l' r' ml mr : List ℕ} -> (ml ≡ l' ++ r) -> (mr ≡ l ++ r') -> (l ≅ l') -> (r ≅ r') -> (ml ≅ (l' ++ r')) × (mr ≅ (l' ++ r'))
-
-  -- this ones are a little different (just because the new ≅ doesnt have reflexivity)
-  one-one-reduction : (n1 n2 : ℕ) -> ((n1 ∷ []) ≅* (n2 ∷ [])) -> n1 ≡ n2
-  two-two-reduction : (a b1 b2 : ℕ) -> ((a ∷ a ∷ []) ≅* (b1 ∷ b2 ∷ [])) -> (b1 ≡ b2) × (a ≡ b1)
-  cancel-reduction : (m : List ℕ) -> ((n ∷ n ∷ []) ≅* m) -> (m ≡ []) ⊎ (m ≡ (n ∷ n ∷ []))
-  -- one-reduction : (m : List ℕ) -> ((n ∷ []) ≅* m) -> m ≡ (n ∷ [])
-
-  -- these ones are extension to ≅*
-  len-mod2 : (m1 m2 : List ℕ) -> (m1 ≅* m2) -> (mod2 (length m1) ≡ mod2 (length m2))
-  len-nonincreasing : (m1 m2 : List ℕ) -> (m1 ≅* m2) -> (length m2 ≤ length m1)
+-- postulate
+--   -- these are proved for the previous representation, it's possible to transport them to here
+--   mod2-+ : (n1 n2 : ℕ) -> mod2 (n1 + n2) ≡ not ((mod2 n1) xor (mod2 n2))
+--   len-mod2≅ : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (mod2 (length m1) ≡ mod2 (length m2))
+--   len-nonincreasing≅ : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (length m2 ≤ length m1)
+--   diamond-separate : {l r l' r' ml mr : List ℕ} -> (ml ≡ l' ++ r) -> (mr ≡ l ++ r') -> (l ≅ l') -> (r ≅ r') -> (ml ≅ (l' ++ r')) × (mr ≅ (l' ++ r'))
+--
+--   -- this ones are a little different (just because the new ≅ doesnt have reflexivity)
+--   one-one-reduction : (n1 n2 : ℕ) -> ((n1 ∷ []) ≅* (n2 ∷ [])) -> n1 ≡ n2
+--   two-two-reduction : (a b1 b2 : ℕ) -> ((a ∷ a ∷ []) ≅* (b1 ∷ b2 ∷ [])) -> (b1 ≡ b2) × (a ≡ b1)
+--   cancel-reduction : (m : List ℕ) -> ((n ∷ n ∷ []) ≅* m) -> (m ≡ []) ⊎ (m ≡ (n ∷ n ∷ []))
+--   -- one-reduction : (m : List ℕ) -> ((n ∷ []) ≅* m) -> m ≡ (n ∷ [])
+--
+--   -- these ones are extension to ≅*
+--   len-mod2 : (m1 m2 : List ℕ) -> (m1 ≅* m2) -> (mod2 (length m1) ≡ mod2 (length m2))
+--   len-nonincreasing : (m1 m2 : List ℕ) -> (m1 ≅* m2) -> (length m2 ≤ length m1)
 
 
 long-swap : (n1 n2 : ℕ) -> (k : ℕ) -> (k + n1 < n2) -> (n2 ∷ (n1 ↓ k)) ≅* ((n1 ↓ k) ++ [ n2 ])
@@ -199,8 +199,9 @@ long-swap<-lr n1 n2 k l r p =
 
 short-swap : {n k t tl tr : ℕ} -> (tr + n ≡ t) -> ((tl + suc t) ≡ suc (k + n)) -> (n ↓ (2 + k) ++ [ suc t ]) ≅* (t ∷ (n ↓ (2 + k)))
 short-swap {n} {k} {t} {tl} {tr} ptn ptkn rewrite (≡-sym ptn) =
-  let k=tl+tr : 2 + k ≡ tl + (2 + tr)
-      k=tl+tr = {!!}
+  let pp = ≡-down-r-+ {r = n} (≡-trans (+-assoc tl (1 + tr) n) (≡-trans ptkn (≡-sym (+-assoc 1 k n))))
+      k=tl+tr : 2 + k ≡ tl + (2 + tr)
+      k=tl+tr = ≡-trans (≡-sym (cong suc pp)) (≡-sym (+-three-assoc {tl} {1} {1 + tr}))
 
       lemma : n ↓ (2 + k) ≡ (n + (2 + tr)) ↓ tl ++ (n ↓ (2 + tr))
       lemma = ≡-trans (cong (λ e -> n ↓ e) k=tl+tr) (↓-+ n tl (2 + tr))

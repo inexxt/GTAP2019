@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas --without-K #-}
+{-# OPTIONS --without-K #-}
 module LongLemmas where
 
 open import Data.List

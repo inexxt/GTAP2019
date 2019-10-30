@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas --without-K #-}
+{-# OPTIONS --without-K #-}
 module Lists where
 
 open import Data.List
@@ -10,7 +10,7 @@ open import Data.Product using (∃; _×_; _,_)
 open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
-open import Data.Bool hiding (_<_; _≤_; ≤-trans)
+open import Data.Bool hiding (_<_; _≤_)
 open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans)
 open import Function
 
