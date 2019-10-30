@@ -31,7 +31,8 @@ n ↓ (suc k) = (k + n) ∷ (n ↓ k)
 
 
 ++-unit : {l : List ℕ} -> l ++ [] ≡ l
-++-unit = {!   !}
+++-unit {[]} = refl
+++-unit {x ∷ l} rewrite (++-unit {l}) = refl
 
 cut-head : {a1 a2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ l1 ≡ a2 ∷ l2) -> (l1 ≡ l2)
 cut-head {a1} {.a1} {l1} {.l1} refl = refl
@@ -61,10 +62,10 @@ cut-h4 : {a1 a2 b1 b2 c1 c2 d1 d2 : ℕ} -> {l1 l2 : List ℕ} -> (a1 ∷ b1 ∷
 cut-h4 {l1 = l1} {l2 = .l1} refl = refl
 
 head+tail : {h1 h2 : ℕ} -> {t1 t2 : List ℕ} -> (h1 ≡ h2) -> (t1 ≡ t2) -> (h1 ∷ t1) ≡ (h2 ∷ t2)
-head+tail p1 p2 = {!!}
+head+tail refl refl = refl
 
 start+end : {h1 h2 : List ℕ} -> {t1 t2 : List ℕ} -> (h1 ≡ h2) -> (t1 ≡ t2) -> (h1 ++ t1) ≡ (h2 ++ t2)
-start+end p1 p2 = {!!}
+start+end refl refl = refl
 
 
 ↓-+ : (n k1 k2 : ℕ) -> n ↓ (k1 + k2) ≡ ((n + k2) ↓ k1) ++ (n ↓ k2)
@@ -88,10 +89,12 @@ rev [] = []
 rev (x ∷ l) = (rev l) ++ [ x ]
 
 rev-d : (k p : ℕ) -> rev (k ↓ p) ≡ k ↑ p
-rev-d k p = {!!}
+rev-d k zero = refl
+rev-d k (suc p) rewrite (rev-d k p) = ++-↑ k p
 
 rev-u : (k p : ℕ) -> rev (k ↑ p) ≡ k ↓ p
-rev-u k p = {!!}
+rev-u k zero = refl
+rev-u k (suc p) rewrite (rev-u (suc k) p) = ++-↓ k p
 
 rev-++ : (l r : List ℕ) -> rev (l ++ r) ≡ (rev r) ++ (rev l)
 rev-++ [] r = ≡-sym ++-unit
@@ -100,7 +103,8 @@ rev-++ (x ∷ l) r =
   in  ≡-trans rec (++-assoc (rev r) (rev l) (x ∷ []))
 
 rev-rev : {l : List ℕ} -> l ≡ rev (rev l)
-rev-rev {l} = {!!}
+rev-rev {[]} = refl
+rev-rev {x ∷ l} = ≡-trans (head+tail refl (rev-rev {l})) (≡-sym (rev-++ (rev l) [ x ]))
 
 telescope-rev : (n k : ℕ) -> (r : List ℕ) -> ((rev (suc (suc n) ↑ k) ++ suc n ∷ []) ++ n ∷ []) ++ r ≡ (n ↓ (2 + k)) ++ r
 telescope-rev n k r =
