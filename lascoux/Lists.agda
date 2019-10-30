@@ -126,11 +126,17 @@ telescope-l-rev-+1 n k l r =
   ≡⟨ ++-assoc (l ++ rev (suc (suc (suc n)) ↑ k)) (suc (suc n) ∷ []) (suc n ∷ n ∷ r) ⟩
     _
   ≡⟨ ++-assoc (l) (rev (suc (suc (suc n)) ↑ k)) (suc (suc n) ∷ suc n ∷ n ∷ r) ⟩
+    l ++ (rev (suc (suc (suc n)) ↑ k) ++ suc (suc n) ∷ suc n ∷ n ∷ r)
+  ≡⟨ start+end (refl {x = l}) (≡-sym (++-assoc (rev (suc (suc (suc n)) ↑ k)) (suc (suc n) ∷ []) _)) ⟩
+    l ++ ((rev (suc (suc (suc n)) ↑ k) ++ suc (suc n) ∷ []) ++ suc n ∷ n ∷ r)
+  ≡⟨ start+end (refl {x = l}) (≡-sym (++-assoc (rev (suc (suc (suc n)) ↑ k) ++ suc (suc n) ∷ []) (suc n ∷ []) _)) ⟩
+    l ++ (((rev (suc (suc (suc n)) ↑ k) ++ suc (suc n) ∷ []) ++ suc n ∷ []) ++ n ∷ r)
+  ≡⟨ start+end (refl {x = l}) (≡-sym (++-assoc _ (n ∷ []) r)) ⟩
+    l ++ ((((rev (suc (suc (suc n)) ↑ k) ++ suc (suc n) ∷ []) ++ suc n ∷ []) ++ n ∷ []) ++ r)
+  ≡⟨ start+end (refl {x = l}) (start+end (telescope-rev (1 + n) k [ n ]) (refl {x = r})) ⟩
+    l ++ ((((suc n) ↓ (2 + k)) ++ n ∷ []) ++ r)
+  ≡⟨ start+end (refl {x = l}) (start+end (++-↓ n (suc (suc k))) (refl {x = r}))  ⟩
     _
-  ≡⟨ {!start+end (refl {x = rev l}) (telescope-rev (suc n) k ?)!} ⟩
-    {!!}
-  ≡⟨ {!!} ⟩
-    {!!}
   ∎
 
 ++-empty : (l r : List ℕ) -> (l ++ r) ≡ l -> (r ≡ [])
