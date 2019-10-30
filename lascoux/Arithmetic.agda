@@ -94,3 +94,6 @@ nowhere {suc n} {suc k} p1 p2 p3 p4 = nowhere (λ x → p1 (s≤s x)) (λ x → 
 ≤-∃ (suc n) (suc m) (s≤s p) =
   let rec-t , rec-p = ≤-∃ n m p
   in  rec-t , ≡-trans (+-three-assoc {rec-t} {1} {n}) (cong suc rec-p)
+
+rrr : {k : ℕ} -> k ≤ k
+rrr = ≤-reflexive refl

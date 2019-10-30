@@ -31,9 +31,6 @@ variable
 open ≅*-Reasoning
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
-rrr : {k : ℕ} -> k ≤ k
-rrr = ≤-reflexive refl
-
 long-lemma : (n n1 k k1 t t1 : ℕ) -> (suc n ≤ t) -> (suc n1 ≤ t1) -> (r r1 : List ℕ) -> (n ↓ (2 + k)) ++ t ∷ r ≡ (n1 ↓ (2 + k1)) ++ t1 ∷ r1
              -> (n ≡ n1) × ((n ↓ (2 + k)) ≡ (n1 ↓ (2 + k1))) × (r ≡ r1)
 long-lemma n n1 zero zero t t1 pnt pnt1 r r1 p rewrite (cut-t1 p) rewrite (cut-t2 p) rewrite (cut-t3 p) rewrite (cut-h3 p) = refl , (refl , refl)
@@ -426,8 +423,8 @@ long-long-not-disjoint n (suc k) (suc n1) k1 p with k ≤? k1
           1 + k + n ∷ (n ↓ (3 + k)) ++ ((1 + n1) ↓ (2 + k1)) ++ (2 + (k1 + (1 + n1))) ∷ []
         ≅*⟨ refl≡ {!!}  ⟩
           (1 + k + n ∷ 2 + k + n ∷ (n ↓ (2 + k)) ++ ((1 + n1) ↓ (2 + k1))) ++ (2 + (k1 + (1 + n1))) ∷ []
-        ≅*⟨ ++r [ _ ] (l++ (_ ∷ _ ∷ []) ({!long->-long!})) ⟩
-          {!!}
+        ≅*⟨ ++r [ _ ] (l++ (_ ∷ _ ∷ []) (long->-long n k n1 k1 (≡-trans (≡-down2 p) (+-three-assoc {k1} {1} {n1})) (≰⇒> q))) ⟩
+          (1 + k + n ∷ 2 + k + n ∷ (n1 ↓ (2 + k1)) ++ (n ↓ (2 + k))) ++ (2 + (k1 + (1 + n1))) ∷ []
         ≅*⟨ {!!} ⟩
           {!!}
         ≅*⟨ {!!} ⟩
@@ -446,8 +443,8 @@ long-long-not-disjoint n (suc k) (suc n1) k1 p with k ≤? k1
           (n ↓ (3 + k)) ++ suc (k1 + (1 + n1)) ∷ ((1 + n1) ↓ (3 + k1))
         ≅*⟨ short-swap-lr {n} {1 + k} [] (((1 + n1) ↓ (3 + k1))) (≤-trans (≤-up-+ rrr) (≤-reflexive (≡-down2 p))) ((≤-trans (≤-up rrr) (≤-reflexive (cong suc (≡-sym p))))) ⟩
           (k1 + (1 + n1)) ∷ (n ↓ (3 + k)) ++ ((1 + n1) ↓ (3 + k1))
-        ≅*⟨ {!!} ⟩
-          {!!}
+        ≅*⟨ l++ [ _ ] (long->-long n (suc k) n1 (suc k1) (≡-trans p (+-three-assoc {1 + k1} {1} {n1})) (s≤s ((≰⇒> q)))) ⟩
+          (k1 + (1 + n1)) ∷ (n1 ↓ (3 + k1)) ++ (n ↓ (3 + k))
         ≅*∎
   in  _ , left , right
 
