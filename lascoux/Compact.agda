@@ -148,6 +148,14 @@ empty-reduction (swap≅ x (x₁ ∷ l) r .[] _ () defmf)
 empty-reduction (long≅ k [] r .[] mf () defmf)
 empty-reduction (long≅ k (x ∷ l) r .[] mf () defmf)
 
+one-reduction : {x : ℕ} -> {m : List ℕ} -> ([ x ] ≅ m) -> ⊥
+one-reduction {x} (cancel≅ (x₁ ∷ []) r .(x ∷ []) mf () defmf)
+one-reduction {x} (cancel≅ (x₁ ∷ x₂ ∷ l) r .(x ∷ []) mf () defmf)
+one-reduction {x} (swap≅ x₁ (x₂ ∷ []) r .(x ∷ []) mf () defmf)
+one-reduction {x} (swap≅ x₁ (x₂ ∷ x₃ ∷ l) r .(x ∷ []) mf () defmf)
+one-reduction {x} (long≅ k (x₁ ∷ []) r .(x ∷ []) mf () defmf)
+one-reduction {x} (long≅ k (x₁ ∷ x₂ ∷ l) r .(x ∷ []) mf () defmf)
+
 mod2 : ℕ -> Bool
 mod2 0 = true
 mod2 (suc n) with mod2 n

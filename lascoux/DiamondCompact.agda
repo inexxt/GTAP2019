@@ -35,6 +35,7 @@ open Relation.Binary.PropositionalEquality.≡-Reasoning
 
 -- and this should do something like: if ir1 = (ir p1) and ir2 = (ir p2) are non-overlapping, use force-non-crit-pair
 -- otherwise, take the ir1 ∪ ir2 , force it into one of the critical pairs and then reduce critical pair
+{-# NON_TERMINATING #-}
 diamond : (m1 m2 m3 : List ℕ) -> (m1 ≅ m2) -> (m1 ≅ m3) -> ∃ (λ m -> (m2 ≅* m) × (m3 ≅* m))
 -- -- crit-pair
 diamond (x₁ ∷ .x₁ ∷ .x₁ ∷ m1) m2 m3 (cancel≅ [] .(x₁ ∷ m1) .(x₁ ∷ x₁ ∷ x₁ ∷ m1) .m2 refl defmf) (cancel≅ (.x₁ ∷ []) .m1 .(x₁ ∷ x₁ ∷ x₁ ∷ m1) .m3 refl defmf₁)
@@ -181,7 +182,7 @@ diamond m1 m2 m3 (long≅ {n} k [] r .m1 .m2 defm defmf) (long≅ {n₁} k₁ l�
       rec-m , rec-l , rec-r = long-long-lemma n k n₁ k₁ r l₁ r₁ (≡-sym eq)
   in  rec-m , rec-l , rec-r
 
-
+{-# NON_TERMINATING #-}
 diamond-full : {m1 m2 m3 : List ℕ} -> (m1 ≅* m2) -> (m1 ≅* m3) -> ∃ (λ m -> (m2 ≅* m) × (m3 ≅* m))
 diamond-full refl q = _ , (q , refl)
 diamond-full (trans≅ x p) refl = _ , refl , trans≅ x p
@@ -196,16 +197,16 @@ diamond-full {m1} {m2} {m3} (trans≅ x p) (trans≅ y (trans≅ {m4} z q)) =
   in  rec-mm , trans rec-l rec-ll , rec-rr
 
 --
--- data _≃_ : List ℕ -> List ℕ -> Set where
---   R : {m1 m2 mf : List ℕ} -> (p1 : m1 ≅* mf) -> (p2 : m2 ≅* mf) -> m1 ≃ m2
---
--- refl≃ : (m : List ℕ) -> (m ≃ m)
--- refl≃ m = R refl refl
---
--- comm≃ : (m1 m2 : List ℕ) -> (m1 ≃ m2) -> (m2 ≃ m1)
--- comm≃ m1 m2 (R p1 p2) = R p2 p1
---
--- trans≃ : (m1 m2 m3 : List ℕ) -> (r1 : m1 ≃ m2) -> (r2 : m2 ≃ m3) -> (m1 ≃ m3)
--- trans≃ m1 m2 m3 (R p1 p2) (R p3 p4) =
---   let lemma-m , lemma1 , lemma2 = diamond-full p2 p3
---   in  R (trans p1 lemma1) (trans p4 lemma2)
+data _≃_ : List ℕ -> List ℕ -> Set where
+  R : {m1 m2 mf : List ℕ} -> (p1 : m1 ≅* mf) -> (p2 : m2 ≅* mf) -> m1 ≃ m2
+
+refl≃ : (m : List ℕ) -> (m ≃ m)
+refl≃ m = R refl refl
+
+comm≃ : (m1 m2 : List ℕ) -> (m1 ≃ m2) -> (m2 ≃ m1)
+comm≃ m1 m2 (R p1 p2) = R p2 p1
+
+trans≃ : (m1 m2 m3 : List ℕ) -> (r1 : m1 ≃ m2) -> (r2 : m2 ≃ m3) -> (m1 ≃ m3)
+trans≃ m1 m2 m3 (R p1 p2) (R p3 p4) =
+  let lemma-m , lemma1 , lemma2 = diamond-full p2 p3
+  in  R (trans p1 lemma1) (trans p4 lemma2)

@@ -53,9 +53,6 @@ variable
     lb ++ ld
   ∎
 
--- canonical-lift : {m : ℕ} -> (n ≤ m) -> (cl : Canonical n) -> Σ (Canonical m) (λ cll -> immersion {n} cl ≡ immersion {m} cll)
--- canonical-lift {n} {m} nm cl = {!!}
-
 canonical-suc : (cl : Canonical n) -> Σ (Canonical (suc n)) (λ cll -> immersion {n} cl ≡ immersion {suc n} cll)
 canonical-suc {n} cl = (CanS cl {r = 0} z≤n) , ≡-sym ++-unit
 
@@ -79,22 +76,10 @@ postulate
 ≅-abs-r {n} (respects=l {[]} {y ∷ []} [] p x q) = ≅-abs-r p
 ≅-abs-r {n} (comm≅ p) = ≅-abs-l p
 
--- ≅-len : {m1 m2 : List ℕ} -> (m1 ≅ m2) -> (length m2 ≤ length m1)
--- ≅-len {.(_ ∷ _ ∷ [])} {.[]} cancel≅ = z≤n
--- ≅-len {.(_ ∷ _ ∷ [])} {.(_ ∷ _ ∷ [])} (swap≅ x) = s≤s (s≤s z≤n)
--- ≅-len {.(suc _ ∷ _ ∷ suc _ ∷ [])} {.(_ ∷ suc _ ∷ _ ∷ [])} braid≅ = s≤s (s≤s (s≤s z≤n))
--- ≅-len {m1} {m2} (respects=r l {r} {r'} p e1 e2) rewrite e1 rewrite e2 rewrite (length-++ l {r}) rewrite (length-++ l {r'}) =
---   let rec = ≅-len p
---   in  ≤-up2-+ rec
--- ≅-len {m1} {m2} (respects=l {l} {l'} r p e1 e2) rewrite e1 rewrite e2 rewrite (length-++ l {r}) rewrite (length-++ l' {r}) =
---   let rec = ≅-len p
---   in ≤-up2-r-+ rec
--- ≅-len {m1} {m2} (comm≅ p) = {!≅-len p!}
-
 ≃-abs : {x : ℕ} -> (x ∷ []) ≃ [] -> ⊥
 ≃-abs (trans≅ x refl) = ≅-abs-l x
 ≃-abs (trans≅ {m2 = []} x q) = ≅-abs-l x
-≃-abs (trans≅ {m2 = x₁ ∷ m2} x q) = {!!}
+≃-abs (trans≅ {m2 = x₁ ∷ m2} x q) = {!empty-reduction x!}
 
 ZeroCanonical : (n : ℕ) -> Canonical n
 ZeroCanonical zero = CanZ
