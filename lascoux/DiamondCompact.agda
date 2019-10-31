@@ -195,18 +195,3 @@ diamond-full {m1} {m2} {m3} (trans≅ x p) (trans≅ y (trans≅ {m4} z q)) =
   let rec-m , rec-l , rec-r = diamond-full (trans≅ x p) (ext y)
       rec-mm , rec-ll , rec-rr = diamond-full {m4} {rec-m} {_} rec-r (trans≅ z q)
   in  rec-mm , trans rec-l rec-ll , rec-rr
-
---
-data _≃_ : List ℕ -> List ℕ -> Set where
-  R : {m1 m2 mf : List ℕ} -> (p1 : m1 ≅* mf) -> (p2 : m2 ≅* mf) -> m1 ≃ m2
-
-refl≃ : (m : List ℕ) -> (m ≃ m)
-refl≃ m = R refl refl
-
-comm≃ : (m1 m2 : List ℕ) -> (m1 ≃ m2) -> (m2 ≃ m1)
-comm≃ m1 m2 (R p1 p2) = R p2 p1
-
-trans≃ : (m1 m2 m3 : List ℕ) -> (r1 : m1 ≃ m2) -> (r2 : m2 ≃ m3) -> (m1 ≃ m3)
-trans≃ m1 m2 m3 (R p1 p2) (R p3 p4) =
-  let lemma-m , lemma1 , lemma2 = diamond-full p2 p3
-  in  R (trans p1 lemma1) (trans p4 lemma2)
