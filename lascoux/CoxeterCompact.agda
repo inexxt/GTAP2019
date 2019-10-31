@@ -54,16 +54,21 @@ data _~_ : List ℕ -> List ℕ -> Set where
   comm~ : {m1 m2 : List ℕ} -> (m1 ~ m2) -> m2 ~ m1
   trans~ : {m1 m2 m3 : List ℕ} -> (m1 ~ m2) -> (m2 ~ m3) -> m1 ~ m3
 
+long-swap-lemma : (n k x : ℕ) -> (k + n < x) -> ((n ↓ k) ++ x ∷ []) ~ (x ∷ (n ↓ k))
+long-swap-lemma n zero x p = refl~
+long-swap-lemma n (suc k) x p = trans~ (respects-r~ [ k + n ] (long-swap-lemma n k x (≤-down p)) refl refl) (respects-l~ (n ↓ k) (comm~ (swap~ p)) refl refl)
+
+long-lemma : (n k : ℕ) -> ((n ↓ (2 + k)) ++ suc (k + n) ∷ []) ~ (k + n ∷ (n ↓ (2 + k)))
+long-lemma n zero = braid~
+long-lemma n (suc k) = trans~ (respects-r~ (_ ∷ _ ∷ []) (long-swap-lemma n (1 + k) (2 + k + n) rrr) refl refl) (respects-l~ _ braid~ refl refl)
+
 compact≅->coxeter : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (m1 ~ m2)
 compact≅->coxeter m1 m2 (cancel≅ l r .m1 .m2 defm defmf) = respects-r~ l (respects-l~ r cancel~ refl refl) defm defmf
 compact≅->coxeter m1 m2 (swap≅ x l r .m1 .m2 defm defmf) = respects-r~ l (respects-l~ r (swap~ x) refl refl) defm defmf
-compact≅->coxeter m1 m2 (long≅ {n} zero [] r .m1 .m2 defm defmf) =
-  (respects-l~ r braid~ defm defmf)
-compact≅->coxeter m1 m2 (long≅ (suc k) [] r .m1 .m2 defm defmf) = {!   !}
+compact≅->coxeter m1 m2 (long≅ {n} k [] r .m1 .m2 defm defmf) = respects-l~ r (long-lemma n k) (≡-trans defm (≡-sym (++-assoc (n ↓ (2 + k)) [ 1 + k + n ] r))) defmf
 compact≅->coxeter (x₁ ∷ m1) (x₂ ∷ m2) (long≅ k (x ∷ l) r .(x₁ ∷ m1) .(x₂ ∷ m2) defm defmf) =
   let rec = compact≅->coxeter m1 m2 (long≅ k l r m1 m2 (cut-head defm) (cut-head defmf))
   in  respects-r~ [ x ] rec (head+tail (cut-tail defm) refl) (head+tail (cut-tail defmf) refl)
-
 
 compact≅*->coxeter : (m1 m2 : List ℕ) -> (m1 ≅* m2) -> (m1 ~ m2)
 compact≅*->coxeter m1 .m1 refl = refl~
