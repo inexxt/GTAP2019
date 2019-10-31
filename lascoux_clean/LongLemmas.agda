@@ -18,6 +18,7 @@ open import Arithmetic hiding (n)
 open import Lists
 open import Compact hiding (n; l)
 open import SwapLemmas
+open import ImpossibleLemmas
 open ≤-Reasoning renaming (begin_ to ≤-begin_; _∎ to ≤∎) hiding (_≡⟨_⟩_; _≡⟨⟩_)
 open _⊎_
 
@@ -40,20 +41,6 @@ long-lemma n n1 (suc k) zero t t1 pnt pnt1 r r1 p rewrite ≡-sym (cut-t1 p) rew
 long-lemma n n1 (suc k) (suc k1) t t1 pnt pnt1 r r1 p =
   let rec-m , rec-l , rec-r = long-lemma n n1 k k1 t t1 pnt pnt1 r r1 (cut-head p)
   in  rec-m , ((head+tail (cong suc (cut-t2 p) ) rec-l) , rec-r)
-
-repeat-long-lemma : (n k n1 : ℕ) -> (l r : List ℕ) -> (n ↓ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
-repeat-long-lemma n zero n1 [] r ()
-repeat-long-lemma n zero n1 (x ∷ l) r ()
-repeat-long-lemma n (suc (suc k)) n1 [] r p =
-  abs-refl (≤-trans (≤-reflexive (cut-t1 p)) (≤-reflexive (≡-sym (cut-t2 p))))
-repeat-long-lemma n (suc k) n1 (x ∷ l) r p = repeat-long-lemma n k n1 l r (cut-head p)
-
-repeat-long-lemma-rev : (n k n1 : ℕ) -> (l r : List ℕ) -> (n ↑ k) ≡ (l ++ n1 ∷ n1 ∷ r) -> ⊥
-repeat-long-lemma-rev n zero n1 [] r ()
-repeat-long-lemma-rev n zero n1 (x ∷ l) r ()
-repeat-long-lemma-rev n (suc zero) n1 [] r ()
-repeat-long-lemma-rev n (suc (suc k)) n1 [] r ()
-repeat-long-lemma-rev n (suc k) n1 (x ∷ l) r p = repeat-long-lemma-rev (suc n) k n1 l r (cut-head p)
 
 cancel-long-lemma-rev : (n k n1 : ℕ) -> (r l1 r1 : List ℕ) -> ((r ++ (1 + k + n) ∷ (n ↑ (2 + k))) ≡ (r1 ++ n1 ∷ n1 ∷ l1)) -> ∃ (λ mf -> ((((k + n) ∷ (n ↓ (2 + k)) ++ (rev r)) ≅* mf) × (((rev l1) ++ (rev r1))) ≅* mf))
 cancel-long-lemma-rev n k n1 [] l1 [] p =
@@ -166,10 +153,6 @@ cancel-long-lemma n k n1 r l1 r1 p =
       ll = trans (refl≡ (start+end refl (rev-rev {r}))) call-l
       rr = trans (refl≡ (start+end (rev-rev {l1}) (start+end refl (rev-rev {r1})))) call-r
   in  call-m , ll , rr
-
-incr-long-lemma-rev : (n k n1 k1 : ℕ) -> (suc k1 < n1) -> (l r : List ℕ) -> (n ↑ k) ≡ (l ++ k1 ∷ n1 ∷ r) -> ⊥
-incr-long-lemma-rev n (suc (suc k)) .(suc n) .n pkn [] .(suc (suc n) ↑ k) refl = abs-refl pkn
-incr-long-lemma-rev n (suc k) n1 k1 pkn (x ∷ l) r p = incr-long-lemma-rev (suc n) k n1 k1 pkn l r (cut-head p)
 
 swap-long-lemma-base : (n k k1 : ℕ) -> (pkn : suc k1 < suc (k + n))
                        -> (q1 : k1 ≤ n) -> (q2 : n ≤ 1 + k1)
@@ -388,10 +371,6 @@ swap-long-lemma n k n1 k1 pkn r l1 r1 p =
 
 ar-lemma : (k1 k2 : ℕ) -> {n1 n2 : ℕ} -> (n1 ≡ n2) -> suc (k1 + n1) ≡ suc (k2 + n2) -> k1 ≡ k2
 ar-lemma k1 k2 pn p rewrite pn = ≡-down-r-+ (≡-down2 p)
-
-dec-long-lemma-rev : (n k n1 k1 : ℕ) -> (n1 ≤ k1) -> (l r : List ℕ) -> (n ↑ k) ≡ (l ++ k1 ∷ n1 ∷ r) -> ⊥
-dec-long-lemma-rev n (suc (suc k)) .(suc n) .n pkn [] .(suc (suc n) ↑ k) refl = abs-refl pkn
-dec-long-lemma-rev n (suc k) n1 k1 pkn (x ∷ l) r p = dec-long-lemma-rev (suc n) k n1 k1 pkn l r (cut-head p)
 
 dec-long-lemma-disjoint-rev : (n k n1 k1 x : ℕ) -> (n < x) -> (l r : List ℕ) -> l ++ x ∷ (n ↑ (1 + k)) ≡ (n1 ↑ (1 + k1)) ++ r
                               -> ((l ≡ (n1 ↑ k1)) × (x ≡ n1 + k1) × (r ≡ (n ↑ (1 + k)))) ⊎
