@@ -34,6 +34,9 @@ variable
 abs-refl : {A : Set} -> n < n -> A
 abs-refl p = ⊥-elim (1+n≰n p)
 
+abs-suc : {A : Set} -> suc n < n -> A
+abs-suc {n} p = ⊥-elim (1+n≰n (≤-down p))
+
 postulate
     ∸-implies-≤ : {p q r : ℕ} -> (p ≡ q ∸ r) -> (p ≤ q)
     ≤-remove-+ : {p q r : ℕ} -> (p + q ≤ r) -> (q ≤ r)

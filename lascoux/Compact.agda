@@ -88,9 +88,6 @@ l++ l (trans≅ x p) = trans≅ (l++≅ _ _ l x) ((l++ l p))
 refl≡ : {l l' : List ℕ} -> (l ≡ l') -> l ≅* l'
 refl≡ refl = refl
 
-abs-suc : {A : Set} -> suc n < n -> A
-abs-suc {n} p = ⊥-elim (1+n≰n (≤-down p))
-
 module ≅*-Reasoning where
     infix  1 ≅*begin_
     infixr 2 _≅*⟨⟩_ _≅*⟨_⟩_
@@ -155,33 +152,6 @@ one-reduction {x} (swap≅ x₁ (x₂ ∷ []) r .(x ∷ []) mf () defmf)
 one-reduction {x} (swap≅ x₁ (x₂ ∷ x₃ ∷ l) r .(x ∷ []) mf () defmf)
 one-reduction {x} (long≅ k (x₁ ∷ []) r .(x ∷ []) mf () defmf)
 one-reduction {x} (long≅ k (x₁ ∷ x₂ ∷ l) r .(x ∷ []) mf () defmf)
-
-mod2 : ℕ -> Bool
-mod2 0 = true
-mod2 (suc n) with mod2 n
-... | true = false
-... | false = true
-
-abs-bool : (true ≡ false) -> ⊥
-abs-bool ()
-
--- postulate
---   -- these are proved for the previous representation, it's possible to transport them to here
---   mod2-+ : (n1 n2 : ℕ) -> mod2 (n1 + n2) ≡ not ((mod2 n1) xor (mod2 n2))
---   len-mod2≅ : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (mod2 (length m1) ≡ mod2 (length m2))
---   len-nonincreasing≅ : (m1 m2 : List ℕ) -> (m1 ≅ m2) -> (length m2 ≤ length m1)
---   diamond-separate : {l r l' r' ml mr : List ℕ} -> (ml ≡ l' ++ r) -> (mr ≡ l ++ r') -> (l ≅ l') -> (r ≅ r') -> (ml ≅ (l' ++ r')) × (mr ≅ (l' ++ r'))
---
---   -- this ones are a little different (just because the new ≅ doesnt have reflexivity)
---   one-one-reduction : (n1 n2 : ℕ) -> ((n1 ∷ []) ≅* (n2 ∷ [])) -> n1 ≡ n2
---   two-two-reduction : (a b1 b2 : ℕ) -> ((a ∷ a ∷ []) ≅* (b1 ∷ b2 ∷ [])) -> (b1 ≡ b2) × (a ≡ b1)
---   cancel-reduction : (m : List ℕ) -> ((n ∷ n ∷ []) ≅* m) -> (m ≡ []) ⊎ (m ≡ (n ∷ n ∷ []))
---   -- one-reduction : (m : List ℕ) -> ((n ∷ []) ≅* m) -> m ≡ (n ∷ [])
---
---   -- these ones are extension to ≅*
---   len-mod2 : (m1 m2 : List ℕ) -> (m1 ≅* m2) -> (mod2 (length m1) ≡ mod2 (length m2))
---   len-nonincreasing : (m1 m2 : List ℕ) -> (m1 ≅* m2) -> (length m2 ≤ length m1)
-
 
 long-swap : (n1 n2 : ℕ) -> (k : ℕ) -> (k + n1 < n2) -> (n2 ∷ (n1 ↓ k)) ≅* ((n1 ↓ k) ++ [ n2 ])
 long-swap n1 n2 zero p = refl
