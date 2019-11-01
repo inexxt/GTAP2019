@@ -1,0 +1,6 @@
+data Int : Set where
+  Pos : (x : ℕ) -> Int
+  Neg : (x : ℕ) -> Int
+
+_+_ : Int -> Int -> Int
+a + b = ?
