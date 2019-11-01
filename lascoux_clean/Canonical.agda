@@ -133,7 +133,7 @@ always-reduces n (suc k) x px | no r | no rr | yes rr2 | inj₁ (rec-m , rec-p) 
 always-reduces n (suc k) x px | no r | no rr | yes rr2 | inj₂ y = inj₂ y
 
 
-lemma : (n r x : ℕ) -> (r ≤ n) -> (cl : Canonical n) -> (f : (mf : List ℕ) -> ((immersion {n} cl ++ ((n ∸ r) ↓ (1 + r))) ++ x ∷ []) ≅* mf -> ⊥) -> n < x ⊎ ((x ≡ n ∸ (1 + r)) × (suc r ≤ n))
+lemma : (n r x : ℕ) -> (r ≤ n) -> (cl : Canonical n) -> (f : (mf : List ℕ) -> ((immersion {n} cl ++ ((n ∸ r) ↓ (1 + r))) ++ x ∷ []) ≅* mf -> ⊥) -> (n < x) ⊎ ((x ≡ n ∸ (1 + r)) × (suc r ≤ n))
 lemma n r x pnr cl f with n <? x
 ... | yes q = inj₁ q
 ... | no q with  always-reduces (n ∸ r) r x (≤-trans (≤-down2 (≰⇒> q)) (≤-reflexive (≡-sym (plus-minus pnr))))
@@ -149,7 +149,10 @@ lemma n r x pnr cl f with n <? x
   in  ⊥-elim (f _ red)
 ... | inj₂ qq = inj₂ ({!!} , {!!})
 
-canonical-final≅ : {n : ℕ} -> (m : List ℕ) -> (n >> m) -> (f : (mf : List ℕ) -> (rev m ≅ mf) -> ⊥) -> ∃ (λ cl -> immersion {n} cl ≡ rev m)
+canonical-final≅ : {n : ℕ} -> (m : List ℕ) -> (n >> m) -> (f : (mf : List ℕ) -> (rev m ≅* mf) -> ⊥) -> ∃ (λ cl -> immersion {n} cl ≡ rev m)
 canonical-final≅ {n} [] l f = canonical-lift n z≤n CanZ
-canonical-final≅ {n} (x ∷ m) (.x :⟨ p ⟩: l) f with (canonical-final≅ {n} m l (λ mf red → f (mf ++ [ x ]) (++r≅ _ _ [ x ] red)))
-canonical-final≅ {.(suc _)} (x ∷ m) (.x :⟨ p ⟩: l) f | CanS fst {r} x₁ , snd rewrite (≡-sym snd) = {! `  !}
+canonical-final≅ {n} (x ∷ m) (.x :⟨ p ⟩: l) f with (canonical-final≅ {n} m l (λ mf red → f (mf ++ [ x ]) (++r [ x ] red)))
+canonical-final≅ {.(suc _)} (x ∷ m) (.x :⟨ p ⟩: l) f | CanS fst {zero} x₁ , snd = {!!}
+canonical-final≅ {(suc n)} (x ∷ m) (.x :⟨ p ⟩: l) f | CanS fst {suc r} x₁ , snd  with lemma n r x (≤-down2 x₁) fst (λ mf mf-abs → f mf (subst (λ e -> (e ++ [ x ]) ≅* mf) snd mf-abs))
+canonical-final≅ {suc n} (x ∷ m) (.x :⟨ p ⟩: l) f | CanS fst {suc r} x₁ , snd | inj₁ x₂ = (CanS fst p) , (≡-trans {!!} {!!})
+canonical-final≅ {suc n} (x ∷ m) (.x :⟨ p ⟩: l) f | CanS fst {suc r} x₁ , snd | inj₂ (fst₁ , snd₁) = {!!}
