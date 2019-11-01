@@ -17,8 +17,8 @@ Diamond:
     - TODO take care of termination checker in diamond-full
 
 Uniqueness:
-  - `CanonicalUnique.agda` - proves that if two canonical elements have immersions related by Compact, then they are the same element
+  - `CanonicalUnique.agda` - by showing, that every canonical form is irreducible, it proves that canonical forms are unique
 
 Reduction:
-  - ?? - proves that every element in the free group is related by Compact to some canonical element
-    (actually, maybe I can try to prove that it is only canonical elements that do not reduce?)
+  - `Canonization.agda`, `CanonizationInterface.agda`, `ReductionStep.agda`, `ReductionStepINterface.agda`, `Reduction.agda` - these implement lascoux algorithm
+  - `CanonicalFinal.agda` - this implements the proof that every non-reducible form is a canonical
