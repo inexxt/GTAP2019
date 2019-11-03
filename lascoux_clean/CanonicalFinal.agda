@@ -10,8 +10,8 @@ open import Data.Product using (Σ; ∃; _×_; _,_)
 open import Relation.Nullary
 open import Data.Empty
 open import Data.Sum hiding (swap)
-open import Data.Bool hiding (_<_; _≤_; _≟_; _<?_)
-open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans; _≟_; _<?_)
+open import Data.Bool hiding (_<_; _≤_; _≟_; _<?_; _≤?_)
+open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans; _≟_; _<?_; _≤?_)
 open import Function
 
 open import Arithmetic hiding (n)
@@ -52,6 +52,10 @@ canonical-proper-append cl x px =
   let _ , upl , upl-p = unproperize cl
       clx , clx-p = canonical-append upl x px
   in  {!!}
+
+canonical-proper-append-smaller : {n nf r : ℕ} -> {pn : n < nf} -> {pr : r ≤ nf} -> {cl : CanonicalProper n} -> (x : ℕ) -> (clf : CanonicalProper nf) -> (defclf : clf ≡ CanS pn cl pr)
+                                  -> (defx : suc x ≡ (nf ∸ r)) -> Σ (suc r ≤ nf) (λ prr -> immersionProper {nf} (CanS pn cl prr) ≡ (immersionProper {nf} clf) ++ [ x ])
+canonical-proper-append-smaller {n} {nf} {r} {pn} {pr} {cl} x clf defclf defx = {!!}
 
 always-reduces : (n k x : ℕ) -> (x ≤ k + n) -> (∃ (λ mf -> (n ↓ (1 + k) ++ [ x ]) ≅* mf)) ⊎ (suc x ≡ n)
 always-reduces n k x px with suc x <? n
@@ -174,16 +178,35 @@ is-canonical? (x ∷ m) with is-canonical? m
 
 -- final≅-canonical : (cl : Canonical n) -> (m mf : List ℕ) -> (defm : m ≡ (immersion {n} cl)) -> m ≅ mf -> ⊥
 
-canonical-proper-is-NF : {n : ℕ} -> (cl : CanonicalProper n) -> (∃ (λ m -> immersionProper {n} cl ≅ m)) -> ⊥
-canonical-proper-is-NF cl (m , p) =
+canonical-proper-NF : {n : ℕ} -> (cl : CanonicalProper n) -> (∃ (λ m -> immersionProper {n} cl ≅ m)) -> ⊥
+canonical-proper-NF cl (m , p) =
   let _ , unproper , unproper-p = unproperize cl
   in  final≅-canonical unproper _ m refl (subst (λ e -> e ≅ m) unproper-p p)
 
-is-normal-form? : (m : List ℕ) -> Dec (¬ (∃ (λ mf -> (rev m) ≅ mf)))
-is-normal-form? m with is-canonical? m
-... | yes (_ , clf , clf-p) rewrite (≡-sym clf-p) = yes (canonical-proper-is-NF clf)
-... | no  p = no (λ {qr → qr {!!}})
+not-canonical-not-NF : (m : List ℕ) -> ¬ ∃ (λ n -> ∃ (λ cl -> immersionProper {n} cl ≡ (rev m))) -> ∃ (λ mf -> (rev m) ≅* mf)
+not-canonical-not-NF [] p = ⊥-elim (p (_ , (CanZ , refl)))
+not-canonical-not-NF (x ∷ m) p with is-canonical? m
+... | no  q =
+  let rec-m , rec-p = not-canonical-not-NF m q
+  in  _ , (++r [ x ] rec-p)
+not-canonical-not-NF (x ∷ m) p | yes (_ , CanZ , qp) rewrite (≡-sym qp) =
+  let app = canonical-proper-append CanZ x z≤n
+  in  ⊥-elim (p (_ , app))
+not-canonical-not-NF (x ∷ m) p | yes ((suc nf) , CanS pn cl {r} pr , qp) with (suc nf) ≤? x -- first check if x is not too big, which will make a canonical out of m ++ [ x ]
+... | yes q2 rewrite (≡-sym qp) =
+  let app = canonical-proper-append (CanS pn cl pr) x q2
+  in  ⊥-elim (p (_ , app))
+... | no  q2 with suc x ≟ (suc nf) ∸ r -- then - if does not complete the last sequence in m
+... | yes q3 rewrite (≡-sym qp) =
+  let prr , app = canonical-proper-append-smaller x (CanS pn cl pr) refl q3
+  in  ⊥-elim (p (_ , (CanS pn cl prr) , app))
+... | no  q3 = {!!} -- now we know that something reduces
 
+{-# NON_TERMINATING #-}
 everything-to-canonical : (m : List ℕ) -> ∃ (λ n -> ∃ (λ cl -> rev m ≅* immersionProper {n} cl))
-everything-to-canonical m with is-normal-form? m
-... | p = {!!}
+everything-to-canonical m with is-canonical? m
+... | yes (_ , cl , cl-p) = _ , (cl , (refl≡ (≡-sym cl-p)))
+... | no  p =
+  let step-m , step-p = not-canonical-not-NF m p
+      nn , rec-m , rec-p = everything-to-canonical (rev step-m)
+  in  nn , rec-m , (trans step-p (trans (refl≡ rev-rev) rec-p))
