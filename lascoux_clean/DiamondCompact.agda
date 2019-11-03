@@ -18,6 +18,7 @@ open import Arithmetic hiding (n)
 open import Lists
 open import Compact hiding (n; l)
 open import LongLemmas hiding (n; l)
+open import SwapLemmas
 open ≤-Reasoning renaming (begin_ to ≤-begin_; _∎ to ≤∎) hiding (_≡⟨_⟩_; _≡⟨⟩_)
 
 

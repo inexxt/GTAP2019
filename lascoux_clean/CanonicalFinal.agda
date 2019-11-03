@@ -41,6 +41,7 @@ immersionProper : {n : ℕ} -> CanonicalProper n -> List ℕ
 immersionProper {zero} CanZ = []
 immersionProper {suc n} (CanS l {r} r≤n) = (immersion l) ++ (((suc n) ∸ (1 + r)) ↓ (1 + r))
 
+
 always-reduces : (n k x : ℕ) -> (x ≤ k + n) -> (∃ (λ mf -> (n ↓ (1 + k) ++ [ x ]) ≅* mf)) ⊎ (suc x ≡ n)
 always-reduces n k x px with suc x <? n
 ... | yes r = inj₁ (_ , (long-swap<-lr x n (1 + k) [] [] r))
@@ -92,3 +93,52 @@ canonical-final≅ (x ∷ m) f | _ , CanS {n} fst {suc r} x₁ , snd | inj₂ (f
           rev m ++ x ∷ []
         ∎
   in _ , ((CanS fst {suc (suc r)} (s≤s snd₁)) , tt)
+
+abs-list : ([] ≡ l ++ [ n ]) -> ⊥
+abs-list {[]} ()
+abs-list {x ∷ l} ()
+
+cut-last : {l1 l2 : List ℕ} -> {x1 x2 : ℕ} -> (l1 ++ [ x1 ] ≡ l2 ++ [ x2 ]) -> (l1 ≡ l2)
+cut-last {[]} {[]} p = refl
+cut-last {[]} {x ∷ []} ()
+cut-last {[]} {x ∷ x₁ ∷ l2} ()
+cut-last {x ∷ []} {[]} ()
+cut-last {x ∷ x₁ ∷ l1} {[]} ()
+cut-last {x ∷ l1} {x₁ ∷ l2} p = head+tail (cut-tail p) (cut-last (cut-head p))
+
+cut-last-canonical : (x : ℕ) -> (cl : Canonical n) -> (immersion cl ≡ l ++ [ x ]) -> ∃ (λ nf -> ∃ (λ clf -> immersion {nf} clf ≡ l))
+cut-last-canonical {zero} {l} x CanZ pp = ⊥-elim (abs-list pp)
+cut-last-canonical {suc n} {l} x (CanS cl {zero} pr) pp = cut-last-canonical x cl (≡-trans (≡-sym ++-unit) pp)
+cut-last-canonical {suc n} {l} x (CanS cl {suc r} pr) pp =
+  let p1 =
+        begin
+          (immersion cl ++ (suc (n ∸ r) ↓ r)) ++ n ∸ r ∷ []
+        ≡⟨ ++-assoc (immersion cl) (suc (n ∸ r) ↓ r) (n ∸ r ∷ []) ⟩
+          immersion cl ++ (suc (n ∸ r) ↓ r) ++ [ n ∸ r ]
+        ≡⟨ start+end (refl {x = immersion cl}) (++-↓ (n ∸ r) r) ⟩
+          immersion cl ++ ((n ∸ r) ↓ (1 + r))
+        ≡⟨ pp ⟩
+          l ++ [ x ]
+        ∎
+      p2 =
+        begin
+          immersion cl ++ ((suc n ∸ r) ↓ r)
+        ≡⟨ start+end (refl {x = immersion cl}) (cong (λ e -> e ↓ r) {!!}) ⟩
+          immersion cl ++ (suc (n ∸ r) ↓ r)
+        ≡⟨ cut-last p1 ⟩
+          l
+        ∎
+  in  _ , (CanS cl {r} (≤-down pr)) , p2
+
+is-canonical? : (m : List ℕ) -> Dec (∃ (λ nf -> ∃ (λ cl -> immersion {nf} cl ≡ rev m)))
+is-canonical? [] = yes (_ , (CanZ , refl))
+is-canonical? (x ∷ m) with is-canonical? m
+... | yes (_ , CanZ , pp) rewrite (≡-sym pp) =
+  let (clf , clf-p) = canonical-lift x z≤n CanZ
+  in  yes (_ , canonical-append CanZ x z≤n)
+... | yes (_ , CanS {n} cl q , pp) with n <? x
+... | no  p = no λ {(_ , cl , pp) → p (cut-last-canonical x cl pp) }
+
+
+everything-to-canonical : (m : List ℕ) -> ∃ (λ n -> ∃ (λ cl -> immersion {n} cl ≡ rev m))
+everything-to-canonical m = {!!}
