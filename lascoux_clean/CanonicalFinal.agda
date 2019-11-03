@@ -158,17 +158,10 @@ is-canonical? (x ∷ m) with is-canonical? m
 ... | yes q =
   let clx , clp = canonical-proper-append (CanS qn cl qr) x q
   in  yes (_ , clx , (≡-trans clp (start+end pp refl)))
-... | no q with suc x ≟ ((suc n) ∸ (1 + r))
+... | no q with suc x ≟ (nn ∸ r)
 ... | yes qq rewrite (≡-sym pp) =
-  let pl =
-        begin
-          immersionProper cl ++ ((nn ∸ (1 + r)) ↓ (2 + r))
-        ≡⟨ {!!} ⟩
-          immersionProper cl ++ (((nn ∸ r) ↓ (1 + r)) ++ x ∷ [])
-        ≡⟨ ≡-sym (++-assoc (immersionProper cl) ((nn ∸ r) ↓ (1 + r)) [ x ]) ⟩
-          (immersionProper cl ++ ((nn ∸ r) ↓ (1 + r))) ++ x ∷ []
-        ∎
-  in  yes (_ , ((CanS {n} {suc nn} qn cl {suc r} (≤-≠-≤ (s≤s qr) {!!})) , pl))
+  let  prr , app = canonical-proper-append-smaller x (CanS qn cl qr) refl qq
+  in  yes (_ , ((CanS qn cl prr) , app))
 ... | no qq = no λ {
   (_ , CanZ , pp) → abs-list pp ;
   (_ , CanS (s≤s x) CanZ {zero} (s≤s z≤n) , ppp) →
