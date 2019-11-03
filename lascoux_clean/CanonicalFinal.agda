@@ -34,12 +34,12 @@ open _⊎_
 -- Canonical proper represents canonicals with a non-empty last sequence
 data CanonicalProper : (n : ℕ) -> Set where
   CanZ : CanonicalProper 0
-  CanS : {n : ℕ} -> {nf : ℕ} -> (n < nf) -> (l : CanonicalProper n) -> {r : ℕ} -> (r ≤ nf) -> CanonicalProper nf
+  CanS : {n : ℕ} -> {nf : ℕ} -> (n < nf) -> (l : CanonicalProper n) -> {r : ℕ} -> (r < nf) -> CanonicalProper nf
 
 
 immersionProper : {n : ℕ} -> CanonicalProper n -> List ℕ
 immersionProper {zero} CanZ = []
-immersionProper {suc n} (CanS _ l {r} _) = (immersionProper l) ++ (((suc n) ∸ (1 + r)) ↓ (1 + r))
+immersionProper {suc n} (CanS _ l {r} _) = (immersionProper l) ++ ((n ∸ r) ↓ (1 + r))
 
 properize : (cl : Canonical n) -> ∃ (λ nf -> ∃ (λ clf -> immersion {n} cl ≡ immersionProper {nf} clf))
 properize cl = {!!}
@@ -53,9 +53,10 @@ canonical-proper-append cl x px =
       clx , clx-p = canonical-append upl x px
   in  {!!}
 
-canonical-proper-append-smaller : {n nf r : ℕ} -> {pn : n < nf} -> {pr : r ≤ nf} -> {cl : CanonicalProper n} -> (x : ℕ) -> (clf : CanonicalProper nf) -> (defclf : clf ≡ CanS pn cl pr)
-                                  -> (defx : suc x ≡ (nf ∸ r)) -> Σ (suc r ≤ nf) (λ prr -> immersionProper {nf} (CanS pn cl prr) ≡ (immersionProper {nf} clf) ++ [ x ])
+canonical-proper-append-smaller : {n nf r : ℕ} -> {pn : suc n ≤ suc nf} -> {pr : suc r ≤ suc nf} -> {cl : CanonicalProper n} -> (x : ℕ) -> (clf : CanonicalProper (suc nf)) -> (defclf : clf ≡ CanS pn cl pr)
+                                  -> (defx : suc x ≡ (nf ∸ r)) -> Σ (suc r < suc nf) (λ prr -> immersionProper {suc nf} (CanS pn cl prr) ≡ (immersionProper {suc nf} clf) ++ [ x ])
 canonical-proper-append-smaller {n} {nf} {r} {pn} {pr} {cl} x clf defclf defx = {!!}
+
 
 always-reduces : (n k x : ℕ) -> (x ≤ k + n) -> (∃ (λ mf -> (n ↓ (1 + k) ++ [ x ]) ≅* mf)) ⊎ (suc x ≡ n)
 always-reduces n k x px with suc x <? n
@@ -170,13 +171,11 @@ is-canonical? (x ∷ m) with is-canonical? m
   in  yes (_ , ((CanS {n} {suc nn} qn cl {suc r} (≤-≠-≤ (s≤s qr) {!!})) , pl))
 ... | no qq = no λ {
   (_ , CanZ , pp) → abs-list pp ;
-  (_ , CanS (s≤s x) CanZ {zero} z≤n , ppp) →
+  (_ , CanS (s≤s x) CanZ {zero} (s≤s z≤n) , ppp) →
     let m-empty = cut-last {[]} ppp
     in  abs-list (≡-trans m-empty (≡-sym pp)) ;
   (_ , CanS x (CanS x₂ cl pr) {zero} x₁ , ppp) → {!!} ;
   (_ , CanS x cl {suc r} pr , ppp) → {!!} }
-
--- final≅-canonical : (cl : Canonical n) -> (m mf : List ℕ) -> (defm : m ≡ (immersion {n} cl)) -> m ≅ mf -> ⊥
 
 canonical-proper-NF : {n : ℕ} -> (cl : CanonicalProper n) -> (∃ (λ m -> immersionProper {n} cl ≅ m)) -> ⊥
 canonical-proper-NF cl (m , p) =
@@ -186,21 +185,30 @@ canonical-proper-NF cl (m , p) =
 not-canonical-not-NF : (m : List ℕ) -> ¬ ∃ (λ n -> ∃ (λ cl -> immersionProper {n} cl ≡ (rev m))) -> ∃ (λ mf -> (rev m) ≅* mf)
 not-canonical-not-NF [] p = ⊥-elim (p (_ , (CanZ , refl)))
 not-canonical-not-NF (x ∷ m) p with is-canonical? m
+-- first, the case when m is not canonical
 ... | no  q =
   let rec-m , rec-p = not-canonical-not-NF m q
   in  _ , (++r [ x ] rec-p)
-not-canonical-not-NF (x ∷ m) p | yes (_ , CanZ , qp) rewrite (≡-sym qp) =
+-- under this line, we know that m is canonical
+-- now, lets check if m is empty
+... | yes (_ , CanZ , qp) rewrite (≡-sym qp) =
   let app = canonical-proper-append CanZ x z≤n
   in  ⊥-elim (p (_ , app))
-not-canonical-not-NF (x ∷ m) p | yes ((suc nf) , CanS pn cl {r} pr , qp) with (suc nf) ≤? x -- first check if x is not too big, which will make a canonical out of m ++ [ x ]
-... | yes q2 rewrite (≡-sym qp) =
-  let app = canonical-proper-append (CanS pn cl pr) x q2
+-- under this line, we know that m is not empty
+-- now check if x is not too big, which will make a canonical out of m ++ [ x ]
+... | yes ((suc nf) , CanS {nf = suc nf} pn cl {r} pr , qp) with x ≤? nf
+... | no q2 rewrite (≡-sym qp) =
+  let app = canonical-proper-append (CanS pn cl pr) x (≰⇒> q2)
   in  ⊥-elim (p (_ , app))
-... | no  q2 with suc x ≟ (suc nf) ∸ r -- then - if does not complete the last sequence in m
-... | yes q3 rewrite (≡-sym qp) =
+-- under this line, we know that x is not too big
+-- now we can finally use the always-reduces
+... | yes  q2 with (always-reduces (nf ∸ r) r x (≤-trans q2 (≤-reflexive (≡-sym (plus-minus (≤-down2 pr))))))
+ -- the case when there is a reduction
+... | inj₁ (red-m , red-p) rewrite (≡-sym qp) rewrite (plus-minus (≤-down pr)) rewrite (plus-minus (≤-down2 pr)) = _ , trans (refl≡ (++-assoc (immersionProper cl) _ _)) (l++ (immersionProper cl) red-p)
+-- the case when x completes the sequence
+... | inj₂ q3 rewrite (≡-sym qp) =
   let prr , app = canonical-proper-append-smaller x (CanS pn cl pr) refl q3
   in  ⊥-elim (p (_ , (CanS pn cl prr) , app))
-... | no  q3 = {!!} -- now we know that something reduces
 
 {-# NON_TERMINATING #-}
 everything-to-canonical : (m : List ℕ) -> ∃ (λ n -> ∃ (λ cl -> rev m ≅* immersionProper {n} cl))
