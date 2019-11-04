@@ -65,7 +65,7 @@ The proof is done in four stages.
       quote : {n : ℕ} -> (Fin n ~ Fin n) -> (Lehmer n)
       ```
 
-  along with the proofs that `eval ∘ quote ≡ id` and `quote ∘ eval ≡ id`.
+      along with the proofs that `eval ∘ quote ≡ id` and `quote ∘ eval ≡ id`.
 
 ---
 
@@ -73,13 +73,13 @@ We can then finally define
 
 ```agda
 Pi-eval = eval ∘ sseq-norm ∘ Pi-sseq ∘ Pi-norm
-quote-Pi : sseq-Pi ∘ immerse ∘ quote`
+quote-Pi = sseq-Pi ∘ immerse ∘ quote`
 ```
 
 and two proofs
- - that turning an bijection into Pi 1-combinator and executing it gives us the same bijection back:
+ - that turning an bijection into a 1-combinator and executing it gives us the same bijection back:
    `quote-eval : Pi-eval ∘ quote-Pi ≡ id`
- - that executing a Pi 1-combinator and then quoting the result gives us the same (with respect to 2-combinators) combinator back:
+ - that executing a 1-combinator and then quoting the result gives us the same (with respect to 2-combinators) combinator back:
    `eval-quote : {A B : PiType} -> (c : A <-> B) -> ((quote-Pi ∘ Pi-eval) c) <=> c`
 
 ---
@@ -113,8 +113,19 @@ Info from prof. Sabry.
 ### Third stage
 
 #### Normalization
+We can define Coxeter presentation in Agda as follows
+```agda
+data _≃_ : List ℕ -> List ℕ -> Set where
+  cancel : l ++ n ∷ n ∷ r ≃ l ++ r
+  swap : {k : ℕ} -> (suc k < n) -> l ++ n ∷ k ∷ r ≃ l ++ k ∷ n ∷ r
+  braid : l ++ (suc n) ∷ n ∷ (suc n) ∷ r ≃ l ++ n ∷ (suc n) ∷ n ∷ r
 
-Normalization is done using a collection of rewriting rules.
+  refl : m ≃ m
+  comm : m1 ≃ m2 -> m2 ≃ m1
+  trans : m1 ≃ m2 -> m2 ≃ m3 -> m1 ≃ m3
+```
+
+But, in our case, the normalization is done using a collection of the following rewriting rules:
   - `cancel`, where `l ++ n ∷ n ∷ r` goes to `l ++ r`
   - `swap`, where `l ++ k ∷ n ∷ r` goes to `l ++ n ∷ k ∷ r`, provided that `1 + k < n`
   - `lbraid`, where  `l ++ n ∷ n - 1 ∷ n - 2 ∷ ... ∷ n - k ∷ n ∷ r` goes to `l ++ n - 1 ∷ n ∷ n - 2 ∷ ... ∷ n - k ∷ r`, provided that `0 < k`
@@ -132,20 +143,9 @@ data _≃_ : List ℕ -> List ℕ -> Set where
   comm : (l1 l2 l : List ℕ) -> (l1 →* l) -> (l2 →* l) -> l1 ≃ l2
 ```
 
-Contrast this with the usual definition of Coexeter relations for a full symmetric group, where the reduction rules (having `braid` instad of `lbraid`) go in both directions, so there is no normalization property.
+Contrast this with the usual definition of Coxeter relations for a full symmetric group, where the reduction rules (having `braid` instad of `lbraid`) go in both directions, so there is no normalization property.
 
-```agda
-data _≃_ : List ℕ -> List ℕ -> Set where
-  cancel : l ++ n ∷ n ∷ r ≃ l ++ r
-  swap : {k : ℕ} -> (suc k < n) -> l ++ n ∷ k ∷ r ≃ l ++ k ∷ n ∷ r
-  braid : l ++ (suc n) ∷ n ∷ (suc n) ∷ r ≃ l ++ n ∷ (suc n) ∷ n ∷ r
-
-  refl : m ≃ m
-  comm : m1 ≃ m2 -> m2 ≃ m1
-  trans : m1 ≃ m2 -> m2 ≃ m3 -> m1 ≃ m3
-```
-
-The third rule - `lbraid` - is defined as such, because it is both strong enough to give the diamond property (ie to resolve critical pairs), and weak enough not to break Coxeter equivalence (we prove formally that the equivalence relation defined above is not stronger than Coxeter relation).
+Our third rule - `lbraid` - is defined as such, because it is both strong enough to give the diamond property (ie to resolve critical pairs), and weak enough not to break Coxeter equivalence (we prove formally that the equivalence relation defined above is not stronger than Coxeter relation).
 
 The reason we're using this admittedly more complicated machinery is because it is very hard (or maybe even impossible) to prove certain things about the relation when using non-directed version. For example, suppose that what we need to prove is that `[] ≄ [ 0 ]`. Using the standard Coxeter presentation, we quickly run into a problem with transitive property: we have to prove, that there is no (arbitrary list) `l`, such that `[] ≃ l` and `l ≃ [ x ]`. Thus, we can't do usual induction over reduction rules, and the only way to prove that is to use some kind of clever invariant. And even though in this particular case, the invariant saying that *if `l ≃ l'`, then their lengths are equal `mod 2`* would suffice, it should be clear that in general case, proving things about this relation is going to be very difficult.
 
