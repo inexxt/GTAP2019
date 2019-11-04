@@ -37,7 +37,7 @@ To do that, the choice was made to have the semantics grounded in (... - this de
       sseq-Pi : {n : ℕ} -> List ℕ -> (PiFin n <-> PiFin n)
       ```
 
-  along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.  
+      along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.  
 
   3. We're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n`, and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.  
   We do that by defining a function  
