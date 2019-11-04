@@ -79,7 +79,7 @@ and two proofs
    `eval-quote : {A B : PiType} -> (c : A <-> B) -> ((quote-Pi ∘ Pi-eval) c) <=> c`
 
 The picture below hopefully shows it more clearly
-(picture)
+![outline](outline.png)
 
 ## Discussion of the specifics
 
@@ -92,7 +92,7 @@ Then, we go to even more bare-bones, abstract language for describing permutatio
 
 This step takes us from the countable to the finite world (intuitively, from "operational" to "denotational" world). In the first one, each permutation is written as a sequence of operations, and so the type representing the permutations (on some particular type) is infinite - in the second one, we have some finite representation of this set of permutations, and permutations having the same "outcome" are identified.
 
-The choice of introducing this intermediate representation in terms of Lehmer codes stems from the fact that working with the permutations type in Agda is a little cumbersome - they are defined as invertible functions, having the proofs of compositions with inversions being identity and so on. The Lehmer codes do not come with any of that - in a way, they are the simplest possible way of talking about the type of bijections on a finite type.
+The choice of introducing this intermediate representation in terms of Lehmer codes stems from the fact that working with the bijections type in Agda is a little cumbersome - they are defined as invertible functions, having the proofs of compositions with inversions being identity and so on. The Lehmer codes do not come with any of that - in a way, they are the simplest possible way of talking about the type of bijections on a finite type.
 
 Having the Lehmer encoding of the bijection, we can isolate the complexity of dealing with bijection types in the last stage of the proof.
 
@@ -126,7 +126,7 @@ Contrast this with the usual definition of Coexeter relations for a full symmetr
 
 The third rule is defined as such, because it is both strong enough to give the diamond property (ie to resolve critical pairs), and weak enough not to break Coxeter equivalence (we prove formally that the equivalence relation defined above is not stronger than Coxeter relation).
 
-The reason we're using this admittedly more complicated machinery is because it is very hard (or maybe even impossible) to prove certain things about the relation when using non-directed version. For example, suppose that what we need to prove is that `[] ≄ [ 0 ]`. Using the standard Coxeter presentation, we quickly run into a problem with transitive property: we have to prove, that there is no (arbitrary list) `l`, such that `[] ≃ l` and `l ≃ [ x ]`. Thus, we can't do usual induction over reduction rules, and the only way to prove that is to use some kind of invariant. And even though in this particular case, the invariant saying that if `l ≃ l'`, then their lengths are equal `mod 2` would suffice, it should be clear that in general case, proving things about this relation is going to be very difficult.
+The reason we're using this admittedly more complicated machinery is because it is very hard (or maybe even impossible) to prove certain things about the relation when using non-directed version. For example, suppose that what we need to prove is that `[] ≄ [ 0 ]`. Using the standard Coxeter presentation, we quickly run into a problem with transitive property: we have to prove, that there is no (arbitrary list) `l`, such that `[] ≃ l` and `l ≃ [ x ]`. Thus, we can't do usual induction over reduction rules, and the only way to prove that is to use some kind of clever invariant. And even though in this particular case, the invariant saying that *if `l ≃ l'`, then their lengths are equal `mod 2`* would suffice, it should be clear that in general case, proving things about this relation is going to be very difficult.
 
 ## Third stage - alternative approach
 In the case above, we prove that any way of reducing a word, using provided rules, is equivalent.
