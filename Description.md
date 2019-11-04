@@ -6,9 +6,9 @@
     + [First stage](#first-stage)
     + [Second stage](#second-stage)
     + [Third stage](#third-stage)
-  * [Third stage - alternative approach](#third-stage---alternative-approach)
+    + [Third stage - alternative approach](#third-stage---alternative-approach)
     + [General outline of Lascoux method](#general-outline-of-lascoux-method)
-  * [Fourth stage](#fourth-stage)
+    + [Fourth stage](#fourth-stage)
     + [Fourth stage - alternative approach](#fourth-stage---alternative-approach)
   * [The meaning](#the-meaning)
 
