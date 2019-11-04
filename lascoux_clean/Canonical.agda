@@ -50,7 +50,7 @@ canonical-lift {n} .(suc (fst + n)) p cln | suc fst , refl =
   let rec-m , rec-p = canonical-lift {n} (fst + n) (≤-up-+ rrr) cln
   in  (CanS rec-m z≤n) , (≡-trans ++-unit rec-p)
 
-canonical-append : {n : ℕ} -> (cl : Canonical n) -> (x : ℕ) -> (n ≤ x) -> ∃ (λ clx ->  immersion {suc x} clx ≡ immersion {n} cl ++ [ x ])
+canonical-append : {n : ℕ} -> (cl : Canonical n) -> (x : ℕ) -> (n ≤ x) -> ∃ (λ clx -> immersion {suc x} clx ≡ immersion {n} cl ++ [ x ])
 canonical-append cl x px =
   let lifted-m , lifted-p = canonical-lift x px cl
   in  CanS lifted-m (s≤s z≤n) , start+end lifted-p refl
