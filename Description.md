@@ -46,13 +46,13 @@ To do that, the choice was made to have the semantics grounded in (... - this de
       immerse : {n : ℕ} -> Lehmer n -> List (Fin n)
       ```
   
-  (together with a proof that it is an injection), and a proof  
+      (together with a proof that it is an injection), and a proof  
 
       ```agda
       sseq-norm : {n : ℕ} -> (l : List (Fin n)) -> Σ (Lehmer n) (λ cl -> l ≃ cl)
       ```  
   
-  (an image showing the embedding)  
+      (an image showing the embedding)  
   
   4. Now we do the final isomorphism, between Lehmer codes and real bijections. Having the type of bijections as `_~_`, what we want are two functions  
 
