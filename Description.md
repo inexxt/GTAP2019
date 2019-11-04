@@ -114,10 +114,11 @@ Normalization is done using a collection of rewriting rules.
 
 These three rules come from Coxeter presentation, and the first two of them appear verbatim. The third rule is different - it replaces the standard `braid` rule.
 
-Using these rewriting rules, after taking reflexive-transitive closure, we prove the diamond lemma, and, consequently, Church-Rosser property for the system.
-
-Strong normalization for the system stems from the fact that each transformation either reduces the length of the list or its lexicographical order.
-
+Using these rewriting rules, after taking reflexive-transitive closure, we prove the 
+ - Local confluence - this is the main technical result of this section. The proof requires resolving all critical pairs and is quite long.
+ - Strong normalization - this stems from the fact that each transformation either reduces the length of the list or its lexicographical order.
+ - Church-Rosser - this is the classic, short proof by induction on the reflexive-transitive closure of the reduction rules.
+ 
 This whole procedure is done to define the relation
 ```agda
 data _≃_ : List ℕ -> List ℕ -> Set where
