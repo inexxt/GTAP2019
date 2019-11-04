@@ -1,5 +1,4 @@
 # Technical explanation
-  - [Technical explanation](#technical-explanation)
   * [Introduction](#introduction)
   * [Outline](#outline)
   * [Discussion of the specifics](#discussion-of-the-specifics)
