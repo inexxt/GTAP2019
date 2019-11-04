@@ -73,7 +73,7 @@ quote-Pi : sseq-Pi ∘ immerse ∘ quote`
 ```
 
 and two proofs
- - that turing an bijection into Pi 1-combinator and executing it gives us the same bijection back:
+ - that turning an bijection into Pi 1-combinator and executing it gives us the same bijection back:
    `quote-eval : Pi-eval ∘ quote-Pi ≡ id`
  - that executing a Pi 1-combinator and then quoting the result gives us the same (with respect to 2-combinators) combinator back:
    `eval-quote : {A B : PiType} -> (c : A <-> B) -> ((quote-Pi ∘ Pi-eval) c) <=> c`
