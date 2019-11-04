@@ -184,10 +184,10 @@ Example immersions of Lehmer codes (the embeddings are our normal forms):
  - `[1, 0, 0, 3, 2]` goes to `[0, 3, 2, 1, 0, 4, 3]`.
 
 ### Third stage - alternative approach
-In the case above, we prove that any way of reducing a word, using provided rules, is equivalent.
-A somewhat easier way to define reduction is to focus on some standard reduction method, and prove properties only for that. This is what Alain Lascoux in *(THE SYMMETRIC GROUP, 2002, unpublished)* does, in `Lemma 1`, and what is (partially) replicated in the Coq proof of the equivalence between Coxeter presentation of `S_n` and bijections between sets (see https://github.com/hivert/Coq-Combi/blob/master/theories/SymGroup/presentSn.v).
+In the section above, we prove that any two ways of reducing given word, using provided rules, are equivalent.  
+A somewhat easier way to define reduction is to focus on some standard reduction method, and prove properties only for that method. This is what Alain Lascoux does in *(THE SYMMETRIC GROUP, 2002, unpublished)* does, in `Lemma 1`, and what is (partially) replicated in the Coq proof of the equivalence between Coxeter presentation of `S_n` and bijections between sets (see https://github.com/hivert/Coq-Combi/blob/master/theories/SymGroup/presentSn.v).
 
-We started by implementing this method first, but then run into technical problems described at the end of the previous section. Although Lascoux method does not require the use of full Coxeter relations, and works with reduction rules described above, we thought it is better to prove the more general case, since we had the machinery set up anyway.
+We started by implementing this method first, but then run into technical problems described at the end of the previous section.  Although Lascoux method does not require the use of full Coxeter relations, and works with reduction rules described above, we thought it is better to prove the more general case, since we had the machinery set up anyway.
 
 The implementation closely follows the decription in the book (text included?) and is availble in the `lascoux` directory.
 
