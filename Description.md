@@ -39,7 +39,7 @@ To do that, the choice was made to have the semantics grounded in (... - this de
 
       along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.
 
-  3. We're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n`, and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.
+  3. We're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n` (where the generators are elements of `Fin n` and can be thought of adjecent transpositions), and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.
   We do that by defining a function
 
       ```agda
@@ -122,7 +122,7 @@ data _≃_ : List ℕ -> List ℕ -> Set where
   comm : (l1 l2 l : List ℕ) -> (l1 →* l) -> (l2 →* l) -> l1 ≃ l2
 ```
 
-Contrast this with the usual definition of Coexeter relations for a full symmetric group, where the reduction rules (having `braid` instad of `lbraid`) go in both directions, but so there is no normalization property.
+Contrast this with the usual definition of Coexeter relations for a full symmetric group, where the reduction rules (having `braid` instad of `lbraid`) go in both directions, so there is no normalization property.
 
 The third rule is defined as such, because it is both strong enough to give the diamond property (ie to resolve critical pairs), and weak enough not to break Coxeter equivalence (we prove formally that the equivalence relation defined above is not stronger than Coxeter relation).
 
@@ -130,9 +130,9 @@ The reason we're using this admittedly more complicated machinery is because it 
 
 ## Third stage - alternative approach
 In the case above, we prove that any way of reducing a word, using provided rules, is equivalent.
-A somewhat easier way to define reduction is to focus on some standard reduction method, and prove properties only for that. This is what Alain Lascoux in (THE SYMMETRIC GROUP, 2002, unpublished) does, in `Lemma 1`, and what is (partially) replicated in the coq proof of the equivalence between Coxeter presentation of `S_n` and bijections between sets.
+A somewhat easier way to define reduction is to focus on some standard reduction method, and prove properties only for that. This is what Alain Lascoux in *(THE SYMMETRIC GROUP, 2002, unpublished)* does, in `Lemma 1`, and what is (partially) replicated in the Coq proof of the equivalence between Coxeter presentation of `S_n` and bijections between sets (see https://github.com/hivert/Coq-Combi/blob/master/theories/SymGroup/presentSn.v).
 
-Lascoux method works by induction over the generators. (TODO should I describe it there?)
+Lascoux method works by induction over the generators. **(TODO should I describe it there?)**
 
 We started by implementing this method first, but then run into technical problems described at the end of the previous section. Although Lascoux method does not require the use of full Coxeter relations, and works with reduction rules described above, we thought it is better to prove the more general case, since we had the machinery set up anyway.
 
@@ -152,8 +152,5 @@ Then, to complete the proof, one would have to show that `eval` respects Coxeter
 As the space of 1-combinators is much bigger than the space of bijections, we cannot hope for getting the same thing back - but this is a good thing! What we are actually getting is a normalized version of the program defined by 1-combinator.
 
 What we would like would be of course an "optimized" version of such a program. The procedure outlined cannot guarantee that at this moment - the reason for this is that we lack the `un-norm-Pi` function, that would serve as a counterpart of `Pi-norm` function. However, this is actually the only missing element of the puzzle!
-What we have now is the optimizer for the low-level language describing the permutations (lists of adjecent transpositions) (TODO think more about that)
+What we have now is the optimizer for the low-level language describing the permutations (lists of adjecent transpositions) **(TODO think more about that)**
 And, of course, it is possible that such a function will be developed in the future, giving us the ultimate optimizer for the whole stack.
-
-## TODO
-Define adjecent swaps
