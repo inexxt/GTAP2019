@@ -1,4 +1,5 @@
 # Technical explanation
+  - [Technical explanation](#technical-explanation)
   * [Introduction](#introduction)
   * [Outline](#outline)
   * [Discussion of the specifics](#discussion-of-the-specifics)
@@ -6,8 +7,10 @@
     + [First stage](#first-stage)
     + [Second stage](#second-stage)
     + [Third stage](#third-stage)
+      - [Normalization](#normalization)
+      - [Lehmer codes and normal forms](#lehmer-codes-and-normal-forms)
     + [Third stage - alternative approach](#third-stage---alternative-approach)
-    + [General outline of Lascoux method](#general-outline-of-lascoux-method)
+      - [General outline of Lascoux method](#general-outline-of-lascoux-method)
     + [Fourth stage](#fourth-stage)
     + [Fourth stage - alternative approach](#fourth-stage---alternative-approach)
   * [The meaning](#the-meaning)
@@ -119,6 +122,9 @@ Info from prof. Sabry.
 Info from prof. Sabry.
 
 ### Third stage
+
+#### Normalization
+
 Normalization is done using a collection of rewriting rules.
   - `cancel`, where `l ++ n ∷ n ∷ r` goes to `l ++ r`
   - `swap`, where `l ++ k ∷ n ∷ r` goes to `l ++ n ∷ k ∷ r`, provided that `1 + k < n`
@@ -154,6 +160,7 @@ The third rule - `lbraid` - is defined as such, because it is both strong enough
 
 The reason we're using this admittedly more complicated machinery is because it is very hard (or maybe even impossible) to prove certain things about the relation when using non-directed version. For example, suppose that what we need to prove is that `[] ≄ [ 0 ]`. Using the standard Coxeter presentation, we quickly run into a problem with transitive property: we have to prove, that there is no (arbitrary list) `l`, such that `[] ≃ l` and `l ≃ [ x ]`. Thus, we can't do usual induction over reduction rules, and the only way to prove that is to use some kind of clever invariant. And even though in this particular case, the invariant saying that *if `l ≃ l'`, then their lengths are equal `mod 2`* would suffice, it should be clear that in general case, proving things about this relation is going to be very difficult.
 
+#### Lehmer codes and normal forms
 After performing all reductions possible, we arrive at one of the normal forms - in the image of immersion of Lehmer codes.
 ```agda
 data Lehmer : ℕ -> Set where
