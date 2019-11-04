@@ -199,10 +199,10 @@ Lascoux method works by induction over the generators, from the highest to the l
 Info from Robert Rose.
 
 ### Fourth stage - alternative approach
-An alternative approach to defining isomorphism between Lehmer codes and bijections would be to work directly with lists of swaps. Then, `eval` is trivially defined as a composition of `eval` on each element, and the proof that it gives a bijection is quite easily done (by induction).
-On the other hand, `quote` can be defined as insertion sort of tabulated function values. That this is specifically the **insertion** sort is important - this is because normalized words in Coxeter group are precisely the sequences of swaps coming from insertion sort running on some data!
+An alternative approach to defining isomorphism between Lehmer codes and bijections would be to work directly with lists of transpositions. Then, `eval` is trivially defined as a composition of `eval` on each element, and the proof that it gives a bijection is also quite easily done by induction.  
+On the other hand, `quote` can be defined as insertion sort of tabulated function values. That this is specifically the **insertion** sort is important - and that's because normalized words in Coxeter group are precisely the sequences of swaps coming from insertion sort running on some data!
 
-Then, to complete the proof, one would have to show that `eval` respects Coxeter equations - but this is again quite simple to do so.
+Then, to complete the proof, one would have to show that `eval` respects Coxeter equations - but it's again quite simple to do so.
 
 ## The meaning
 
