@@ -16,9 +16,9 @@ To do that, the choice was made to have the semantics grounded in (... - this de
 ## Outline
 
   1. First step is doing an internal normalization in Pi.
-      - Types normalization: informally speaking, every type in Pi should be "equivalent" to a type in the family:
-    ` {0, 0 + 1, (0 + 1) + 1, ((0 + 1) + 1) + 1, ...}`
-    We'll call this family of types `PiFin`.
+      - Types normalization: informally speaking, every type in Pi should be "equivalent" to a type in the family:  
+    ` {0, 0 + 1, (0 + 1) + 1, ((0 + 1) + 1) + 1, ...}`  
+      We'll call this family of types `PiFin`.
       - Along with types normalization, there comes (internal to Pi) 1-combinator normalization. We want to express all normalized functions solely by a combination of `id, assoc, swap` constants and sequential and parallel composition.
       - Ultimately, what we want to get is a following commuting square:  
       (square picture)  
@@ -32,10 +32,10 @@ To do that, the choice was made to have the semantics grounded in (... - this de
   2. Then, we want to switch away from Pi, and talk about the combinators more abstractly - informally, as seqences of adjecent swaps (we'll talk about it in the next section). Such sequences are represented as elements of the `List (Fin n)` type.  
   So, we'd like to have two functions  
   
-    ```agda
-    Pi-sseq : {n : ℕ} -> (c : PiFin n <-> PiFin n) -> List (Fin n)
-    sseq-Pi : {n : ℕ} -> List ℕ -> (PiFin n <-> PiFin n)
-    ```
+      ```agda
+      Pi-sseq : {n : ℕ} -> (c : PiFin n <-> PiFin n) -> List (Fin n)
+      sseq-Pi : {n : ℕ} -> List ℕ -> (PiFin n <-> PiFin n)
+      ```
 
   along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.  
   The idea in this part is to prepare the ground for the next step.
