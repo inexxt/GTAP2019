@@ -38,23 +38,28 @@ To do that, the choice was made to have the semantics grounded in (... - this de
       ```
 
   along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.  
-  The idea in this part is to prepare the ground for the next step.
 
-  3. We're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of $n$ generators. In the type `List (Fin n)` we introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group $S_n$. We'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes. To do that, we have a function  
-  `immerse : {n : ℕ} -> Lehmer n -> List (Fin n)` (together with a proof that it is an injection), and a proof  
-  `sseq-norm : {n : ℕ} -> (l : List (Fin n)) -> Σ (Lehmer n) (λ cl -> l ≃ cl)`.  
+  3. We're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n`, and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.  
+  We do that by defining a function  
+      ```agda
+      immerse : {n : ℕ} -> Lehmer n -> List (Fin n)
+      ```
+  (together with a proof that it is an injection), and a proof  
+
+      ```agda
+      sseq-norm : {n : ℕ} -> (l : List (Fin n)) -> Σ (Lehmer n) (λ cl -> l ≃ cl)
+      ```  
   (an image showing the embedding)  
-  The idea here is that this step takes us from the countable to finite world (intuitively, from "operational" to "denotational" world). In the first case, each permutation is written as a sequence of operations, and so the type representing the permutations (on some particular type) is infinite - in the second case, we have some finite representation of this set of permutations.
-
-  4. Now we do the final isomorphism, between Lehmer codes and real bijections. We have the type of bijections `_~_`, and what we want are two functions  
-  ```
-  eval  : {n : ℕ} -> (Lehmer n) -> (Fin n ~ Fin n)
-  quote : {n : ℕ} -> (Fin n ~ Fin n) -> (Lehmer n)
-  ```  
+  
+  4. Now we do the final isomorphism, between Lehmer codes and real bijections. Having the type of bijections as `_~_`, what we want are two functions  
+      ```agda
+      eval  : {n : ℕ} -> (Lehmer n) -> (Fin n ~ Fin n)
+      quote : {n : ℕ} -> (Fin n ~ Fin n) -> (Lehmer n)
+      ```  
   along with the proofs that `eval ∘ quote ≡ id` and `quote ∘ eval ≡ id`.
 
 We can then finally define
-```
+```agda
 Pi-eval = eval ∘ sseq-norm ∘ Pi-sseq ∘ Pi-norm
 quote-Pi : sseq-Pi ∘ immerse ∘ quote`
 ```
@@ -72,6 +77,8 @@ The reason the proof is structured in a way it is, is to get down the complexity
 First, as Pi is a fairly complicated language, with many features built-in, we want to scale it down to the bare minimum. This minimum consists specifically of the standard types (0 + 1 + 1 + ...) and functions defined by (id, assoc, swap) and parallel and sequential composition.
 
 Then, we go to even more bare-bones, abstract language for describing permutations syntactically - lists of numbers denoting adjecent swaps - Coxeter presentation of a full symmetric group $S_n$. It is in this setting we isolate the task of word normalization.
+
+The idea here is that this step takes us from the countable to finite world (intuitively, from "operational" to "denotational" world). In the first case, each permutation is written as a sequence of operations, and so the type representing the permutations (on some particular type) is infinite - in the second case, we have some finite representation of this set of permutations.
 
 The choice of introducing this intermediate representation in terms of Lehmer codes stems from the fact that working with permutations in Agda is a little cumbersome - they are defined as invertible functions, having the proofs of compositions with inversions being identity and so on. The Lehmer codes do not come with any of that - in a way, they are the simplest possible way of talking about the type of bijections on a finite type.
 
