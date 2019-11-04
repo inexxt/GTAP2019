@@ -7,15 +7,14 @@ We are working with Pi language. Pi is a language for describing (syntactically)
   - Second part is about invertible functions between these types. It consists of so-called 1-combinators: constants (like `id: A <-> A`, `+-comm: A + B <-> B + A`, etc.) and 1-combinators constructors (like sequential composition, parallel composition etc).
   - Third part is about the equivalences between the 1-combinators, so called 2-combinators (like `id-left: id.x <=> x`, etc).
 
-To define the semantics of Pi, we have to map Pi types to appropriate concrete types, where 1-combinators will be mapped to bijections between (concrete) types, and if two 1-combinators are related by some 2-combinator, then appropriate (concrete) bijections should be equal.
+To define the semantics of Pi, we have to map Pi types to appropriate concrete types, where 1-combinators will be mapped to bijections between (concrete) types, and if two 1-combinators are related by some 2-combinator, then appropriate (concrete) bijections should be equivalent.
 
 We'd also like this language to be complete in this context, e.g. for the family of concrete types that we can get from interpreting Pi types, every possible bijection can be acquired by interpreting some 1-combinator, and if two bijections are equivalent, there is a way of constructing 2-combinator between them.
 
-To do that, the choice was made to have the semantics grounded in (... - this section depends on where does Robert Rose work - in HoTT? in pure Agda? in cubical?)
+To do that, the choice was made to have the semantics grounded in (... - this depends on where does Robert Rose work - in HoTT? in pure Agda? in cubical?)
 
 ## Outline
 
-The proof goes through four stages.
   1. First step is doing an internal normalization in Pi.
     - Types normalization: informally speaking, every type in Pi should be "equivalent" to a type in the family:
     ` {0, 0 + 1, (0 + 1) + 1, ((0 + 1) + 1) + 1, ...}`
@@ -24,15 +23,20 @@ The proof goes through four stages.
     - Ultimately, what we want to get is a following commuting square:  
     (square picture)  
     where "commuting" in this case means "related by 2-combinator"
-  - In the end, we should have a function  
-  `Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ (PiFin n <-> PiFin n) (λ cc -> c <=> cn))`
+    - In the end, we should have a function 
+      
+      ```agda
+      Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ( PiFin n <-> PiFin n) (λ cc -> c <=> cn))
+       ```
 
-  2. Then, we want to switch away from Pi, and talk about the combinators more abstractly - informally, as seqences of adjecent swaps. We represent such sequences as elements of the `List (Fin n)` type. We'll talk about it in the next section.  
+  2. Then, we want to switch away from Pi, and talk about the combinators more abstractly - informally, as seqences of adjecent swaps (we'll talk about it in the next section). Such sequences are represented as elements of the `List (Fin n)` type.  
   So, we'd like to have two functions  
-  ```
-  Pi-sseq : {n : ℕ} -> (c : PiFin n <-> PiFin n) -> List (Fin n)
-  sseq-Pi : {n : ℕ} -> List ℕ -> (PiFin n <-> PiFin n)
-  ```
+  
+    ```agda
+    Pi-sseq : {n : ℕ} -> (c : PiFin n <-> PiFin n) -> List (Fin n)
+    sseq-Pi : {n : ℕ} -> List ℕ -> (PiFin n <-> PiFin n)
+    ```
+
   along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.  
   The idea in this part is to prepare the ground for the next step.
 
