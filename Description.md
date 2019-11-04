@@ -16,18 +16,18 @@ To do that, the choice was made to have the semantics grounded in (... - this de
 ## Outline
 
   1. First step is doing an internal normalization in Pi.
-    - Types normalization: informally speaking, every type in Pi should be "equivalent" to a type in the family:
+      - Types normalization: informally speaking, every type in Pi should be "equivalent" to a type in the family:
     ` {0, 0 + 1, (0 + 1) + 1, ((0 + 1) + 1) + 1, ...}`
     We'll call this family of types `PiFin`.
-    - Along with types normalization, there comes (internal to Pi) 1-combinator normalization. We want to express all normalized functions solely by a combination of `id, assoc, swap` constants and sequential and parallel composition.
-    - Ultimately, what we want to get is a following commuting square:  
-    (square picture)  
-    where "commuting" in this case means "related by 2-combinator"
-    - In the end, we should have a function 
+      - Along with types normalization, there comes (internal to Pi) 1-combinator normalization. We want to express all normalized functions solely by a combination of `id, assoc, swap` constants and sequential and parallel composition.
+      - Ultimately, what we want to get is a following commuting square:  
+      (square picture)  
+      where "commuting" in this case means "related by 2-combinator"
+      - In the end, we should have a function 
       
-      ```agda
-      Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ( PiFin n <-> PiFin n) (λ cc -> c <=> cn))
-       ```
+          ```agda
+          Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ( PiFin n <-> PiFin n) (λ cc -> c <=> cn))
+          ```
 
   2. Then, we want to switch away from Pi, and talk about the combinators more abstractly - informally, as seqences of adjecent swaps (we'll talk about it in the next section). Such sequences are represented as elements of the `List (Fin n)` type.  
   So, we'd like to have two functions  
