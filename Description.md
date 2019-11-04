@@ -46,7 +46,7 @@ The proof is done in four stages.
 
       along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.
 
-  3. In the third step, we're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n` (where the generators are elements of `Fin n` and can be thought of adjecent transpositions), and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.
+  3. In the third step, we're in the realm of permutations represented as `List (Fin n)` - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n` (where the generators are elements of `Fin n` and can be thought of adjecent transpositions), and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.  
   We do that by defining a function
 
       ```agda
@@ -58,8 +58,6 @@ The proof is done in four stages.
       ```agda
       sseq-norm : {n : ℕ} -> (l : List (Fin n)) -> Σ (Lehmer n) (λ cl -> l ≃ cl)
       ```
-
-      (an image showing the embedding)
 
   4. As a fourth step, we do the final isomorphism, between Lehmer codes and real bijections. Having the type of bijections as `_~_`, what we want are two functions
 
@@ -153,13 +151,13 @@ The third rule - `lbraid` - is defined as such, because it is both strong enough
 The reason we're using this admittedly more complicated machinery is because it is very hard (or maybe even impossible) to prove certain things about the relation when using non-directed version. For example, suppose that what we need to prove is that `[] ≄ [ 0 ]`. Using the standard Coxeter presentation, we quickly run into a problem with transitive property: we have to prove, that there is no (arbitrary list) `l`, such that `[] ≃ l` and `l ≃ [ x ]`. Thus, we can't do usual induction over reduction rules, and the only way to prove that is to use some kind of clever invariant. And even though in this particular case, the invariant saying that *if `l ≃ l'`, then their lengths are equal `mod 2`* would suffice, it should be clear that in general case, proving things about this relation is going to be very difficult.
 
 #### Lehmer codes and normal forms
-After performing all reductions possible, we arrive at one of the normal forms - in the image of immersion of Lehmer codes.
+After performing all reductions possible, we arrive at one of the normal forms - in the image of immersion of Lehmer codes. We define them as
 ```agda
 data Lehmer : ℕ -> Set where
   LZ : Lehmer 0
   LS : (l : Lehmer n) -> {r : ℕ} -> (r ≤ suc n) -> Lehmer (suc n)
 ```
-So, Lehmer codes are in essence lists, where on `n`-th place we have a number less than or equal to `n`. 
+So, Lehmer codes are, in essence, lists, where on `n`-th place there is a number that is less than or equal to `n`. 
 
 To define embedding, we first define a decreasing sequence
 ```agda
@@ -176,9 +174,9 @@ immersion : {n : ℕ} -> Lehmer n -> List ℕ
 immersion {zero} LZ = []
 immersion {suc n} (LS l {r} _) = (immersion l) ++ (((suc n) ∸ r) ↓ r)
 ```
-An embedding takes a Lehmer code, interprets the number on `n`-th place as the length of decreasing sequece starting with `n`, and then concatenates them all together.
+Immersion takes a Lehmer code, interprets the number on `n`-th place as the length of decreasing sequece starting with `n`, and then concatenates them all together.
 
-Example embeddings of Lehmer codes (the embeddings are our normal forms):
+Example immersions of Lehmer codes (the embeddings are our normal forms):
  - `[]` goes to `[]`
  - `[0, 0, 0]` goes to `[]`
  - `[1]` goes to `[0]`
