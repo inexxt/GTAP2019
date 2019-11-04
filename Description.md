@@ -63,6 +63,8 @@ To do that, the choice was made to have the semantics grounded in (... - this de
 
   along with the proofs that `eval ∘ quote ≡ id` and `quote ∘ eval ≡ id`.
 
+---
+
 We can then finally define
 
 ```agda
@@ -75,6 +77,9 @@ and two proofs
    `quote-eval : Pi-eval ∘ quote-Pi ≡ id`
  - that executing a Pi 1-combinator and then quoting the result gives us the same (with respect to 2-combinators) combinator back:
    `eval-quote : {A B : PiType} -> (c : A <-> B) -> ((quote-Pi ∘ Pi-eval) c) <=> c`
+
+The picture below hopefully shows it more clearly
+(picture)
 
 ## The discussion of specifics
 
