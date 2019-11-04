@@ -187,7 +187,7 @@ Example embeddings of Lehmer codes (the embeddings are our normal forms):
  - `[1, 2, 3, 4]` goes to `[0, 1, 0, 2, 1, 0, 3, 2, 1, 0]`
  - `[1, 0, 0, 3, 2]` goes to `[0, 3, 2, 1, 0, 4, 3]`.
 
-## Third stage - alternative approach
+### Third stage - alternative approach
 In the case above, we prove that any way of reducing a word, using provided rules, is equivalent.
 A somewhat easier way to define reduction is to focus on some standard reduction method, and prove properties only for that. This is what Alain Lascoux in *(THE SYMMETRIC GROUP, 2002, unpublished)* does, in `Lemma 1`, and what is (partially) replicated in the Coq proof of the equivalence between Coxeter presentation of `S_n` and bijections between sets (see https://github.com/hivert/Coq-Combi/blob/master/theories/SymGroup/presentSn.v).
 
@@ -195,11 +195,11 @@ We started by implementing this method first, but then run into technical proble
 
 The implementation closely follows the decription in the book (text included?) and is availble in the `lascoux` directory.
 
-### General outline of Lascoux method
+#### General outline of Lascoux method
 
 Lascoux method works by induction over the generators, from the highest to the lowest. Let's assume that we are currently at the generator `k`.  There are three reduction rules at our disposition (actually, three reduction schemas, like our `lbraid`) and the strategy to select next redux  is to choose the leftmost redux of all that contain `k`. If threre is no such thing - proceed with induction. The rules are chosen such that this process always terminates, and always brings one the predefined normal forms (the same as we defined earlier.)
 
-## Fourth stage
+### Fourth stage
 Info from Robert Rose.
 
 ### Fourth stage - alternative approach
