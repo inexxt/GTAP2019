@@ -124,7 +124,18 @@ data _≃_ : List ℕ -> List ℕ -> Set where
 
 Contrast this with the usual definition of Coexeter relations for a full symmetric group, where the reduction rules (having `braid` instad of `lbraid`) go in both directions, so there is no normalization property.
 
-The third rule is defined as such, because it is both strong enough to give the diamond property (ie to resolve critical pairs), and weak enough not to break Coxeter equivalence (we prove formally that the equivalence relation defined above is not stronger than Coxeter relation).
+```agda
+data _≃_ : List ℕ -> List ℕ -> Set where
+  cancel : l ++ n ∷ n ∷ r ≃ l ++ r
+  swap : {k : ℕ} -> (suc k < n) -> l ++ n ∷ k ∷ r ≃ l ++ k ∷ n ∷ r
+  braid : l ++ (suc n) ∷ n ∷ (suc n) ∷ r ≃ l ++ n ∷ (suc n) ∷ n ∷ r
+
+  refl : m ≃ m
+  comm : m1 ≃ m2 -> m2 ≃ m1
+  trans : m1 ≃ m2 -> m2 ≃ m3 -> m1 ≃ m3
+```
+
+The third rule - `lbraid` - is defined as such, because it is both strong enough to give the diamond property (ie to resolve critical pairs), and weak enough not to break Coxeter equivalence (we prove formally that the equivalence relation defined above is not stronger than Coxeter relation).
 
 The reason we're using this admittedly more complicated machinery is because it is very hard (or maybe even impossible) to prove certain things about the relation when using non-directed version. For example, suppose that what we need to prove is that `[] ≄ [ 0 ]`. Using the standard Coxeter presentation, we quickly run into a problem with transitive property: we have to prove, that there is no (arbitrary list) `l`, such that `[] ≃ l` and `l ≃ [ x ]`. Thus, we can't do usual induction over reduction rules, and the only way to prove that is to use some kind of clever invariant. And even though in this particular case, the invariant saying that *if `l ≃ l'`, then their lengths are equal `mod 2`* would suffice, it should be clear that in general case, proving things about this relation is going to be very difficult.
 
