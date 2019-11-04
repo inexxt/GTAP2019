@@ -1,4 +1,16 @@
 # Technical explanation
+  * [Introduction](#introduction)
+  * [Outline](#outline)
+  * [Discussion of the specifics](#discussion-of-the-specifics)
+    + [Outline](#outline-1)
+    + [First stage](#first-stage)
+    + [Second stage](#second-stage)
+    + [Third stage](#third-stage)
+  * [Third stage - alternative approach](#third-stage---alternative-approach)
+    + [General outline of Lascoux method](#general-outline-of-lascoux-method)
+  * [Fourth stage](#fourth-stage)
+    + [Fourth stage - alternative approach](#fourth-stage---alternative-approach)
+  * [The meaning](#the-meaning)
 
 ## Introduction
 
