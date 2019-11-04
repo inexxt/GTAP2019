@@ -41,28 +41,35 @@ To do that, the choice was made to have the semantics grounded in (... - this de
 
   3. We're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n`, and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.  
   We do that by defining a function  
+
       ```agda
       immerse : {n : ℕ} -> Lehmer n -> List (Fin n)
       ```
+  
   (together with a proof that it is an injection), and a proof  
 
       ```agda
       sseq-norm : {n : ℕ} -> (l : List (Fin n)) -> Σ (Lehmer n) (λ cl -> l ≃ cl)
       ```  
+  
   (an image showing the embedding)  
   
   4. Now we do the final isomorphism, between Lehmer codes and real bijections. Having the type of bijections as `_~_`, what we want are two functions  
+
       ```agda
       eval  : {n : ℕ} -> (Lehmer n) -> (Fin n ~ Fin n)
       quote : {n : ℕ} -> (Fin n ~ Fin n) -> (Lehmer n)
       ```  
+
   along with the proofs that `eval ∘ quote ≡ id` and `quote ∘ eval ≡ id`.
 
 We can then finally define
+
 ```agda
 Pi-eval = eval ∘ sseq-norm ∘ Pi-sseq ∘ Pi-norm
 quote-Pi : sseq-Pi ∘ immerse ∘ quote`
 ```
+
 and two proofs
  - that turing an bijection into Pi 1-combinator and executing it gives us the same bijection back:
    `quote-eval : Pi-eval ∘ quote-Pi ≡ id`
