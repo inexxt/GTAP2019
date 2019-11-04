@@ -106,11 +106,13 @@ Info from prof. Sabry.
 
 ### Third stage
 Normalization is done using a collection of rewriting rules.
-  - cancel, where `l ++ n ∷ n ∷ r` goes to `l ++ r`
-  - swap, where `l ++ k ∷ n ∷ r` goes to `l ++ n ∷ k ∷ r`, provided that `1 + k < n`
-  - lbraid, where  `l ++ n ∷ n - 1 ∷ n - 2 ∷ ... ∷ n - k ∷ n ∷ r` goes to `l ++ n - 1 ∷ n ∷ n - 2 ∷ ... ∷ n - k ∷ r`, provided that `0 < k`
-These three rules come from Coxeter presentation, and the first two of them appear as they are. The third rule is different - it replaces the standard `braid` rule.
-Using these rewriting rules, after taking reflexive-transitive closure, the diamond lemma, and, consequently, Church-Rosser property for the system.
+  - `cancel`, where `l ++ n ∷ n ∷ r` goes to `l ++ r`
+  - `swap`, where `l ++ k ∷ n ∷ r` goes to `l ++ n ∷ k ∷ r`, provided that `1 + k < n`
+  - `lbraid`, where  `l ++ n ∷ n - 1 ∷ n - 2 ∷ ... ∷ n - k ∷ n ∷ r` goes to `l ++ n - 1 ∷ n ∷ n - 2 ∷ ... ∷ n - k ∷ r`, provided that `0 < k`
+
+These three rules come from Coxeter presentation, and the first two of them appear verbatim. The third rule is different - it replaces the standard `braid` rule.
+
+Using these rewriting rules, after taking reflexive-transitive closure, we prove the diamond lemma, and, consequently, Church-Rosser property for the system.
 
 Strong normalization for the system stems from the fact that each transformation either reduces the length of the list or its lexicographical order.
 
@@ -121,6 +123,9 @@ data _≃_ : List ℕ -> List ℕ -> Set where
 ```
 
 Contrast this with the usual definition of Coexeter relations for a full symmetric group, where the reduction rules (having `braid` instad of `lbraid`) go in both directions, but so there is no normalization property.
+
+The third rule is defined as such, because it is both strong enough to give the diamond property (ie to resolve critical pairs), and weak enough not to break Coxeter equivalence (we prove formally that the equivalence relation defined above is not stronger than Coxeter relation).
+
 The reason we're using this admittedly more complicated machinery is because it is very hard (or maybe even impossible) to prove certain things about the relation when using non-directed version. For example, suppose that what we need to prove is that `[] ≄ [ 0 ]`. Using the standard Coxeter presentation, we quickly run into a problem with transitive property: we have to prove, that there is no (arbitrary list) `l`, such that `[] ≃ l` and `l ≃ [ x ]`. Thus, we can't do usual induction over reduction rules, and the only way to prove that is to use some kind of invariant. And even though in this particular case, the invariant saying that if `l ≃ l'`, then their lengths are equal `mod 2` would suffice, it should be clear that in general case, proving things about this relation is going to be very difficult.
 
 ## Third stage - alternative approach
