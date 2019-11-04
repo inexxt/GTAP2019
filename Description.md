@@ -3,10 +3,9 @@
 ## Introduction
 
 We are working with Pi language. Pi is a language for describing (syntactically) invertible functions between types. It consists of three parts:
-    - First part is about types. It consists of type constants (0, 1) and type constructors (_+_ , _*_)
-    - Second part is about the invertible functions between these types. It consists of so-called 1-combinators: constants (like id: A <-> A, +-comm: A + B <-> B + A) and 1-combinators constructors (like sequential composition, parallel composition etc).
-    - Third part is about the equivalences between the 1-combinators, so called 2-combinators (like id-left: id.x <=> x, etc).
-
+  - First part is about types. It consists of type constants (0, 1) and type constructors (_+_ , _*_)
+  - Second part is about the invertible functions between these types. It consists of so-called 1-combinators: constants (like id: A <-> A, +-comm: A + B <-> B + A) and 1-combinators constructors (like sequential composition, parallel composition etc).
+  - Third part is about the equivalences between the 1-combinators, so called 2-combinators (like id-left: id.x <=> x, etc).
 
 The intended semantics for this language is of course to map Pi types to appropriate concrete types, for 1-combinators to describe bijections between (concrete) types, and for 2-combinators to describe equivalences between (concrete) bijections. We'd also like this language to be complete in this context, e.g. that, for the family of concrete types that we can get from interpreting Pi types, every possible bijection can be acquired by interpreting some 1-combinator, and if two bijections are equivalent, there is a way of constructing 2-combinator between them.
 
