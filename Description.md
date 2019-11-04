@@ -14,8 +14,8 @@ We'd also like this language to be complete in this context, e.g. for the family
 To do that, the choice was made to have the semantics grounded in (... - this depends on where does Robert Rose work - in HoTT? in pure Agda? in cubical?)
 
 ## Outline
-
-  1. First step is doing an internal normalization in Pi.
+The proof is done in four stages.
+  1. The first step is doing an internal normalization in Pi.
       - Types normalization: informally speaking, every type in Pi should be "equivalent" to a type in the family:
     ` {0, 0 + 1, (0 + 1) + 1, ((0 + 1) + 1) + 1, ...}`
       We'll call this family of types `PiFin`.
@@ -29,7 +29,7 @@ To do that, the choice was made to have the semantics grounded in (... - this de
           Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ( PiFin n <-> PiFin n) (λ cc -> c <=> cn))
           ```
 
-  2. Then, we want to switch away from Pi, and talk about the combinators more abstractly - informally, as seqences of adjecent swaps (we'll talk about it in the next section). Such sequences are represented as elements of the `List (Fin n)` type.
+  2. Then, in the next step, we want to switch away from Pi, and talk about the combinators more abstractly - informally, as seqences of adjecent swaps (we'll talk about it in the next section). Such sequences are represented as elements of the `List (Fin n)` type.
   So, we'd like to have two functions
 
       ```agda
@@ -39,7 +39,7 @@ To do that, the choice was made to have the semantics grounded in (... - this de
 
       along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.
 
-  3. We're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n` (where the generators are elements of `Fin n` and can be thought of adjecent transpositions), and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.
+  3. In the third step, we're in the realm of permutations represented as `List (Fin n)` now - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n` (where the generators are elements of `Fin n` and can be thought of adjecent transpositions), and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.
   We do that by defining a function
 
       ```agda
@@ -54,7 +54,7 @@ To do that, the choice was made to have the semantics grounded in (... - this de
 
       (an image showing the embedding)
 
-  4. Now we do the final isomorphism, between Lehmer codes and real bijections. Having the type of bijections as `_~_`, what we want are two functions
+  4. As a fourth step, we do the final isomorphism, between Lehmer codes and real bijections. Having the type of bijections as `_~_`, what we want are two functions
 
       ```agda
       eval  : {n : ℕ} -> (Lehmer n) -> (Fin n ~ Fin n)
@@ -78,7 +78,9 @@ and two proofs
  - that executing a Pi 1-combinator and then quoting the result gives us the same (with respect to 2-combinators) combinator back:
    `eval-quote : {A B : PiType} -> (c : A <-> B) -> ((quote-Pi ∘ Pi-eval) c) <=> c`
 
-The picture below hopefully shows it more clearly
+---
+
+The picture below hopefully shows the whole process more clearly
 ![outline](outline.png)
 
 ## Discussion of the specifics
@@ -92,7 +94,7 @@ Then, we go to even more bare-bones, abstract language for describing permutatio
 
 This step takes us from the countable to the finite world (intuitively, from "operational" to "denotational" world). In the first one, each permutation is written as a sequence of operations, and so the type representing the permutations (on some particular type) is infinite - in the second one, we have some finite representation of this set of permutations, and permutations having the same "outcome" are identified.
 
-The choice of introducing this intermediate representation in terms of Lehmer codes stems from the fact that working with the bijections type in Agda is a little cumbersome - they are defined as invertible functions, having the proofs of compositions with inversions being identity and so on. The Lehmer codes do not come with any of that - in a way, they are the simplest possible way of talking about the type of bijections on a finite type.
+The choice of introducing this intermediate representation in terms of Lehmer codes stems from the fact that working with the bijections type in Agda is a little cumbersome - they are defined as invertible functions, having the proofs of compositions with inversions being identity and so on. The Lehmer codes do not come with any of that - in a way, they are the simplest possible way of talking about the type of bijections on a finite type - and, in addition, have a very natural embedding as words in `List (Fin n)`.
 
 Having the Lehmer encoding of the bijection, we can isolate the complexity of dealing with bijection types in the last stage of the proof.
 
@@ -139,17 +141,52 @@ The third rule - `lbraid` - is defined as such, because it is both strong enough
 
 The reason we're using this admittedly more complicated machinery is because it is very hard (or maybe even impossible) to prove certain things about the relation when using non-directed version. For example, suppose that what we need to prove is that `[] ≄ [ 0 ]`. Using the standard Coxeter presentation, we quickly run into a problem with transitive property: we have to prove, that there is no (arbitrary list) `l`, such that `[] ≃ l` and `l ≃ [ x ]`. Thus, we can't do usual induction over reduction rules, and the only way to prove that is to use some kind of clever invariant. And even though in this particular case, the invariant saying that *if `l ≃ l'`, then their lengths are equal `mod 2`* would suffice, it should be clear that in general case, proving things about this relation is going to be very difficult.
 
+After performing all reductions possible, we arrive at one of the normal forms - in the image of immersion of Lehmer codes.
+```agda
+data Lehmer : ℕ -> Set where
+  LZ : Lehmer 0
+  LS : (l : Lehmer n) -> {r : ℕ} -> (r ≤ suc n) -> Lehmer (suc n)
+```
+So, Lehmer codes are in essence lists, where on `n`-th place we have a number less than or equal to `n`. 
+
+To define embedding, we first define a decreasing sequence
+```agda
+_↓_ : (n : ℕ) -> (k : ℕ) -> List ℕ
+n ↓ 0 = []
+n ↓ (suc k) = (k + n) ∷ (n ↓ k)
+```
+By the defintion above, `n ↓ (1 + k)` means a sequence
+`[n + k, n + (k - 1), ... n]`.
+
+Now, we can define immersion as
+```agda
+immersion : {n : ℕ} -> Lehmer n -> List ℕ
+immersion {zero} LZ = []
+immersion {suc n} (LS l {r} _) = (immersion l) ++ (((suc n) ∸ r) ↓ r)
+```
+An embedding takes a Lehmer code, interprets the number on `n`-th place as the length of decreasing sequece starting with `n`, and then concatenates them all together.
+
+Example embeddings of Lehmer codes (the embeddings are our normal forms):
+ - `[]` goes to `[]`
+ - `[0, 0, 0]` goes to `[]`
+ - `[1]` goes to `[0]`
+ - `[1, 2]` goes to `[0, 1, 0]`
+ - `[1, 2, 3, 4]` goes to `[0, 1, 0, 2, 1, 0, 3, 2, 1, 0]`
+ - `[1, 0, 0, 3, 2]` goes to `[0, 3, 2, 1, 0, 4, 3]`.
+
 ## Third stage - alternative approach
 In the case above, we prove that any way of reducing a word, using provided rules, is equivalent.
 A somewhat easier way to define reduction is to focus on some standard reduction method, and prove properties only for that. This is what Alain Lascoux in *(THE SYMMETRIC GROUP, 2002, unpublished)* does, in `Lemma 1`, and what is (partially) replicated in the Coq proof of the equivalence between Coxeter presentation of `S_n` and bijections between sets (see https://github.com/hivert/Coq-Combi/blob/master/theories/SymGroup/presentSn.v).
-
-Lascoux method works by induction over the generators. **(TODO should I describe it there?)**
 
 We started by implementing this method first, but then run into technical problems described at the end of the previous section. Although Lascoux method does not require the use of full Coxeter relations, and works with reduction rules described above, we thought it is better to prove the more general case, since we had the machinery set up anyway.
 
 The implementation closely follows the decription in the book (text included?) and is availble in the `lascoux` directory.
 
-### Fourth stage
+### General outline of Lascoux method
+
+Lascoux method works by induction over the generators, from the highest to the lowest. Let's assume that we are currently at the generator `k`.  There are three reduction rules at our disposition (actually, three reduction schemas, like our `lbraid`) and the strategy to select next redux  is to choose the leftmost redux of all that contain `k`. If threre is no such thing - proceed with induction. The rules are chosen such that this process always terminates, and always brings one the predefined normal forms (the same as we defined earlier.)
+
+## Fourth stage
 Info from Robert Rose.
 
 ### Fourth stage - alternative approach

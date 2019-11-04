@@ -1,4 +1,5 @@
-## Structure
+# README
+This file contains the general description of code structure.
 
 General:
   - `Arithmetic.agda` - general arithmetical lemmas and proofs
@@ -7,8 +8,7 @@ General:
   - `Compact.agda` - defines relations in full symmetric group, concerned mainly with `_≅*_` data type (TODO think of a good name for this relation)
   - `SwapLemmas.agda` - defines lemmas concerning exchanging the order of singletons and down-arrows (TODO rename them to exchange-lemmas)
   - `Canonical.agda` - defines canonical data type
-  - `CoxeterCompact.agda` - defines Coxeter presentation and proves that Compact presentation is weaker than Coxeter presentation
-    - (ie when two things are related by Compact, then they are related by Coxeter)
+  - `CoxeterCompact.agda` - defines Coxeter presentation and proves that Compact presentation is weaker than Coxeter presentation - ie when two things are related by Compact, then they are related by Coxeter.
 
 Diamond:
   - `LongLemmas.agda` - defines very specific lemmas for critical pairs involving `long` constructor
@@ -20,5 +20,5 @@ Uniqueness:
   - `CanonicalUnique.agda` - by showing, that every canonical form is irreducible, it proves that canonical forms are unique
 
 Reduction:
-  - `Canonization.agda`, `CanonizationInterface.agda`, `ReductionStep.agda`, `ReductionStepINterface.agda`, `Reduction.agda` - these implement lascoux algorithm
-  - `CanonicalFinal.agda` - this implements the proof that every non-reducible form is a canonical
+  - `Canonization.agda`, `CanonizationInterface.agda`, `ReductionStep.agda`, `ReductionStepINterface.agda`, `Reduction.agda` - implementation of the Lascoux algorithm
+  - `CanonicalFinal.agda` - implementation of the proof that every non-reducible form is a canonical, also containing the proof the alternate reduction algorithm
