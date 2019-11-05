@@ -226,6 +226,7 @@ Here we include, for the ease of use, all exported signatures and types.
 Pi-type : Set
 <-> : Pi-type -> Pi-type -> Set
 <=> : {A B : Pi-type} -> A <-> B -> A <-> B -> Set
+-- TODO and all other stuff from Pi
 
 ---------------
 --- Stage 1 ---
@@ -238,7 +239,7 @@ Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ( PiFin n <-> 
 --- Stage 2 ---
 ---------------
 Pi-sseq : {n : ℕ} -> (c : PiFin n <-> PiFin n) -> List (Fin n)
-sseq-Pi : {n : ℕ} -> List ℕ -> (PiFin n <-> PiFin n)
+sseq-Pi : {n : ℕ} -> List (Fin n) -> (PiFin n <-> PiFin n)
 
 Pi-sseq-Pi : Pi-sseq ∘ sseq-Pi ≡ id
 sseq-Pi-sseq : sseq-Pi ∘ Pi-sseq ≡ id
@@ -246,6 +247,16 @@ sseq-Pi-sseq : sseq-Pi ∘ Pi-sseq ≡ id
 ---------------
 --- Stage 3 ---
 ---------------
+
+_≃_ : {n : ℕ} -> List (Fin n) -> List (Fin n) -> Set
+
+cancel : {n : ℕ} -> (k : Fin n) -> (l r : List (Fin n)) -> l ++ k ∷ k ∷ r ≃ l ++ r
+swap : {n : ℕ} -> (k m : Fin n) -> (l r : List (Fin n)) -> (suc m < k) -> l ++ k ∷ m ∷ r ≃ l ++ m ∷ k ∷ r
+braid : {n : ℕ} -> (k : Fin n) -> (l r : List (Fin n)) -> l ++ (suc k) ∷ k ∷ (suc k) ∷ r ≃ l ++ k ∷ (suc k) ∷ k ∷ r
+
+refl : {n : ℕ} -> (m : List (Fin n)) -> m ≃ m
+comm : {n : ℕ} -> (m1 m2 : List (Fin n)) -> m1 ≃ m2 -> m2 ≃ m1
+trans : {n : ℕ} -> (m1 m2 m3 : List (Fin n)) -> m1 ≃ m2 -> m2 ≃ m3 -> m1 ≃ m3
 
 data Lehmer : ℕ -> Set where
   LZ : Lehmer 0
