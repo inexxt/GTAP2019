@@ -208,6 +208,70 @@ Then, to complete the proof, one would have to show that `eval` respects Coxeter
 
 As the space of 1-combinators is much bigger than the space of bijections, we cannot hope for getting the same thing back - but this is a good thing! What we are actually getting is a normalized version of the program defined by 1-combinator.
 
-What we would like would be of course an "optimized" version of such a program. The procedure outlined cannot guarantee that at this moment - the reason for this is that we lack the `un-norm-Pi` function, that would serve as a counterpart of `Pi-norm` function. However, this is actually the only missing element of the puzzle!
-What we have now is the optimizer for the low-level language describing the permutations (lists of adjecent transpositions) **(TODO think more about that)**
-And, of course, it is possible that such a function will be developed in the future, giving us the ultimate optimizer for the whole stack.
+What we would like would be of course an "optimized" version of such a program. The procedure outlined cannot guarantee that at this moment - the reason for this is that we lack the `un-norm-Pi` function, that would serve as a counterpart of `Pi-norm`. What we have now is the optimizer for the low-level language describing the permutations (lists of adjecent transpositions) **(TODO think more about that)** There is an obvious way of embedding lists of transpositions into Pi, but what is unclear is whether this naive embedding, even though being an, is actually "optimal" at the level of Pi - moreover, we don't even have a good notion of being "optimal"/"optimized" on the level of Pi (some possible choices would be: lowest number of operators, lowest number of sequential steps, etc.). 
+
+Of course, it is possible that such a notion will be developed in the future, along with the `un-nor-Pi` function, giving us the ultimate optimizer for the whole stack.  
+In general, optimiztion is a hard process. In this case, however, notice that we don't have to optimize arbitrary programs (Pi expressions) - only the normal forms! As normal forms have a very clear, "rigid" structure, the task of writing optimizer for them no longer seems impossibly hard.
+
+
+## Interface
+
+Here we include, for the ease of use, all exported signatures and types.
+
+```agda
+---------------
+--- Pi lang ---
+---------------
+Pi-type : Set
+<-> : Pi-type -> Pi-type -> Set
+<=> : {A B : Pi-type} -> A <-> B -> A <-> B -> Set
+
+---------------
+--- Stage 1 ---
+---------------
+PiFin : ℕ -> Set
+
+Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ( PiFin n <-> PiFin n) (λ cc -> c <=> cn))
+
+---------------
+--- Stage 2 ---
+---------------
+Pi-sseq : {n : ℕ} -> (c : PiFin n <-> PiFin n) -> List (Fin n)
+sseq-Pi : {n : ℕ} -> List ℕ -> (PiFin n <-> PiFin n)
+
+Pi-sseq-Pi : Pi-sseq ∘ sseq-Pi ≡ id
+sseq-Pi-sseq : sseq-Pi ∘ Pi-sseq ≡ id
+
+---------------
+--- Stage 3 ---
+---------------
+
+data Lehmer : ℕ -> Set where
+  LZ : Lehmer 0
+  LS : (l : Lehmer n) -> {r : ℕ} -> (r ≤ suc n) -> Lehmer (suc n)
+
+sseq-norm : {n : ℕ} -> (l : List (Fin n)) -> Σ (Lehmer n) (λ cl -> l ≃ cl)
+
+immerse : {n : ℕ} -> Lehmer n -> List (Fin n)
+immerse-inj : {n : ℕ} -> (l1 l2 : Lehmer n) -> l1 ≄ l2
+
+---------------
+--- Stage 4 ---
+---------------
+
+eval  : {n : ℕ} -> (Lehmer n) -> (Fin n ~ Fin n)
+quote : {n : ℕ} -> (Fin n ~ Fin n) -> (Lehmer n)
+
+eval∘quote : eval ∘ quote ≡ id
+quote∘eval : quote ∘ eval ≡ id
+
+---------------
+---   All   ---
+---------------
+
+Pi-eval = eval ∘ sseq-norm ∘ Pi-sseq ∘ Pi-norm
+quote-Pi = sseq-Pi ∘ immerse ∘ quote
+
+quote-eval : Pi-eval ∘ quote-Pi ≡ id
+eval-quote : {A B : PiType} -> (c : A <-> B) -> ((quote-Pi ∘ Pi-eval) c) <=> c
+```
