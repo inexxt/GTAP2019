@@ -113,7 +113,7 @@ Info from prof. Sabry.
 ### Third stage
 
 #### Normalization
-We can define Coxeter presentation in Agda as follows
+We can define Coxeter presentation in Agda as follows (this will be useful later on):
 ```agda
 data _≃_ : List ℕ -> List ℕ -> Set where
   cancel : l ++ n ∷ n ∷ r ≃ l ++ r
@@ -125,7 +125,7 @@ data _≃_ : List ℕ -> List ℕ -> Set where
   trans : m1 ≃ m2 -> m2 ≃ m3 -> m1 ≃ m3
 ```
 
-But, in our case, the normalization is done using a collection of the following rewriting rules:
+In our case, the normalization is done using a collection of the following rewriting rules:
   - `cancel`, where `l ++ n ∷ n ∷ r` goes to `l ++ r`
   - `swap`, where `l ++ k ∷ n ∷ r` goes to `l ++ n ∷ k ∷ r`, provided that `1 + k < n`
   - `lbraid`, where  `l ++ n ∷ n - 1 ∷ n - 2 ∷ ... ∷ n - k ∷ n ∷ r` goes to `l ++ n - 1 ∷ n ∷ n - 2 ∷ ... ∷ n - k ∷ r`, provided that `0 < k`
