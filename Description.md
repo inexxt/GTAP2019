@@ -208,9 +208,10 @@ Then, to complete the proof, one would have to show that `eval` respects Coxeter
 
 As the space of 1-combinators is much bigger than the space of bijections, we cannot hope for getting the same thing back - but this is a good thing! What we are actually getting is a normalized version of the program defined by 1-combinator.
 
-What we would like would be of course an "optimized" version of such a program. The procedure outlined cannot guarantee that at this moment - the reason for this is that we lack the `un-norm-Pi` function, that would serve as a counterpart of `Pi-norm`. What we have now is the optimizer for the low-level language describing the permutations (lists of adjecent transpositions) **(TODO think more about that)** There is an obvious way of embedding lists of transpositions into Pi, but what is unclear is whether this naive embedding, even though being an, is actually "optimal" at the level of Pi - moreover, we don't even have a good notion of being "optimal"/"optimized" on the level of Pi (some possible choices would be: lowest number of operators, lowest number of sequential steps, etc.). 
+What we would like would be of course an "optimized" version of such a program. The procedure outlined cannot guarantee that at this moment - the reason for this is that we lack the `un-norm-Pi` function, that would serve as a counterpart of `Pi-norm`. What we have now is the optimizer for the low-level language describing the permutations (lists of adjecent transpositions) **(TODO think more about that)** There is an obvious way of embedding lists of transpositions into Pi, but what is unclear is whether this naive embedding, even though being an, is actually "optimal" at the level of Pi - moreover, we don't even have a good notion of what it would mean (some possible choices would be: lowest number of operators, lowest number of sequential steps, etc.). 
 
-Of course, it is possible that such a notion will be developed in the future, along with the `un-nor-Pi` function, giving us the ultimate optimizer for the whole stack.  
+Of course, it is possible that such a notion will be developed in the future, along with the `un-nor-Pi` function, ultimately giving us the optimizer for the whole stack.  
+
 In general, optimiztion is a hard process. In this case, however, notice that we don't have to optimize arbitrary programs (Pi expressions) - only the normal forms! As normal forms have a very clear, "rigid" structure, the task of writing optimizer for them no longer seems impossibly hard.
 
 
