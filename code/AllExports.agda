@@ -5,43 +5,27 @@ open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Product using (Σ; ∃; _×_; _,_; proj₁; proj₂)
 open import Data.Fin using (Fin)
-open import Data.Empty
-open import Data.Bool hiding (_<_; _≤_; _≟_; _<?_; _≤?_)
-open import Data.Bool.Properties hiding (≤-reflexive; ≤-trans; _≟_; _<?_; _≤?_)
 open import Function
 
 open import Relation.Nullary
-open import Arithmetic hiding (n)
-open import Lists
-open import Compact hiding (n; l)
-open import SwapLemmas
-open import ImpossibleLemmas
-open ≤-Reasoning renaming (begin_ to ≤-begin_; _∎ to ≤∎) hiding (_≡⟨⟩_; step-≡)
-
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
-
-
-variable
-    n : ℕ
-    l : List ℕ
-
-open ≅*-Reasoning
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
-open Σ
+open import Compact hiding (n; l)
+open ≅*-Reasoning
 
 ---------------
 --- Pi lang ---
 ---------------
 
 data Pi-type : Set where
+  -- Here we define Pi types
   
 data _<->_ : Pi-type -> Pi-type -> Set where
-  
+  -- Here we define Pi 1-combinators
+ 
 data _<=>_ : {A B C D : Pi-type} -> (A <-> B) -> (C <-> D) -> Set where
-  
--- TODO and all other stuff from Pi
-
+  -- Here we define Pi 2-combinators
 
 
 ---------------
@@ -50,7 +34,8 @@ data _<=>_ : {A B C D : Pi-type} -> (A <-> B) -> (C <-> D) -> Set where
 PiFin : ℕ -> Pi-type
 
 data Normed1comb : {n : ℕ} -> (PiFin n) <-> (PiFin n) -> Set where
-  
+  -- this is a (technical) property of 1-combinators that tells us that it is composed only from swaps, assocs and identities
+  -- for us to be able to represent it as an abstract "list of swaps"
 
 Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ((PiFin n) <-> (PiFin n)) (λ cc -> (Normed1comb cc) × (c <=> cc)))
 
@@ -63,19 +48,22 @@ sseq-Pi : {n : ℕ} -> List (Fin n) -> (PiFin n <-> PiFin n)
 Pi-sseq-Pi : {n : ℕ} -> (Pi-sseq {n}) ∘ (sseq-Pi {n}) ≡ id
 sseq-Pi-sseq : {n : ℕ} -> (sseq-Pi {n}) ∘ (Pi-sseq {n}) ≡ id
 
+
 ---------------
 --- Stage 3 ---
 ---------------
 
 data _≃_ : {n : ℕ} -> List (Fin n) -> List (Fin n) -> Set where
-  
+  -- This is the main part - the equivalence relation over lists of swaps that tells us if they represent the same permutation
+  -- It is implemented as a reduction of such lists to a canonical form
 
 data _≈_ : Set -> Set -> Set where
+  -- this is just functions equivalence
   bijection : {A B : Set} -> (f : A -> B) -> (g : B -> A) -> (f ∘ g ≡ id) -> (g ∘ f ≡ id) -> (A ≈ B)
 
 data Lehmer : ℕ -> Set where
   LZ : Lehmer 0
-  LS : (l : Lehmer n) -> {r : ℕ} -> (r ≤ suc n) -> Lehmer (suc n)
+  LS : {n : ℕ} -> (l : Lehmer n) -> {r : ℕ} -> (r ≤ suc n) -> Lehmer (suc n)
 
 immerse : {n : ℕ} -> Lehmer n -> List (Fin n)
 immerse-inj : {n : ℕ} -> (l1 l2 : Lehmer n) -> immerse l1 ≡ immerse l2 -> l1 ≡ l2
