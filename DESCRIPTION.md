@@ -45,7 +45,7 @@ The proof is done in four stages.
 
       along with the proofs that `Pi-sseq ∘ sseq-Pi ≡ id` and `sseq-Pi ∘ Pi-sseq ≡ id`.
 
-  3. In the third step, we're in the realm of permutations represented as `List (Fin n)` - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n` (where the generators are elements of `Fin n` and can be thought of adjecent transpositions), and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.  
+  3. In the third step, we're in the realm of permutations represented as `List (Fin n)` - in other words, what we have is a word in the free group of `n` generators. We introduce a relation `_≃_`, based on Coxeter presentation of full symmetric group `S_n` (where the generators are elements of `Fin n` - the `k`-th generator represents a transposition of `k`-th and `k+1`-th elements), and we'd like to show that the type `List (Fin n)` divided by this equivalence relation is isomorphic to yet another form of permutation representation - Lehmer codes.  
   We do that by defining a function
 
       ```agda
