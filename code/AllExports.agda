@@ -11,9 +11,6 @@ open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst) renaming (trans to ≡-trans; sym to ≡-sym)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
-open import Compact hiding (n; l)
-open ≅*-Reasoning
-
 ---------------
 --- Pi lang ---
 ---------------
