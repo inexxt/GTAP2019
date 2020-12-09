@@ -16,25 +16,68 @@ What we have: fully abstract denotational semantics for reversible languages
 
 \begin{verbatim}
 
-4) Read about the Rubik cube in the book you recommended, but I don't think we'll make any progess there. This is because we really don't have a good way of representing cycle decomposition. I thought about that for some time before (around a day as far as I remember) and couldn't find any smart way of representing it. This means that calculating things like order of permutation is at present beyond our capabilities, and, as Rubik cube is mainly about cycles, there isn't much we can do there,
-Simple cycles have an easy representation in Lehmer codes - they are just 11111..1110, but things like multiple cycles - I don't see it. We can encode cycles in lists of transpositions, but this is unfortunately only one way - there's no method of recovering it (e.g. it is easy to turn a cycle (12345) ito a list (12)(13)(14)(15), but turning (14)(23)(15)(23) into a disjoint cycles representation is hard)
-
+4) Read about the Rubik cube in the book you recommended, but I don't
+ think we'll make any progess there. This is because we really don't
+ have a good way of representing cycle decomposition. I thought about
+ that for some time before (around a day as far as I remember) and
+ couldn't find any smart way of representing it. This means that
+ calculating things like order of permutation is at present beyond
+ our capabilities, and, as Rubik cube is mainly about cycles, there
+ isn't much we can do there,
+Simple cycles have an easy representation in Lehmer codes - they are
+ just 11111..1110, but things like multiple cycles - I don't see it.
+ We can encode cycles in lists of transpositions, but this is
+ unfortunately only one way - there's no method of recovering it
+ (e.g. it is easy to turn a cycle (12345) ito a list
+ (12)(13)(14)(15), but turning (14)(23)(15)(23) into a disjoint
+ cycles representation is hard)
 
 I tried looking at the strengths of our representations instead:
 
- - Lehmer codes give us a very easy way of telling how "disorderd" a permutation is - e.g. a minimal number of adjecent swaps that are needed sort it back. This means that for a binary circuit, where bridges are expensive, we can tell how expensive this particular circuit is to make (I think?) 
+ - Lehmer codes give us a very easy way of telling how "disorderd" a
+ permutation is - e.g. a minimal number of adjecent swaps that are
+ needed sort it back. This means that for a binary circuit, where
+ bridges are expensive, we can tell how expensive this particular
+ circuit is to make (I think?) 
 
- - on the similar note, we can (probably?) calculate Kendall distance between permutations. This is used to tell how much do they differ https://en.wikipedia.org/wiki/Kendall_tau_distance and it is used in some big-data things (http://proceedings.mlr.press/v54/li17b/li17b.pdf) but this is very shallow connection and I don't know if that helps us in any way
+ - on the similar note, we can (probably?) calculate Kendall distance
+ between permutations. This is used to tell how much do they differ
+ https://en.wikipedia.org/wiki/Kendall_tau_distance and it is used in
+ some big-data things
+ (http://proceedings.mlr.press/v54/li17b/li17b.pdf) but this is very
+ shallow connection and I don't know if that helps us in any way
+
 
  - you probably know some strengths of Pi - are they listed anywhere?
 
- - for two other representations (invertible Agda functions and lists of transpositions), I didn't find any obvious things they can be used for. Do you have any ideas?
+ - for two other representations (invertible Agda functions and lists
+ of transpositions), I didn't find any obvious things they can be
+ used for. Do you have any ideas?
 
- - How about these things with garbage-collecting wires in quantum circuits? is that something we could contribute to? 
+ - How about these things with garbage-collecting wires in quantum
+ circuits? is that something we could contribute to? 
 
- - Read some of the Russian paper about q-circuit synthesis that you sent before, but it seems they are solving a more complicated problem (e.g. instead of simple generators of adjecent swaps, they have three kinds of generators - NOT, CNOT, CCNOT - NCT library - and look for a circuit optimal wrt to number of all of these gates). I think it is unlikely that our current simple methods would work in their case - almost surely not the optimization on the adj-swaps level. There is a possiblity that we could encode this optimization on the "Pi-optimizer" level, as discussed in the description document, but I am by no means convinced about this.
+ - Read some of the Russian paper about q-circuit synthesis that you
+ sent before, but it seems they are solving a more complicated
+ problem (e.g. instead of simple generators of adjecent swaps, they
+ have three kinds of generators - NOT, CNOT, CCNOT - NCT library -
+ and look for a circuit optimal wrt to number of all of these gates).
+ I think it is unlikely that our current simple methods would work in
+ their case - almost surely not the optimization on the adj-swaps
+ level. There is a possiblity that we could encode this optimization
+ on the "Pi-optimizer" level, as discussed in the description
+ document, but I am by no means convinced about this.
 
- - There is still unexplored connection Young tableaux (it is basically about counting different reduced decompositions of a permutation - in our case, basically "how many different leaves there are in the reduction tree, if we assume the default Coxeter case" - in other words, in this case that we don't have a diamond, what is the number of different outcomes that we can arrive to). They do some stuff with that in Coq implementation, but I didn't yet read into that further, and I don't know how much fruitful that can be.  
+
+ - There is still unexplored connection Young tableaux (it is
+ basically about counting different reduced decompositions of a
+ permutation - in our case, basically "how many different leaves
+ there are in the reduction tree, if we assume the default Coxeter
+ case" - in other words, in this case that we don't have a diamond,
+ what is the number of different outcomes that we can arrive to).
+ They do some stuff with that in Coq implementation, but I didn't yet
+ read into that further, and I don't know how much fruitful that can
+ be.  
 \url{http://www-math.mit.edu/~rstan/transparencies/redec-ams.pdf}
 
  - encode-decode
