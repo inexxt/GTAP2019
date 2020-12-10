@@ -34,7 +34,7 @@ data Normed1comb : {n : ℕ} -> (PiFin n) <-> (PiFin n) -> Set where
   -- this is a (technical) property of 1-combinators that tells us that it is composed only from swaps, assocs and identities
   -- for us to be able to represent it as an abstract "list of swaps"
 
-Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ((PiFin n) <-> (PiFin n)) (λ cc -> (Normed1comb cc) × (c <=> cc)))
+Pi-norm  : {A B : Pi-type} -> (c : A <-> B) -> Σ ℕ (λ n -> Σ ((PiFin n) <-> (PiFin n)) (λ nc -> (Normed1comb nc) × (c <=> nc)))
 
 ---------------
 --- Stage 2 ---
