@@ -1,4 +1,4 @@
-# Indiana
+# GTAP 2019
 Work performed at Indiana University, GTAP program 2019
 
 ## Technical explanation
